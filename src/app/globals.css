@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  /* Modern dark theme palette with neon accents */
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --primary: #7c3aed;
-  --primary-light: #9f67ff;
-  --primary-dark: #5b21b6;
-  --accent: #10b981;
-  --accent-light: #34d399;
-  --accent-dark: #059669;
-  --secondary: #f43f5e;
-  --secondary-light: #fb7185;
-  --secondary-dark: #be123c;
-  --tertiary: #2563eb;
-  --tertiary-light: #60a5fa;
-  --tertiary-dark: #1d4ed8;
-  --surface: #1e293b;
-  --surface-light: #334155;
-  --surface-dark: #0f172a;
-  --neon-glow: rgba(124, 58, 237, 0.6);
-  --accent-glow: rgba(16, 185, 129, 0.5);
-  --shadow: rgba(0, 0, 0, 0.25);
+  /* Light theme with light green accent */
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --primary: #4ade80;
+  --primary-light: #86efac;
+  --primary-dark: #22c55e;
+  --accent: #4ade80;
+  --accent-light: #86efac;
+  --accent-dark: #22c55e;
+  --secondary: #4ade80;
+  --secondary-light: #86efac;
+  --secondary-dark: #22c55e;
+  --tertiary: #4ade80;
+  --tertiary-light: #86efac;
+  --tertiary-dark: #22c55e;
+  --surface: #ffffff;
+  --surface-light: #f1f5f9;
+  --surface-dark: #e2e8f0;
+  --neon-glow: rgba(74, 222, 128, 0.4);
+  --accent-glow: rgba(74, 222, 128, 0.3);
+  --shadow: rgba(0, 0, 0, 0.1);
   --text-on-light: #1e293b;
   --text-on-dark: #f8fafc;
   --text-on-primary: #ffffff;
@@ -38,9 +38,9 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Same as our main theme - we want a dark theme */
-    --background: #0f172a;
-    --foreground: #f8fafc;
+    /* Override dark mode preference with our light theme */
+    --background: #f8fafc;
+    --foreground: #1e293b;
   }
 }
 
@@ -77,11 +77,40 @@
   100% { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes rotate-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes scale-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes slide-in-left {
+  0% { transform: translateX(-50px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  0% { transform: translateX(50px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   overflow-x: hidden;
+  background-image: url('/images/subtle-clouds.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  background-blend-mode: overlay;
 }
 
 .minecraft-btn {
@@ -92,11 +121,12 @@ body {
   color: var(--text-on-primary);
   font-weight: 600;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   transition: all 0.3s ease;
   overflow: hidden;
   z-index: 1;
   letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
 .minecraft-btn::before {
@@ -152,7 +182,7 @@ body {
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary), var(--primary));
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary), var(--primary-light), var(--primary-dark));
   background-size: 400% 100%;
   animation: border-flow 6s linear infinite;
   z-index: -1;
@@ -169,10 +199,12 @@ body {
 }
 
 .glass-effect {
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .fade-in-up {
@@ -180,9 +212,84 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(90deg, var(--primary-light), var(--accent-light));
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
+}
+
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.bounce-animation {
+  animation: bounce-subtle 2s infinite ease-in-out;
+}
+
+.rotate-animation {
+  animation: rotate-slow 15s infinite linear;
+}
+
+.scale-animation {
+  animation: scale-pulse 3s infinite ease-in-out;
+}
+
+.slide-in-left {
+  animation: slide-in-left 0.5s forwards;
+}
+
+.slide-in-right {
+  animation: slide-in-right 0.5s forwards;
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 25px rgba(74, 222, 128, 0.2);
+}
+
+/* animated gradient for the heading */
+@keyframes gradientX {
+  0%,100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}
+.animate-gradient-x {
+  background: linear-gradient(90deg, #4ade80, #06b6d4, #4ade80);
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradientX 6s ease infinite;
+}
+
+/* gentle floating orbs behind everything */
+@keyframes float {
+  0%   { transform: translateY(0) rotate(0deg); }
+  50%  { transform: translateY(-20px) rotate(45deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+  animation: float var(--dance-speed) ease-in-out infinite;
+}
+
+/* Hide Chrome, Safari, Edge, Opera spinners */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Hide Firefox spinner */
+input[type=number] {
+  -moz-appearance: textfield;
 }

@@ -1,0 +1,19 @@
+model Product {
+  // Important
+  id String @id @default(cuid())
+  name String
+  description String
+  price Float
+  image String
+
+  // Extras
+  stock Int
+  additionalImages String[]
+  category String
+  rating Float
+  badge String
+  features String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

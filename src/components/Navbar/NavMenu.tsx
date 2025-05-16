@@ -25,13 +25,22 @@ const staggerContainer = {
   },
 };
 
-interface NavMenuProps {
-  items?: string[];
-}
+const items = [
+  {
+    label: "Home",
+    href: "/",
+  },
+  {
+    label: "Shop",
+    href: "/shop",
+  },
+  {
+    label: "Vouches",
+    href: "/vouches",
+  },
+]
 
-const NavMenu = ({
-  items = ["Home", "Shop", "Categories", "About", "Contact"],
-}: NavMenuProps) => {
+const NavMenu = () => {
   return (
     <motion.ul
       className="hidden md:flex space-x-8"
@@ -40,12 +49,12 @@ const NavMenu = ({
       animate="visible"
     >
       {items.map((item) => (
-        <motion.li key={item} variants={fadeInUp} className="relative group">
+        <motion.li key={item.label} variants={fadeInUp} className="relative group">
           <a
-            href="#"
+            href={item.href}
             className="font-medium transition-colors hover:text-[var(--primary-light)]"
           >
-            {item}
+            {item.label}
           </a>
           <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--primary)] transition-all group-hover:w-full" />
         </motion.li>
