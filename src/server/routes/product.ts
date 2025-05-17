@@ -4,12 +4,29 @@ import { adminProcedure, baseProcedure, createTRPCRouter } from '../init';
 
 export const productRouter = createTRPCRouter({
     getAll: baseProcedure.query(async () => {
-        return await prisma.product.findMany({
+        const raw = await prisma.product.findMany({
             orderBy: { createdAt: 'desc' },
-            omit: {
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                price: true,
+                image: true,
+                additionalImages: true,
+                category: true,
+                rating: true,
+                badge: true,
+                features: true,
                 stock: true,
-            }
+                createdAt: true,
+                updatedAt: true,
+            },
         });
+
+        return raw.map(({ stock: stockArr, ...rest }) => ({
+            ...rest,
+            stock: stockArr.length,
+        }));
     }),
 
     getAllWithStock: adminProcedure.query(async () => {

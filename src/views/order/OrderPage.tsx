@@ -7,11 +7,38 @@ import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FaCheck, FaClock, FaExclamationTriangle, FaShippingFast, FaTimesCircle } from "react-icons/fa";
+import { FaCheck, FaClock, FaExclamationTriangle, FaShippingFast, FaTimesCircle, FaCopy } from "react-icons/fa";
 import { useTRPC } from "@/server/client";
 import { useQuery } from "@tanstack/react-query";
 
 type OrderStatusType = "PENDING" | "PAID" | "DELIVERED" | "CANCELLED";
+
+// Type definition based on the prisma schema
+type OrderItem = {
+    id: string;
+    orderId: string;
+    productId: string;
+    quantity: number;
+    price: number;
+    codes: string[];
+    createdAt: Date;
+    updatedAt: Date;
+    product: {
+        id: string;
+        name: string;
+        description: string;
+        price: number;
+        stock: string[];
+        image: string;
+        additionalImages: string[];
+        category: string;
+        badge: string;
+        rating: number;
+        features: string[];
+        createdAt: Date;
+        updatedAt: Date;
+    };
+};
 
 const StatusBadge = ({ status }: { status: OrderStatusType }) => {
     let color = "";
@@ -53,9 +80,16 @@ const OrderPage = ({ id }: { id: string }) => {
     const trpc = useTRPC();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
     const { data: order, isLoading: isOrderLoading, error: orderError } = useQuery(trpc.checkout.getOrderStatus.queryOptions(
         { orderId: id as string },
+        {
+            enabled: !!id,
+            retry: 3,
+            retryDelay: 1000,
+            retryOnMount: true,
+        }
     ));
 
     useEffect(() => {
@@ -66,6 +100,13 @@ const OrderPage = ({ id }: { id: string }) => {
             setIsLoading(false);
         }
     }, [isOrderLoading, orderError]);
+
+    const copyToClipboard = (code: string) => {
+        navigator.clipboard.writeText(code).then(() => {
+            setCopiedCode(code);
+            setTimeout(() => setCopiedCode(null), 2000);
+        });
+    };
 
     if (isLoading) {
         return (
@@ -117,7 +158,7 @@ const OrderPage = ({ id }: { id: string }) => {
     }
 
     // Calculate order totals
-    const subtotal = order.OrderItem.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const subtotal = order.OrderItem.reduce((sum: number, item: OrderItem) => sum + (item.price * item.quantity), 0);
     const customerInfo = order.CustomerInformation[0];
 
     return (
@@ -153,27 +194,73 @@ const OrderPage = ({ id }: { id: string }) => {
                                 <h2 className="text-xl font-bold mb-4 text-[var(--foreground)]">Items</h2>
                                 <div className="space-y-4">
                                     {order.OrderItem.map((item) => (
-                                        <div key={item.id} className="flex items-center space-x-4 py-3 border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] last:border-0">
-                                            <div className="w-16 h-16 relative bg-gradient-to-br from-[color-mix(in_srgb,var(--primary),#fff_95%)] to-[color-mix(in_srgb,var(--secondary),#fff_95%)] rounded-lg overflow-hidden flex-shrink-0">
-                                                <Image
-                                                    src={item.product.image}
-                                                    alt={item.product.name}
-                                                    fill
-                                                    className="object-contain p-2"
-                                                />
+                                        <div key={item.id} className="flex flex-col py-3 border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] last:border-0">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="w-16 h-16 relative bg-gradient-to-br from-[color-mix(in_srgb,var(--primary),#fff_95%)] to-[color-mix(in_srgb,var(--secondary),#fff_95%)] rounded-lg overflow-hidden flex-shrink-0">
+                                                    <Image
+                                                        src={item.product.image}
+                                                        alt={item.product.name}
+                                                        fill
+                                                        className="object-contain p-2"
+                                                    />
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <h3 className="font-medium text-[var(--foreground)]">{item.product.name}</h3>
+                                                    <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                                                        Quantity: {item.quantity}
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-medium text-[var(--foreground)]">{formatPrice(item.price)}</p>
+                                                    <p className="text-sm text-[var(--primary)]">
+                                                        {formatPrice(item.price * item.quantity)}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="flex-grow">
-                                                <h3 className="font-medium text-[var(--foreground)]">{item.product.name}</h3>
-                                                <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                                                    Quantity: {item.quantity}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-medium text-[var(--foreground)]">{formatPrice(item.price)}</p>
-                                                <p className="text-sm text-[var(--primary)]">
-                                                    {formatPrice(item.price * item.quantity)}
-                                                </p>
-                                            </div>
+
+                                            {/* Show codes only for PAID or DELIVERED orders */}
+                                            {(order.status === "PAID" || order.status === "DELIVERED") && item.codes && item.codes.length > 0 && (
+                                                <div className="mt-4 w-full">
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <h4 className="font-medium text-sm text-[var(--foreground)]">Your Code{item.codes.length > 1 ? "s" : ""}:</h4>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => copyToClipboard(item.codes.join('\n'))}
+                                                            className="flex items-center px-2 py-1 text-xs bg-[color-mix(in_srgb,var(--primary),#fff_90%)] text-[var(--primary)] rounded"
+                                                        >
+                                                            {copiedCode === item.codes.join('\n') ? "Copied All!" : "Copy All"}
+                                                            <FaCopy className="ml-1" />
+                                                        </motion.button>
+                                                    </div>
+                                                    <div className="bg-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] rounded-md p-3 overflow-x-auto">
+                                                        {item.codes.map((code, index) => (
+                                                            <div key={index} className="flex items-center justify-between mb-2 last:mb-0">
+                                                                <pre
+                                                                    className="text-sm font-mono text-[var(--foreground)] cursor-pointer flex-grow px-2 py-1 rounded hover:bg-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]"
+                                                                    onClick={() => copyToClipboard(code)}
+                                                                    title="Click to copy"
+                                                                >
+                                                                    {code}
+                                                                </pre>
+                                                                <motion.button
+                                                                    whileHover={{ scale: 1.05 }}
+                                                                    whileTap={{ scale: 0.95 }}
+                                                                    onClick={() => copyToClipboard(code)}
+                                                                    className="ml-2 p-1 text-xs text-[var(--primary)] rounded hover:bg-[color-mix(in_srgb,var(--primary),#fff_90%)]"
+                                                                    title="Copy code"
+                                                                >
+                                                                    {copiedCode === code ? (
+                                                                        <FaCheck className="text-green-500" />
+                                                                    ) : (
+                                                                        <FaCopy />
+                                                                    )}
+                                                                </motion.button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

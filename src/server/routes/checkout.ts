@@ -102,8 +102,8 @@ export const checkoutRouter = createTRPCRouter({
                             });
                         }
 
-                        const oldestStock = product.stock[0];
-                        const filteredStock = product.stock.filter(stock => stock !== oldestStock);
+                        const oldestStock = product.stock.slice(0, item.quantity);
+                        const filteredStock = product.stock.filter(stock => !oldestStock.includes(stock));
                         await prisma.product.update({
                             where: { id: item.productId },
                             data: { stock: filteredStock },
@@ -115,7 +115,7 @@ export const checkoutRouter = createTRPCRouter({
                                 productId: item.productId,
                                 quantity: item.quantity,
                                 price: item.price,
-                                data: oldestStock,
+                                codes: oldestStock,
                             }
                         });
                     }
@@ -140,14 +140,6 @@ export const checkoutRouter = createTRPCRouter({
         .query(async ({ input }) => {
             const order = await prisma.order.findUnique({
                 where: { id: input.orderId },
-                include: {
-                    OrderItem: {
-                        include: {
-                            product: true,
-                        },
-                    },
-                    CustomerInformation: true,
-                },
             });
 
             if (!order) {
@@ -157,7 +149,37 @@ export const checkoutRouter = createTRPCRouter({
                 });
             }
 
-            return order;
+            if (order.status === OrderStatus.PAID || order.status === OrderStatus.DELIVERED) {
+                return prisma.order.findUnique({
+                    where: { id: input.orderId },
+                    include: {
+                        OrderItem: {
+                            include: {
+                                product: true,
+                            },
+                        },
+                        CustomerInformation: true,
+                    },
+                });
+            } else {
+                return prisma.order.findUnique({
+                    where: { id: input.orderId },
+                    include: {
+                        OrderItem: {
+                            include: {
+                                product: true,
+                            },
+                            select: {
+                                quantity: true,
+                                price: true,
+                                product: true,
+                                codes: false
+                            }
+                        },
+                        CustomerInformation: true,
+                    },
+                });
+            }
         }),
 
     updateOrderStatus: baseProcedure

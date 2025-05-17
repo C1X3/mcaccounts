@@ -3,7 +3,6 @@ import Image from "next/image";
 import { FaStar, FaShoppingCart } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { toast } from "react-hot-toast";
 import { ProductGetAllOutput } from "@/server/routes/_app";
 
 const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
@@ -15,9 +14,8 @@ const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
     };
 
     const handleAddToCart = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent navigation when clicking add to cart
+        e.stopPropagation();
         addItem(product);
-        toast.success(`Added to cart: ${product.name}`);
     };
 
     return (
@@ -77,14 +75,19 @@ const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
                         ${product.price}
                     </span>
                     <div className="flex space-x-2">
-                        <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center"
+                        <button
+                            type="button"
                             onClick={handleAddToCart}
+                            className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center"
                         >
-                            <FaShoppingCart size={16} />
-                        </motion.button>
+                            <motion.div
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="flex items-center"
+                            >
+                                <FaShoppingCart size={16} />
+                            </motion.div>
+                        </button>
                         <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}

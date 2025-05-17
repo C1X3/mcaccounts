@@ -185,7 +185,7 @@ const CartPage = () => {
                                                     <motion.button
                                                         whileHover={{ scale: 1.1 }}
                                                         whileTap={{ scale: 0.9 }}
-                                                        className="w-8 h-8 flex items-center justify-center text-[color-mix(in_srgb,var(--foreground),#888_40%)] hover:text-[var(--primary)] rounded-full"
+                                                        className="w-8 h-8 flex items-center justify-center text-[color-mix(in_srgb,var(--foreground),#888_40%)] hover:text-[var(--primary)] rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                                                         onClick={() => updateQuantity(item.product.id, Math.max(1, item.quantity - 1))}
                                                         disabled={item.quantity <= 1}
                                                     >
@@ -199,8 +199,9 @@ const CartPage = () => {
                                                     <motion.button
                                                         whileHover={{ scale: 1.1 }}
                                                         whileTap={{ scale: 0.9 }}
-                                                        className="w-8 h-8 flex items-center justify-center text-[color-mix(in_srgb,var(--foreground),#888_40%)] hover:text-[var(--primary)] rounded-full"
+                                                        className="w-8 h-8 flex items-center justify-center text-[color-mix(in_srgb,var(--foreground),#888_40%)] hover:text-[var(--primary)] rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                                                         onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                                                        disabled={item.quantity >= item.product.stock}
                                                     >
                                                         <FaPlus size={10} />
                                                     </motion.button>

@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { FaSearch } from "react-icons/fa";
 import { useTRPC } from "@/server/client";
 import { useQuery } from "@tanstack/react-query";
-import { ProductGetAllOutput } from "@/server/routes/_app";
 
 const ShopPage = () => {
     const trpc = useTRPC();
@@ -18,14 +17,12 @@ const ShopPage = () => {
         error,
     } = useQuery(trpc.product.getAll.queryOptions());
 
-    // Local UI state
-    const [filteredProducts, setFilteredProducts] = useState<ProductGetAllOutput>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
     const [searchQuery, setSearchQuery] = useState<string>("");
 
     const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
 
-    useEffect(() => {
+    const filteredProducts = useMemo(() => {
         let result = products;
 
         if (selectedCategory !== "All") {
@@ -40,7 +37,7 @@ const ShopPage = () => {
             );
         }
 
-        setFilteredProducts(result);
+        return result;
     }, [products, selectedCategory, searchQuery]);
 
     return (

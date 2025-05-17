@@ -31,7 +31,7 @@ const Page = async ({ params, searchParams }: {
 
                 if (!product) return;
 
-                const stock = product.stock.concat(item.data);
+                const stock = product.stock.concat(item.codes);
                 await tx.product.update({
                     where: { id: item.productId },
                     data: { stock },

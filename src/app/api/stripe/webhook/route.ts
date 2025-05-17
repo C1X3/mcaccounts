@@ -101,7 +101,7 @@ export async function POST(request: Request) {
                         return NextResponse.json({ error: 'No product found' }, { status: 400 });
                     }
 
-                    const stock = product.stock.concat(item.data);
+                    const stock = product.stock.concat(item.codes);
                     await tx.product.update({
                         where: { id: item.productId },
                         data: { stock },

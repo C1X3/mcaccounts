@@ -9,6 +9,7 @@ import {
     updateCartExpiration,
     clearCart as clearLocalStorageCart
 } from '@/utils/cart';
+import toast from 'react-hot-toast';
 
 type CartContextType = {
     items: CartItem[];
@@ -65,58 +66,80 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     // Add item to cart
     const addItem = (product: Product, quantity = 1) => {
-        setItems(currentItems => {
-            // Update cart expiration
-            updateCartExpiration();
+        const idx = items.findIndex(item => item.product.id === product.id);
+        const currentQty = idx >= 0 ? items[idx].quantity : 0;
 
-            // Check if item already exists
-            const existingItemIndex = currentItems.findIndex(item => item.product.id === product.id);
+        if (currentQty + quantity > product.stock) {
+            const available = product.stock - currentQty;
+            toast.error(
+                available > 0
+                    ? `Only ${available} more "${product.name}" in stock.`
+                    : `"${product.name}" is out of stock.`
+            );
+            return;
+        }
 
-            if (existingItemIndex >= 0) {
-                // Update quantity of existing item
-                const newItems = [...currentItems];
-                newItems[existingItemIndex].quantity += quantity;
-                return newItems;
-            } else {
-                // Add new item
-                return [...currentItems, {
-                    id: `${product.id}-${Date.now()}`,
-                    product,
-                    quantity,
-                }];
-            }
-        });
+        const newItems: CartItem[] =
+            idx >= 0
+                ? items.map((item, i) =>
+                    i === idx ? { ...item, quantity: item.quantity + quantity } : item
+                )
+                : [...items, { id: `${product.id}-${Date.now()}`, product, quantity }];
+
+        setItems(newItems);
+
+        toast.success(`Added x${quantity} "${product.name}" to cart`);
+        updateCartExpiration();
     };
 
-    // Update item quantity
+    // Update item quantity (with stock check)
     const updateQuantity = (productId: string, quantity: number) => {
-        setItems(currentItems => {
-            // Update cart expiration
-            updateCartExpiration();
+        // find the item index
+        const idx = items.findIndex(item => item.product.id === productId);
 
-            // Find the item
-            const existingItemIndex = currentItems.findIndex(item => item.product.id === productId);
+        // nothing to do if not found
+        if (idx < 0) return;
 
-            if (existingItemIndex >= 0 && quantity > 0) {
-                // Update quantity
-                const newItems = [...currentItems];
-                newItems[existingItemIndex].quantity = quantity;
-                return newItems;
-            }
+        const currentItem = items[idx];
+        const maxStock = currentItem.product.stock;
 
-            return currentItems;
-        });
+        // invalid quantity or exceeding stock?
+        if (quantity <= 0) {
+            // you might choose to remove the item here instead:
+            // return removeItem(productId);
+            return;
+        }
+        if (quantity > maxStock) {
+            const available = maxStock;
+            toast.error(
+                available > 0
+                    ? `Only ${available} "${currentItem.product.name}" in stock.`
+                    : `"${currentItem.product.name}" is out of stock.`
+            );
+            return;
+        }
+
+        // build the new array just once
+        const newItems = items.map(item =>
+            item.product.id === productId
+                ? { ...item, quantity }
+                : item
+        );
+
+        setItems(newItems);
+        updateCartExpiration();
     };
 
     // Remove item from cart
     const removeItem = (productId: string) => {
-        setItems(currentItems => {
-            // Update cart expiration
-            updateCartExpiration();
+        // filter out the one item
+        const newItems = items.filter(item => item.product.id !== productId);
 
-            // Filter out the item
-            return currentItems.filter(item => item.product.id !== productId);
-        });
+        // if length didn’t change, nothing to do
+        if (newItems.length === items.length) return;
+
+        setItems(newItems);
+        updateCartExpiration();
     };
 
     // Clear cart

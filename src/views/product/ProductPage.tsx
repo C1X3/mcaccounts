@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaArrowLeft, FaStar, FaMinus, FaPlus, FaShoppingCart } from "react-icons/fa";
 import { useCart } from "@/context/CartContext";
-import { toast } from "react-hot-toast";
 
 const ProductPage = ({ product, stockCount }: { product?: Product, stockCount?: number }) => {
     const router = useRouter();
@@ -35,22 +34,15 @@ const ProductPage = ({ product, stockCount }: { product?: Product, stockCount?: 
         if (!product) return;
 
         setIsAdding(true);
-
-        // Add to cart using context - no need for promise handling with localStorage
-        addItem(product, quantity);
+        addItem({ ...product, stock: stockCount || 0 }, quantity);
         setIsAdding(false);
-
-        // Show toast notification
-        toast.success(`Added ${quantity} ${quantity === 1 ? 'item' : 'items'} to cart: ${product.name}`);
     };
 
     const handleBuyNow = () => {
         if (!product) return;
 
-        // Add to cart first
-        addItem(product, quantity);
+        addItem({ ...product, stock: stockCount || 0 }, quantity);
 
-        // Then redirect to checkout
         router.push('/cart');
     };
 
