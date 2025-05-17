@@ -6,16 +6,48 @@ enum PaymentType {
     VENMO
 }
 
-model Order {
+enum OrderStatus {
+    PENDING
+    PAID
+    DELIVERED
+    CANCELLED
+}
+
+model OrderItem {
     id String @id @default(cuid())
+
+    orderId String
+    order Order @relation(fields: [orderId], references: [id])
+
     productId String
+    product Product @relation(fields: [productId], references: [id])
+
     quantity Int
-    totalPrice Float
-    paymentType PaymentType
-    customerName String
-    customerEmail String
-    customerPhone String
-    customerAddress String
+    price Float
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+}
+
+model CustomerInformation {
+    id String @id @default(cuid())
+
+    orderId String
+    order Order @relation(fields: [orderId], references: [id])
+
+    name String
+    email String
+}
+
+model Order {
+    id String @id @default(cuid())
+
+    totalPrice Float
+    paymentType PaymentType
+    status OrderStatus
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    OrderItem OrderItem[]
+    CustomerInformation CustomerInformation[]
 }
