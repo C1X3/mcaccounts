@@ -5,15 +5,17 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { FaSearch } from "react-icons/fa";
-import { trpc } from "@/utils/trpc";
+import { useTRPC } from "@/server/client";
+import { useQuery } from "@tanstack/react-query";
 
 const ShopPage = () => {
+    const trpc = useTRPC();
     const {
         data: products = [],
         isLoading,
         isError,
         error,
-    } = trpc.product.getAll.useQuery();
+    } = useQuery(trpc.product.getAll.queryOptions());
 
     // Local UI state
     const [filteredProducts, setFilteredProducts] = useState<typeof products>([]);

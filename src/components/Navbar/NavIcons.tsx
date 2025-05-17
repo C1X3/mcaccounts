@@ -2,12 +2,12 @@
 
 import { motion } from "framer-motion";
 import { FaSearch, FaShoppingCart } from "react-icons/fa";
+import { useCart } from "@/context/CartContext";
+import Link from "next/link";
 
-interface NavIconsProps {
-  cartCount?: number;
-}
+const NavIcons = () => {
+  const { totalItems } = useCart();
 
-const NavIcons = ({ cartCount = 0 }: NavIconsProps) => {
   return (
     <div className="flex items-center space-x-4">
       <motion.button
@@ -17,16 +17,18 @@ const NavIcons = ({ cartCount = 0 }: NavIconsProps) => {
       >
         <FaSearch />
       </motion.button>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="p-2 rounded-full bg-[var(--surface)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white transition-colors relative"
-      >
-        <FaShoppingCart />
-        <span className="absolute -top-1 -right-1 bg-[var(--accent)] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-          {cartCount}
-        </span>
-      </motion.button>
+      <Link href="/cart">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="p-2 rounded-full bg-[var(--surface)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white transition-colors relative"
+        >
+          <FaShoppingCart />
+          <span className="absolute -top-1 -right-1 bg-[var(--accent)] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+            {totalItems}
+          </span>
+        </motion.button>
+      </Link>
     </div>
   );
 };

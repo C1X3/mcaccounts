@@ -1,17 +1,17 @@
 import { z } from 'zod';
-import { router, publicProcedure } from '../trpc';
 import { prisma } from '@/utils/prisma';
+import { adminProcedure, baseProcedure, createTRPCRouter } from '../init';
 
-export const productRouter = router({
+export const productRouter = createTRPCRouter({
     // Get all products
-    getAll: publicProcedure.query(async () => {
+    getAll: baseProcedure.query(async () => {
         return await prisma.product.findMany({
             orderBy: { createdAt: 'desc' },
         });
     }),
 
     // Get a single product by ID
-    getById: publicProcedure
+    getById: baseProcedure
         .input(z.object({ id: z.string() }))
         .query(async ({ input }) => {
             return await prisma.product.findUnique({
@@ -20,7 +20,7 @@ export const productRouter = router({
         }),
 
     // Create a new product
-    create: publicProcedure
+    create: adminProcedure
         .input(
             z.object({
                 name: z.string().min(1),
@@ -42,7 +42,7 @@ export const productRouter = router({
         }),
 
     // Update an existing product
-    update: publicProcedure
+    update: adminProcedure
         .input(
             z.object({
                 id: z.string(),
@@ -67,7 +67,7 @@ export const productRouter = router({
         }),
 
     // Delete a product
-    delete: publicProcedure
+    delete: adminProcedure
         .input(z.object({ id: z.string() }))
         .mutation(async ({ input }) => {
             return await prisma.product.delete({

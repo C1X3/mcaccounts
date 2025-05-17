@@ -8,9 +8,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaArrowLeft, FaStar, FaMinus, FaPlus, FaShoppingCart } from "react-icons/fa";
+import { useCart } from "@/context/CartContext";
 
 const ProductPage = ({ product }: { product?: Product }) => {
     const router = useRouter();
+    const { addItem } = useCart();
 
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(product?.image || '');
@@ -29,20 +31,25 @@ const ProductPage = ({ product }: { product?: Product }) => {
     };
 
     const handleAddToCart = () => {
+        if (!product) return;
+
         setIsAdding(true);
 
-        // Simulate adding to cart
-        setTimeout(() => {
-            setIsAdding(false);
-            // Here you would add the actual cart logic
-            alert(`Added ${quantity} of ${product?.name} to cart!`);
-        }, 800);
+        // Add to cart using context - no need for promise handling with localStorage
+        addItem(product, quantity);
+        setIsAdding(false);
+
+        // Optional: Add feedback that item was added
     };
 
     const handleBuyNow = () => {
-        // Redirect to checkout with the product and quantity
-        alert(`Proceeding to checkout with ${quantity} of ${product?.name}`);
-        // Here you would implement the checkout logic
+        if (!product) return;
+
+        // Add to cart first
+        addItem(product, quantity);
+
+        // Then redirect to checkout
+        router.push('/cart');
     };
 
     if (!product) {

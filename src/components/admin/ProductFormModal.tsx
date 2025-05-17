@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Controller, useForm } from "react-hook-form";
 import { FaTimes } from "react-icons/fa";
-import { trpc } from "@/utils/trpc";
 import { toast } from "react-hot-toast";
 import { Prisma } from "@generated";
+import { useTRPC } from "@/server/client";
 
 type ProductFormModalProps = {
     isOpen: boolean;
@@ -23,6 +23,8 @@ export default function ProductFormModal({
     isEditing = false,
     onSuccess,
 }: ProductFormModalProps) {
+    const trpc = useTRPC();
+
     const [additionalImageUrls, setAdditionalImageUrls] = useState<string[]>([]);
     const [newImageUrl, setNewImageUrl] = useState("");
 
@@ -69,7 +71,7 @@ export default function ProductFormModal({
     }, [initialData, reset]);
 
     // tRPC mutations
-    const createProduct = trpc.product.create.useMutation({
+    const createProduct = trpc.product.create.use({
         onMutate: (data) => {
             console.log(data);
         },

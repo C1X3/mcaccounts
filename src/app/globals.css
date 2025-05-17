@@ -2,7 +2,7 @@
 
 :root {
   /* Light theme with light green accent */
-  --background: #f8fafc;
+  --background: #cfe3d9;
   --foreground: #1e293b;
   --primary: #4ade80;
   --primary-light: #86efac;
@@ -39,7 +39,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Override dark mode preference with our light theme */
-    --background: #f8fafc;
+    --background: #dae8e1;
     --foreground: #1e293b;
   }
 }

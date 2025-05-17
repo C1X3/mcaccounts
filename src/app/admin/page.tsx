@@ -8,25 +8,37 @@ import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer";
 import { toast, Toaster } from "react-hot-toast";
 import ProductFormModal from "@/components/admin/ProductFormModal";
-import { trpc } from "@/utils/trpc";
 import { Prisma, Product } from "@generated";
-
-const ADMIN_PASSWORD = "mccapes123";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/server/client";
 
 export default function AdminDashboard() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState("");
-    const [isAuthLoading, setIsAuthLoading] = useState(false);
     const [isPasswordIncorrect, setIsPasswordIncorrect] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Prisma.ProductCreateInput | undefined>(undefined);
 
     const router = useRouter();
+    const trpc = useTRPC();
 
     // tRPC product hooks
-    const products = trpc.product.getAll.useQuery();
-    const deleteProductMutation = trpc.product.delete.useMutation({
+    const isAuthenticated = useQuery(trpc.auth.isAuthenticated.queryOptions());
+    const login = useMutation(trpc.auth.authenticate.mutationOptions({
+        onSuccess: () => {
+            setIsPasswordIncorrect(false);
+            toast.success("Authenticated successfully");
+        },
+        onError: (error) => {
+            setIsPasswordIncorrect(true);
+            toast.error(`Error authenticating: ${error.message}`);
+        },
+        onSettled: () => {
+            isAuthenticated.refetch();
+        },
+    }));
+    const products = useQuery(trpc.product.getAll.queryOptions());
+    const deleteProductMutation = useMutation(trpc.product.delete.mutationOptions({
         onSuccess: () => {
             toast.success("Product deleted successfully");
             products.refetch();
@@ -34,32 +46,20 @@ export default function AdminDashboard() {
         onError: (error) => {
             toast.error(`Error deleting product: ${error.message}`);
         },
-    });
+    }));
 
     const handlePasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setIsAuthLoading(true);
 
-        // Simulate a delay for authentication (for UX)
-        setTimeout(() => {
-            if (password === ADMIN_PASSWORD) {
-                setIsAuthenticated(true);
-                setIsPasswordIncorrect(false);
-            } else {
-                setIsPasswordIncorrect(true);
-            }
-            setIsAuthLoading(false);
-        }, 800);
+        login.mutate({
+            password: password,
+        });
     };
 
     const handleDeleteProduct = async (id: string) => {
         if (window.confirm("Are you sure you want to delete this product?")) {
             deleteProductMutation.mutate({ id });
         }
-    };
-
-    const handleOpenProduct = (id: string) => {
-        router.push(`/shop/${id}`);
     };
 
     const handleEditProduct = (product: Product) => {
@@ -143,10 +143,10 @@ export default function AdminDashboard() {
 
                                     <button
                                         type="submit"
-                                        disabled={isAuthLoading}
+                                        disabled={login.isPending}
                                         className="w-full px-6 py-3 bg-[var(--primary)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                                     >
-                                        {isAuthLoading ? "Authenticating..." : "Login"}
+                                        {login.isPending ? "Authenticating..." : "Login"}
                                     </button>
                                 </form>
                             </motion.div>
@@ -265,7 +265,7 @@ export default function AdminDashboard() {
                                                     <td className="py-4 px-2 text-right">
                                                         <div className="flex justify-end gap-2">
                                                             <button
-                                                                onClick={() => handleOpenProduct(product.id)}
+                                                                onClick={() => router.push(`/shop/${product.id}`)}
                                                                 className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
                                                                 title="View Product"
                                                             >

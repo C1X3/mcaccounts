@@ -1,18 +1,21 @@
 model Product {
   // Important
-  id String @id @default(cuid())
-  name String
+  id          String @id @default(cuid())
+  name        String
   description String
-  price Float
-  image String
+  price       Float
+  image       String
 
   // Extras
-  stock Int
+  stock            Int
   additionalImages String[]
-  category String
-  rating Float
-  badge String
-  features String[]
+  category         String
+  rating           Float
+  badge            String
+  features         String[]
+
+  // Relations
+  cartItems CartItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

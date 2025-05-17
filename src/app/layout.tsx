@@ -1,11 +1,7 @@
-'use client';
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
-import { trpc } from "@/utils/trpc";
-import superjson from "superjson";
+import { CartProvider } from "@/context/CartContext";
+import { TRPCReactProvider } from "@/server/client";
 
 import "./globals.css";
 
@@ -19,23 +15,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// export const metadata: Metadata = {
-//   title: "MCCapes - Premium Minecraft Cosmetics",
-//   description:
-//     "Get exclusive high-quality Minecraft capes, skins and accessories to make your character stand out.",
-//   keywords: [
-//     "minecraft",
-//     "capes",
-//     "skins",
-//     "minecraft cosmetics",
-//     "minecraft store",
-//   ],
-// };
-
-const queryClient = new QueryClient();
-const trpcClient = trpc.createClient({
-  links: [httpBatchLink({ url: '/api/trpc', transformer: superjson })],
-});
+export const metadata: Metadata = {
+  title: "MCCapes - Premium Minecraft Cosmetics",
+  description:
+    "Get exclusive high-quality Minecraft capes, skins and accessories to make your character stand out.",
+  keywords: [
+    "minecraft",
+    "capes",
+    "skins",
+    "minecraft cosmetics",
+    "minecraft store",
+  ],
+};
 
 export default function RootLayout({
   children,
@@ -50,12 +41,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <trpc.Provider client={trpcClient} queryClient={queryClient}>
-          <QueryClientProvider client={queryClient}>
+        <TRPCReactProvider>
+          <CartProvider>
             {children}
-          </QueryClientProvider>
-        </trpc.Provider>
-      </body>
-    </html>
+          </CartProvider>
+        </TRPCReactProvider>
+      </body >
+    </html >
   );
 }

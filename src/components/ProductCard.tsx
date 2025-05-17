@@ -3,12 +3,19 @@ import Image from "next/image";
 import { FaStar, FaShoppingCart } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { Product } from '@generated';
+import { useCart } from "@/context/CartContext";
 
 const ProductCard = ({ product }: { product: Product }) => {
     const router = useRouter();
+    const { addItem } = useCart();
 
     const handleNavigateToProduct = () => {
         router.push(`/shop/${product.id}`);
+    };
+
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent navigation when clicking add to cart
+        addItem(product.id);
     };
 
     return (
@@ -67,17 +74,27 @@ const ProductCard = ({ product }: { product: Product }) => {
                     <span className="text-xl font-bold text-[var(--foreground)]">
                         ${product.price}
                     </span>
-                    <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center gap-2"
-                        onClick={() => {
-                            router.push(`/shop/${product.id}`);
-                        }}
-                    >
-                        <span className="text-sm font-semibold">Purchase</span>
-                        <FaShoppingCart size={16} />
-                    </motion.button>
+                    <div className="flex space-x-2">
+                        <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center"
+                            onClick={handleAddToCart}
+                        >
+                            <FaShoppingCart size={16} />
+                        </motion.button>
+                        <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center gap-2"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/shop/${product.id}`);
+                            }}
+                        >
+                            <span className="text-sm font-semibold">View</span>
+                        </motion.button>
+                    </div>
                 </div>
             </div>
         </motion.div>
