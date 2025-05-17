@@ -56,11 +56,6 @@ const OrderPage = ({ id }: { id: string }) => {
 
     const { data: order, isLoading: isOrderLoading, error: orderError } = useQuery(trpc.checkout.getOrderStatus.queryOptions(
         { orderId: id as string },
-        {
-            enabled: !!id,
-            retry: 3,
-            retryDelay: 1000,
-        }
     ));
 
     useEffect(() => {
@@ -123,9 +118,6 @@ const OrderPage = ({ id }: { id: string }) => {
 
     // Calculate order totals
     const subtotal = order.OrderItem.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const tax = subtotal * 0.0725; // 7.25% tax
-    const total = subtotal + tax;
-
     const customerInfo = order.CustomerInformation[0];
 
     return (
@@ -201,17 +193,13 @@ const OrderPage = ({ id }: { id: string }) => {
                                         <span className="text-[var(--foreground)]">{formatPrice(subtotal)}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Tax</span>
-                                        <span className="text-[var(--foreground)]">{formatPrice(tax)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
                                         <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Shipping</span>
                                         <span className="text-green-500">Free</span>
                                     </div>
                                     <div className="pt-3 mt-3 border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
                                         <div className="flex justify-between">
                                             <span className="font-bold text-[var(--foreground)]">Total</span>
-                                            <span className="font-bold text-[var(--primary)]">{formatPrice(total)}</span>
+                                            <span className="font-bold text-[var(--primary)]">{formatPrice(subtotal)}</span>
                                         </div>
                                     </div>
                                 </div>

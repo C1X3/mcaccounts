@@ -21,7 +21,7 @@ interface PaymentResponse {
 }
 
 const CartPage = () => {
-    const { items, totalItems, totalPrice, isLoading, updateQuantity, removeItem } = useCart();
+    const { items, totalItems, totalPrice, isLoading, updateQuantity, removeItem, clearCart } = useCart();
     const [showPaymentOptions, setShowPaymentOptions] = useState(false);
     const [customerInfo, setCustomerInfo] = useState({ name: "", email: "" });
     const [showCustomerForm, setShowCustomerForm] = useState(false);
@@ -44,11 +44,6 @@ const CartPage = () => {
     }));
 
     const handlePaymentMethod = (method: PaymentType) => {
-        if (!customerInfo.name || !customerInfo.email) {
-            toast.error("Please provide your name and email");
-            return;
-        }
-
         setPaymentType(method);
         setShowCustomerForm(true);
     };
@@ -70,6 +65,8 @@ const CartPage = () => {
             paymentType,
             totalPrice: totalPrice
         });
+
+        clearCart();
     };
 
     if (isLoading) {

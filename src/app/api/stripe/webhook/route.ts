@@ -1,0 +1,123 @@
+import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import { stripe } from '@/server/providers/stripe';
+import Stripe from 'stripe';
+import { prisma } from '@/utils/prisma';
+import { OrderStatus } from '@generated';
+
+export async function POST(request: Request) {
+    const reqHeaders = await headers();
+    const body = await request.text();
+
+    let event: Stripe.Event | null = null;
+    if (!body) {
+        console.log('No event or body');
+        return NextResponse.json({ error: 'No event or body' }, { status: 400 });
+    }
+
+    const signature = reqHeaders.get('stripe-signature');
+    if (!signature) {
+        console.log('No signature');
+        return NextResponse.json({ error: 'No signature' }, { status: 400 });
+    }
+
+    try {
+        event = stripe.webhooks.constructEvent(
+            body,
+            signature,
+            process.env.STRIPE_WEBHOOK_SECRET || ''
+        );
+    } catch (err) {
+        console.log(`⚠️  Webhook signature verification failed.`, err);
+        return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
+    }
+
+    if (!event) {
+        console.log('No event');
+        return NextResponse.json({ error: 'No event' }, { status: 400 });
+    }
+
+    // Handle the event
+    switch (event.type) {
+        case 'checkout.session.completed':
+            const checkoutIntent = event.data.object;
+            if (checkoutIntent.payment_status === 'paid') {
+                if (!checkoutIntent.metadata?.orderId) {
+                    console.log('No orderId in metadata');
+                    return NextResponse.json({ error: 'No orderId in metadata' }, { status: 400 });
+                }
+
+                const orderId = checkoutIntent.metadata.orderId;
+
+                await prisma.$transaction(async (tx) => {
+                    const order = await tx.order.findUnique({
+                        where: { id: orderId },
+                    });
+
+                    if (!order) {
+                        console.log('No order found');
+                        return NextResponse.json({ error: 'No order found' }, { status: 400 });
+                    }
+
+                    await tx.order.update({
+                        where: { id: orderId },
+                        data: { status: OrderStatus.PAID },
+                    });
+                });
+            }
+
+            console.log(`PaymentIntent for ${checkoutIntent.payment_status} was successful!`);
+            break;
+        case 'checkout.session.expired':
+            const expiryIntent = event.data.object;
+
+            if (!expiryIntent.metadata?.orderId) {
+                console.log('No orderId in metadata');
+                return NextResponse.json({ error: 'No orderId in metadata' }, { status: 400 });
+            }
+
+            const orderId = expiryIntent.metadata.orderId;
+
+            await prisma.$transaction(async (tx) => {
+                const order = await tx.order.findUnique({
+                    where: { id: orderId },
+                    include: {
+                        OrderItem: true,
+                    }
+                });
+
+                if (!order) {
+                    console.log('No order found');
+                    return NextResponse.json({ error: 'No order found' }, { status: 400 });
+                }
+
+                for (const item of order.OrderItem) {
+                    const product = await tx.product.findUnique({
+                        where: { id: item.productId },
+                    });
+
+                    if (!product) {
+                        console.log('No product found');
+                        return NextResponse.json({ error: 'No product found' }, { status: 400 });
+                    }
+
+                    const stock = product.stock.concat(item.data);
+                    await tx.product.update({
+                        where: { id: item.productId },
+                        data: { stock },
+                    });
+                }
+
+                await tx.order.update({
+                    where: { id: orderId },
+                    data: { status: OrderStatus.CANCELLED },
+                });
+            });
+
+            break;
+        default:
+            console.log(`Unhandled event type ${event.type}.`);
+    }
+
+    return NextResponse.json({ received: true }, { status: 200 });
+}

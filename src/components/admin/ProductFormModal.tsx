@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 import { Prisma } from "@generated";
 import { useTRPC } from "@/server/client";
 import { useMutation } from "@tanstack/react-query";
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 type ProductFormModalProps = {
     isOpen: boolean;
@@ -258,25 +259,30 @@ export default function ProductFormModal({
                         rules={{
                             required: "At least one stock code is required",
                         }}
-                        render={({ field, fieldState }) => (
-                            <div>
-                                <label htmlFor="stock" className="block text-[var(--foreground)] mb-2">
-                                    Stock *
-                                </label>
-                                <textarea
-                                    id="stock"
-                                    rows={6}
-                                    value={field.value as string[]}
-                                    onChange={(val) => {
-                                        const arr = val.target.value
-                                            .split("\n")
-                                            .map((s) => s.trim())
-                                            .filter(Boolean);
-                                        field.onChange(arr);
-                                    }}
-                                    onBlur={field.onBlur}
-                                    placeholder="Enter one code per line"
-                                    className="
+                        render={({ field, fieldState }) => {
+                            // turn the array into a newline‐delimited string
+                            const textValue = Array.isArray(field.value)
+                                ? field.value.join("\n")
+                                : "";
+
+                            return (
+                                <div>
+                                    <label htmlFor="stock" className="block text-[var(--foreground)] mb-2">
+                                        Stock *
+                                    </label>
+                                    <textarea
+                                        id="stock"
+                                        rows={6}
+                                        value={textValue}
+                                        onChange={(e) => {
+                                            const lines = e.target.value
+                                                .split("\n")
+                                                .map((s) => s.trim());
+                                            field.onChange(lines);
+                                        }}
+                                        onBlur={field.onBlur}
+                                        placeholder="Enter one code per line"
+                                        className="
                                             w-full p-3
                                             bg-[color-mix(in_srgb,var(--background),#333_15%)]
                                             border rounded-lg
@@ -285,14 +291,15 @@ export default function ProductFormModal({
                                             border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]
                                             resize-vertical
                                         "
-                                />
-                                {fieldState.error && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        {fieldState.error.message}
-                                    </p>
-                                )}
-                            </div>
-                        )}
+                                    />
+                                    {fieldState.error && (
+                                        <p className="text-red-500 text-sm mt-1">
+                                            {fieldState.error.message}
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        }}
                     />
 
                     {/* Category */}
@@ -353,7 +360,7 @@ export default function ProductFormModal({
 
                     {/* Rating */}
                     <div>
-                        <label htmlFor="rating" className="block text-[var(--foreground)] mb-2">
+                        <label className="block text-[var(--foreground)] mb-2">
                             Rating *
                         </label>
                         <Controller
@@ -362,15 +369,27 @@ export default function ProductFormModal({
                             rules={{ required: "Rating is required" }}
                             render={({ field, fieldState }) => (
                                 <>
-                                    <input
-                                        id="rating"
-                                        type="number"
-                                        value={field.value as number}
-                                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                                        onBlur={field.onBlur}
-                                        className="w-full p-3 bg-[color-mix(in_srgb,var(--background),#333_15%)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]"
-                                        placeholder="Enter rating"
-                                    />
+                                    {/* Star buttons */}
+                                    <div className="flex space-x-1">
+                                        {[1, 2, 3, 4, 5].map((i) => (
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                onClick={() => field.onChange(i)}
+                                                onBlur={field.onBlur}
+                                                className="focus:outline-none"
+                                            >
+                                                {field.value >= i ? (
+                                                    <FaStar className="w-6 h-6" />
+                                                ) : (
+                                                    <FaRegStar className="w-6 h-6" />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {/* Hidden input so the form still “sees” the number */}
+                                    <input type="hidden" value={field.value} />
+
                                     {fieldState.error && (
                                         <p className="text-red-500 text-sm mt-1">
                                             {fieldState.error.message}
@@ -391,7 +410,6 @@ export default function ProductFormModal({
                             control={control}
                             rules={{ required: "Features are required" }}
                             render={({ field, fieldState }) => {
-                                // Turn the array into a comma-separated string (or blank if undefined)
                                 const valueString = Array.isArray(field.value)
                                     ? (field.value as string[]).join(", ")
                                     : "";
@@ -401,14 +419,11 @@ export default function ProductFormModal({
                                         <input
                                             id="features"
                                             type="text"
-                                            // display the joined string
                                             value={valueString}
                                             onChange={(e) => {
-                                                // split on comma, trim whitespace, drop any empty entries
                                                 const arr = e.target.value
                                                     .split(",")
-                                                    .map((s) => s.trim())
-                                                    .filter(Boolean);
+                                                    .map((s) => s.trim());
                                                 field.onChange(arr);
                                             }}
                                             onBlur={field.onBlur}

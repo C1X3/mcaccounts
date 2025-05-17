@@ -41,15 +41,6 @@ export const checkoutRouter = createTRPCRouter({
                                 email: input.customerInfo.email,
                             }
                         },
-                        OrderItem: {
-                            createMany: {
-                                data: input.items.map(item => ({
-                                    productId: item.productId,
-                                    quantity: item.quantity,
-                                    price: item.price,
-                                }))
-                            }
-                        }
                     }
                 });
 
@@ -86,6 +77,48 @@ export const checkoutRouter = createTRPCRouter({
                             code: 'BAD_REQUEST',
                             message: 'Invalid payment method',
                         });
+                }
+
+                if (paymentUrl) {
+                    for (const item of input.items) {
+                        const product = await prisma.product.findUnique({
+                            where: { id: item.productId },
+                            select: {
+                                stock: true,
+                            }
+                        });
+
+                        if (!product) {
+                            throw new TRPCError({
+                                code: 'NOT_FOUND',
+                                message: 'Product not found',
+                            });
+                        }
+
+                        if (product.stock.length < item.quantity) {
+                            throw new TRPCError({
+                                code: 'BAD_REQUEST',
+                                message: 'Not enough stock for product',
+                            });
+                        }
+
+                        const oldestStock = product.stock[0];
+                        const filteredStock = product.stock.filter(stock => stock !== oldestStock);
+                        await prisma.product.update({
+                            where: { id: item.productId },
+                            data: { stock: filteredStock },
+                        });
+
+                        await prisma.orderItem.create({
+                            data: {
+                                orderId: order.id,
+                                productId: item.productId,
+                                quantity: item.quantity,
+                                price: item.price,
+                                data: oldestStock,
+                            }
+                        });
+                    }
                 }
 
                 return {

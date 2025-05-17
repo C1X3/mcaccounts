@@ -1,7 +1,7 @@
 import { Stripe } from 'stripe';
 
 // Initialize Stripe with the secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
 interface LineItem {
     productId: string;
@@ -30,7 +30,7 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<s
                     product_data: {
                         name: item.name,
                     },
-                    unit_amount: Math.round(item.price * 100), // Stripe uses cents
+                    unit_amount: Math.round(item.price * 100),
                 },
                 quantity: item.quantity,
             })),
