@@ -10,16 +10,86 @@ import { formatPrice } from "@/utils/formatting";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "react-hot-toast";
+import { useTRPC } from "@/server/client";
+import { useMutation } from "@tanstack/react-query";
+
+interface PaymentResponse {
+    orderId: string;
+    paymentUrl: string;
+    success: boolean;
+}
 
 const CartPage = () => {
     const { items, totalItems, totalPrice, isLoading, updateQuantity, removeItem } = useCart();
     const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+    const [customerInfo, setCustomerInfo] = useState({ name: "", email: "" });
+    const [showCustomerForm, setShowCustomerForm] = useState(false);
+
+    const trpc = useTRPC();
+
+    // Process payment mutation
+    const processPaymentMutation = useMutation(trpc.checkout.processPayment.mutationOptions({
+        onSuccess: (data: PaymentResponse) => {
+            if (data.success && data.paymentUrl) {
+                toast.success("Redirecting to payment...");
+                window.location.href = data.paymentUrl;
+            }
+        },
+        onError: (error) => {
+            toast.error(`Payment error: ${error.message}`);
+            setShowPaymentOptions(true);
+        }
+    }));
 
     // Payment method handling
     const handlePaymentMethod = (method: string) => {
+        // If customer info is not collected yet, show the form
+        if (!showCustomerForm) {
+            setShowCustomerForm(true);
+            return;
+        }
+
+        // Validate customer info
+        if (!customerInfo.name || !customerInfo.email) {
+            toast.error("Please provide your name and email");
+            return;
+        }
+
+        // Map payment method string to the enum value expected by the API
+        const paymentTypeMap: Record<string, "STRIPE" | "CRYPTO" | "PAYPAL" | "CASH_APP" | "VENMO"> = {
+            "Stripe": "STRIPE",
+            "Crypto": "CRYPTO",
+            "PayPal": "PAYPAL",
+            "Cash App": "CASH_APP",
+            "Venmo": "VENMO"
+        };
+
+        const paymentType = paymentTypeMap[method];
+        if (!paymentType) {
+            toast.error(`Unsupported payment method: ${method}`);
+            return;
+        }
+
         toast.success(`Processing ${method} payment...`);
-        setShowPaymentOptions(false);
-        // In a real app, you would redirect to the payment processor or handle the payment here
+
+        // Call the API to process the payment
+        processPaymentMutation.mutate({
+            items: items.map(item => ({
+                productId: item.product.id,
+                quantity: item.quantity,
+                price: item.product.price
+            })),
+            customerInfo,
+            paymentType,
+            totalPrice: totalPrice
+        });
+    };
+
+    // Handle customer form submit
+    const handleCustomerInfoSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setShowCustomerForm(false);
+        // Continue with payment process using the already selected method
     };
 
     if (isLoading) {
@@ -263,6 +333,76 @@ const CartPage = () => {
                                                         <FaMoneyBillWave size={16} />
                                                     </div>
                                                 </div>
+                                            </motion.div>
+                                        ) : showCustomerForm ? (
+                                            <motion.div
+                                                key="customerInfoForm"
+                                                initial={{ opacity: 0, y: 40 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 40 }}
+                                                transition={{
+                                                    duration: 0.4,
+                                                    ease: [0.19, 1.0, 0.22, 1.0]
+                                                }}
+                                                className="h-full"
+                                            >
+                                                <div className="flex items-center justify-between mb-6">
+                                                    <h2 className="text-2xl font-bold text-[var(--foreground)]">
+                                                        Your Information
+                                                    </h2>
+                                                </div>
+
+                                                <form onSubmit={handleCustomerInfoSubmit} className="space-y-4">
+                                                    <div>
+                                                        <label htmlFor="name" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                                                            Full Name
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            id="name"
+                                                            value={customerInfo.name}
+                                                            onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                                                            className="w-full p-3 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_15%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_80%)] text-[var(--foreground)]"
+                                                            placeholder="John Doe"
+                                                            required
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label htmlFor="email" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                                                            Email Address
+                                                        </label>
+                                                        <input
+                                                            type="email"
+                                                            id="email"
+                                                            value={customerInfo.email}
+                                                            onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                                                            className="w-full p-3 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_15%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_80%)] text-[var(--foreground)]"
+                                                            placeholder="john@example.com"
+                                                            required
+                                                        />
+                                                    </div>
+
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.02 }}
+                                                        whileTap={{ scale: 0.98 }}
+                                                        type="submit"
+                                                        className="w-full py-4 mt-6 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"
+                                                    >
+                                                        Continue to Payment
+                                                    </motion.button>
+
+                                                    <motion.button
+                                                        onClick={() => setShowCustomerForm(false)}
+                                                        whileHover={{ scale: 1.05 }}
+                                                        whileTap={{ scale: 0.95 }}
+                                                        type="button"
+                                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[color-mix(in_srgb,var(--background),#333_15%)] text-[var(--foreground)] rounded-xl hover:bg-[color-mix(in_srgb,var(--background),#333_25%)] transition-colors"
+                                                    >
+                                                        <FaArrowLeft />
+                                                        Back to Payment Methods
+                                                    </motion.button>
+                                                </form>
                                             </motion.div>
                                         ) : (
                                             <motion.div
