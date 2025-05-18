@@ -1,133 +1,182 @@
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { useState } from "react";
 
 interface ArticleSectionProps {
     alignment: "left" | "right";
     description: string;
     title: string;
-    image: string;
+    video: string;
     index: number;
 }
 
-const ArticleSection = ({ alignment, description, title, image, index }: ArticleSectionProps) => {
-    return (
-        <section
-            key={index}
-            className={`py-16 ${index % 2 === 0 ? "bg-[var(--surface-light)]" : "bg-white"
-                } relative overflow-hidden`}
-        >
-            <motion.div
-                className="absolute inset-0 bg-gradient-to-tr from-[var(--primary-light)] to-transparent opacity-5 z-0"
-                animate={{
-                    opacity: [0.05, 0.1, 0.05],
-                }}
-                transition={{
-                    duration: 8,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                }}
-            />
+const ArticleSection = ({ alignment, description, title, video, index }: ArticleSectionProps) => {
+    const [showModal, setShowModal] = useState(false);
+    const paragraphs = description.split("\n\n");
+    const firstParagraph = paragraphs[0];
+    const floatClass = alignment === "right" ? "float-right md:ml-6" : "float-left md:mr-6";
 
-            <div className="container mx-auto px-6">
+    return (
+        <>
+            <section
+                key={index}
+                className={`py-16 ${index % 2 === 0 ? "bg-[var(--surface-light)]" : "bg-white"} relative`}
+            >
                 <motion.div
-                    className={`flex flex-col ${alignment === "right"
-                        ? "md:flex-row"
-                        : "md:flex-row-reverse"
-                        } items-center gap-12`}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-                >
-                    {/* Text Content */}
+                    className="absolute inset-0 bg-gradient-to-tr from-[var(--primary-light)] to-transparent opacity-5 z-0"
+                    animate={{
+                        opacity: [0.05, 0.1, 0.05],
+                    }}
+                    transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                    }}
+                />
+
+                <div className="container mx-auto">
                     <motion.div
-                        className="md:w-1/2 mb-10 md:mb-0"
-                        initial={{
-                            opacity: 0,
-                            x: alignment === "right" ? -30 : 30,
-                        }}
-                        whileInView={{ opacity: 1, x: 0 }}
+                        className="relative"
+                        initial="hidden"
+                        whileInView="visible"
                         viewport={{ once: true }}
-                        transition={{ duration: 0.7, delay: 0.2 }}
                     >
+                        {/* Title and intro paragraph - always at the top */}
                         <motion.div
+                            className="mb-8 text-center md:text-left md:w-4/5 mx-auto"
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.7, delay: 0.3 }}
+                            transition={{ duration: 0.7, delay: 0.2 }}
                         >
-                            <h3 className="text-3xl font-bold mb-4 text-[var(--foreground)]">
+                            <motion.h3
+                                className="text-3xl font-bold mb-4 text-[var(--foreground)]"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.7, delay: 0.3 }}
+                            >
                                 <span className="gradient-text">{title}</span>
-                            </h3>
+                            </motion.h3>
+                            <motion.p
+                                className="text-gray-600 text-lg"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.7, delay: 0.4 }}
+                            >
+                                {firstParagraph}
+                            </motion.p>
                         </motion.div>
 
-                        <motion.p
-                            className="text-gray-600 mb-8 text-lg"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.7, delay: 0.4 }}
-                        >
-                            {description}
-                        </motion.p>
-
-                        <motion.button
-                            className="minecraft-btn"
-                            whileHover={{
-                                scale: 1.05,
-                                boxShadow: "0 15px 30px rgba(74, 222, 128, 0.3)",
-                            }}
-                            whileTap={{ scale: 0.95 }}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.7, delay: 0.5 }}
-                        >
-                            Explore Collection
-                        </motion.button>
-                    </motion.div>
-
-                    {/* Image */}
-                    <motion.div
-                        className="md:w-1/2 relative"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <div
-                            className="relative h-[300px] md:h-[400px] bg-white shadow-lg overflow-hidden"
-                            style={{
-                                borderRadius:
-                                    index % 2 === 0
-                                        ? "70% 30% 30% 70% / 60% 40% 60% 40%"
-                                        : "30% 70% 70% 30% / 40% 60% 40% 60%",
-                            }}
-                        >
+                        {paragraphs.length > 2 && (
                             <motion.div
-                                className="absolute inset-0"
-                                animate={{
-                                    rotate: [0, 2, 0, -2, 0],
-                                    scale: [1, 1.05, 1],
-                                }}
-                                transition={{
-                                    duration: 8,
-                                    repeat: Infinity,
-                                    ease: "easeInOut",
-                                }}
+                                className="md:w-4/5 mx-auto overflow-auto mb-8"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.7, delay: 0.6 }}
                             >
-                                <Image
-                                    src={image}
-                                    alt={title}
-                                    fill
-                                    style={{ objectFit: "cover" }}
+                                <iframe
+                                    src={video}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    className={`rounded-lg w-full h-[200px] md:w-1/2 md:h-[300px] ${floatClass} mb-4`}
                                 />
+
+                                {/* Paragraphs 2 & 3 flow around the video */}
+                                <p className="text-gray-600 text-lg mb-4">{paragraphs[1]}</p>
+                                <p className="text-gray-600 text-lg mb-4">{paragraphs[2]}</p>
+
+                                {/* If there's a 4th paragraph, render it below both */}
+                                {paragraphs.length > 3 && (
+                                    <p className="clear-both text-gray-600 text-lg mt-4">
+                                        {paragraphs[3]}
+                                    </p>
+                                )}
                             </motion.div>
+                        )}
+
+                        <div className="text-center mt-6">
+                            <motion.button
+                                className="minecraft-btn"
+                                whileHover={{
+                                    scale: 1.05,
+                                    boxShadow: "0 15px 30px rgba(74, 222, 128, 0.3)",
+                                }}
+                                whileTap={{ scale: 0.95 }}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.7, delay: 0.7 }}
+                                onClick={() => setShowModal(true)}
+                            >
+                                Read More
+                            </motion.button>
                         </div>
                     </motion.div>
+                </div>
+            </section >
 
-                </motion.div>
-            </div>
-        </section>
+            {/* Article Modal */}
+            {
+                showModal && (
+                    <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                        >
+                            <div className="p-6">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-2xl font-bold text-[var(--foreground)]">
+                                        <span className="gradient-text">{title}</span>
+                                    </h2>
+                                    <button
+                                        onClick={() => setShowModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                {/* Video at the top of modal */}
+                                <div className="mb-6 aspect-video">
+                                    <iframe
+                                        width="100%"
+                                        height="100%"
+                                        src={video}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        className="rounded-lg">
+                                    </iframe>
+                                </div>
+
+                                {/* Full article content */}
+                                <div className="prose max-w-none">
+                                    {description.split('\n\n').map((paragraph, i) => (
+                                        <p key={i} className="mb-4 text-gray-600">
+                                            {paragraph}
+                                        </p>
+                                    ))}
+                                </div>
+
+                                <div className="mt-6 flex justify-end">
+                                    <button
+                                        onClick={() => setShowModal(false)}
+                                        className="minecraft-btn"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )
+            }
+        </>
     );
 };
 
