@@ -2,10 +2,12 @@ import ProductCard from "@/components/ProductCard";
 import { ProductGetAllOutput } from "@/server/routes/_app";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { FaShoppingCart, FaChevronRight, FaStar } from "react-icons/fa";
 
 const TopProductsSection = ({ products }: { products: ProductGetAllOutput }) => {
+    const router = useRouter();
     const topProduct = useMemo(() => {
         return products.sort((a, b) => b.rating - a.rating)[0];
     }, [products]);
@@ -123,13 +125,14 @@ const TopProductsSection = ({ products }: { products: ProductGetAllOutput }) => 
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.4 }}
+                    onClick={() => router.push("/shop")}
                 >
                     <motion.button
                         whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(var(--primary-rgb),0.5)" }}
                         whileTap={{ scale: 0.98 }}
                         className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] hover:from-[color-mix(in_srgb,var(--primary),#000_10%)] hover:to-[color-mix(in_srgb,var(--secondary),#000_10%)] text-white font-bold rounded-xl shadow-lg shadow-[var(--primary-rgb)]/30 transition-all"
                     >
-                        Explore All Premium Items
+                        Explore All Products
                         <FaChevronRight className="ml-2" />
                     </motion.button>
                 </motion.div>

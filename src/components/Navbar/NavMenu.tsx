@@ -38,6 +38,10 @@ const items = [
     label: "Vouches",
     href: "/vouches",
   },
+  {
+    label: "Discord",
+    href: "https://discord.gg/mc-capes-1315408127755157615"
+  }
 ];
 
 const NavMenu = () => {

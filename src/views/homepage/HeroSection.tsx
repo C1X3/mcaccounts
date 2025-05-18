@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const HeroSection = () => {
+  const router = useRouter();
+
   return (
     <div className="relative w-full py-24">
       {/* BACKGROUND ORBS CONTAINER */}
@@ -67,6 +70,7 @@ const HeroSection = () => {
                   className="minecraft-btn relative overflow-hidden px-6 py-2.5 rounded-lg bg-green-500 text-white font-semibold shadow-lg"
                   whileHover={{ scale: 1.05, boxShadow: "0 12px 24px rgba(0,0,0,0.2)" }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push("/shop")}
                 >
                   Shop Now
                 </motion.button>
@@ -79,6 +83,7 @@ const HeroSection = () => {
                     boxShadow: "0 8px 20px rgba(34,197,94,0.2)",
                   }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push("https://discord.gg/mc-capes-1315408127755157615")}
                 >
                   Learn More
                 </motion.button>
