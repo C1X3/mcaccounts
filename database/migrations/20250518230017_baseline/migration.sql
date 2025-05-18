@@ -39,6 +39,7 @@ CREATE TABLE "Order" (
     "status" "OrderStatus" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "paypalNote" TEXT,
 
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
@@ -50,6 +51,7 @@ CREATE TABLE "Product" (
     "description" TEXT NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
     "image" TEXT NOT NULL,
+    "slug" TEXT,
     "stock" TEXT[],
     "additionalImages" TEXT[],
     "category" TEXT NOT NULL,
@@ -78,6 +80,9 @@ CREATE TABLE "Wallet" (
 
     CONSTRAINT "Wallet_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Product_slug_key" ON "Product"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Wallet_address_key" ON "Wallet"("address");
