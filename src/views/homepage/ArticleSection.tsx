@@ -18,6 +18,7 @@ const ArticleSection = ({ alignment, description, title, video, index }: Article
     return (
         <>
             <section
+                id="articles"
                 key={index}
                 className={`py-16 ${index % 2 === 0 ? "bg-[var(--surface-light)]" : "bg-white"} relative`}
             >
@@ -117,7 +118,6 @@ const ArticleSection = ({ alignment, description, title, video, index }: Article
                 </div>
             </section >
 
-            {/* Article Modal */}
             {
                 showModal && (
                     <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
@@ -157,7 +157,7 @@ const ArticleSection = ({ alignment, description, title, video, index }: Article
                                 {/* Full article content */}
                                 <div className="prose max-w-none">
                                     {description.split('\n\n').map((paragraph, i) => (
-                                        <p key={i} className="mb-4 text-gray-600">
+                                        <p key={i} className="mb-4 text-gray-600 text-xl">
                                             {paragraph}
                                         </p>
                                     ))}

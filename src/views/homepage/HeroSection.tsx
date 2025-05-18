@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 const HeroSection = () => {
   const router = useRouter();
 
+  const scrollToArticles = () => {
+    const articleSection = document.getElementById("articles");
+    if (articleSection) {
+      articleSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="relative w-full py-24">
       {/* BACKGROUND ORBS CONTAINER */}
@@ -83,7 +90,7 @@ const HeroSection = () => {
                     boxShadow: "0 8px 20px rgba(34,197,94,0.2)",
                   }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => router.push("https://discord.gg/mc-capes-1315408127755157615")}
+                  onClick={scrollToArticles}
                 >
                   Learn More
                 </motion.button>

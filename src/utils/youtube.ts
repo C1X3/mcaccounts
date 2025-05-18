@@ -6,9 +6,9 @@ export const YOUTUBE_CHANNEL_IDS = [
   "UCNLO8nw8mmHN5tMF0sprwSQ",
   "UChNwsP0_jTrqYgq74DyfCIg",
   "UCXHiZWRYzDnzZE_Xm_1OEVA",
-  "UChp01EgQSytIk-fI4wrUACw",
   "UCoDmUnYTz2ly28F6rdDdBNw",
-  "UCSZjWwaOze7AfAUfo3dqYBQ"
+  "UCSZjWwaOze7AfAUfo3dqYBQ",
+  "UCgBfyINBxXscTfTfXI0AT5Q"
 ];
 
 export const YOUTUBE_API_CONFIG = {
@@ -38,8 +38,7 @@ export const fetchYouTubeChannels = async (
 
   try {
     const response = await fetch(
-      `${YOUTUBE_API_CONFIG.baseUrl}/channels?part=${
-        YOUTUBE_API_CONFIG.part
+      `${YOUTUBE_API_CONFIG.baseUrl}/channels?part=${YOUTUBE_API_CONFIG.part
       }&id=${channelIds.join(",")}&key=${YOUTUBE_API_CONFIG.apiKey}`
     );
 
