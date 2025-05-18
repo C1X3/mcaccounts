@@ -21,7 +21,7 @@ import { SiLitecoin, SiSolana } from "react-icons/si";
 import { useTRPC } from "@/server/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import QRCode from "react-qr-code";
-import { CryptoType, OrderStatus } from "@generated";
+import { CryptoType, OrderStatus, PaymentType } from "@generated";
 
 // Confirmation thresholds for different crypto types
 const CONFIRMATION_THRESHOLDS: Record<CryptoType, number> = {
@@ -107,9 +107,9 @@ const OrderPage = ({ id }: { id: string }) => {
     const trpc = useTRPC();
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-    const { data: walletDetails, isLoading: isWalletLoading, error: walletError } = useQuery(trpc.checkout.getCryptoWalletDetails.queryOptions({ orderId: id }));
+    const { data: walletDetails, isLoading: isWalletLoading } = useQuery(trpc.checkout.getCryptoWalletDetails.queryOptions({ orderId: id }));
 
-    const { data: order, isLoading: isOrderLoading, error: orderError, refetch: refetchOrder } = useQuery(trpc.checkout.getOrderStatus.queryOptions(
+    const { data: order, isLoading: isOrderLoading, refetch: refetchOrder } = useQuery(trpc.checkout.getOrderStatus.queryOptions(
         { orderId: id as string },
         {
             enabled: !!id,
@@ -121,23 +121,27 @@ const OrderPage = ({ id }: { id: string }) => {
 
     const markAsDelivered = useMutation(trpc.checkout.updateOrderStatus.mutationOptions());
     const isLoading = useMemo(() => isWalletLoading || isOrderLoading, [isWalletLoading, isOrderLoading]);
-    const error = useMemo(() => orderError || walletError, [orderError, walletError]);
 
     useEffect(() => {
-        const iv = setInterval(refetchOrder, 3000);
+        const iv = setInterval(() => {
+            if (isLoading) return;
+
+            if (order?.status === "PAID") {
+                markAsDelivered.mutate({
+                    orderId: id,
+                    status: 'DELIVERED'
+                });
+                clearInterval(iv);
+            } else if (order?.status === "PENDING") {
+                refetchOrder();
+            }
+        }, 3000);
+
         return () => clearInterval(iv);
-    }, [refetchOrder]);
+    }, [refetchOrder, order?.status, markAsDelivered, id, isLoading]);
 
-    useEffect(() => {
-        if (order?.status === "PAID") {
-            markAsDelivered.mutate({
-                orderId: id,
-                status: 'DELIVERED'
-            });
-        }
-    }, [order?.status, markAsDelivered, id]);
-
-    const copyToClipboard = (code: string) => {
+    const copyToClipboard = (code: string | null) => {
+        if (code === null) return;
         navigator.clipboard.writeText(code).then(() => {
             setCopiedCode(code);
             setTimeout(() => setCopiedCode(null), 2000);
@@ -160,7 +164,7 @@ const OrderPage = ({ id }: { id: string }) => {
         );
     }
 
-    if (error || !order) {
+    if (!order) {
         return (
             <div className="min-h-screen flex flex-col bg-[var(--background)]">
                 <header className="py-8">
@@ -175,7 +179,7 @@ const OrderPage = ({ id }: { id: string }) => {
                                 </div>
                                 <h1 className="text-2xl font-bold mb-4 text-[var(--foreground)]">Order Not Found</h1>
                                 <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] mb-8">
-                                    {error?.message || "We couldn't find the order you're looking for."}
+                                    {"We couldn't find the order you're looking for."}
                                 </p>
                                 <Link href="/shop">
                                     <motion.button
@@ -212,7 +216,7 @@ const OrderPage = ({ id }: { id: string }) => {
                         <div className="h-1 w-20 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] mx-auto rounded-full"></div>
                     </div>
 
-                    {showCryptoPaymentDetails && (
+                    {showCryptoPaymentDetails && order.status === "PENDING" && (
                         <div className="mb-8">
                             <div className={`bg-gradient-to-b ${CRYPTO_GRADIENTS[walletDetails.chain]} rounded-xl p-6 border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] shadow-lg backdrop-blur-sm`}>
                                 <div className="flex items-center justify-between mb-4">
@@ -315,6 +319,137 @@ const OrderPage = ({ id }: { id: string }) => {
                                                 confirmations={walletDetails.confirmations || 0}
                                                 cryptoType={walletDetails.chain}
                                             />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {order.paymentType === PaymentType.PAYPAL && order.status === "PENDING" && (
+                        <div className="mb-8">
+                            <div className="bg-gradient-to-b from-[#0d9ad129] to-[#0d9ad110] rounded-xl p-6 border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] shadow-lg backdrop-blur-sm">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center">
+                                        <div className="w-10 h-10 flex items-center justify-center mr-3 text-2xl text-[#0d9ad1]">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" className="w-6 h-6 fill-current">
+                                                <path d="M111.4 295.9c-3.5 19.2-17.4 108.7-21.5 134-.3 1.8-1 2.5-3 2.5H12.3c-7.6 0-13.1-6.6-12.1-13.9L58.8 46.6c1.5-9.6 10.1-16.9 20-16.9 152.3 0 165.1-3.7 204 11.4 60.1 23.3 65.6 79.5 44 140.3-21.5 62.6-72.5 89.5-140.1 90.3-43.4.7-69.5-7-75.3 24.2zM357.1 152c-1.8-1.3-2.5-1.8-3 1.3-2 11.4-5.1 22.5-8.8 33.6-39.9 113.8-150.5 103.9-204.5 103.9-6.1 0-10.1 3.3-10.9 9.4-22.6 140.4-27.1 169.7-27.1 169.7-1 7.1 3.5 12.9 10.6 12.9h63.5c8.6 0 15.7-6.3 17.4-14.9.7-5.4-1.1 6.1 14.4-91.3 4.6-22 14.3-19.7 29.3-19.7 71 0 126.4-28.8 142.9-112.3 6.5-34.8 4.6-71.4-23.8-92.6z" />
+                                            </svg>
+                                        </div>
+                                        <h2 className="text-xl font-bold text-[var(--foreground)]">
+                                            PayPal Payment
+                                        </h2>
+                                    </div>
+                                    <StatusBadge status={order.status} />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mt-6">
+                                    <div className="flex flex-col items-center justify-center md:col-span-2">
+                                        <div className="bg-white p-3 rounded-xl shadow-md w-full max-w-[220px]">
+                                            {/* Temporary QR code */}
+                                            <Image
+                                                src={`/paypalqrcode.png`}
+                                                alt="PayPal"
+                                                width={200}
+                                                height={200}
+                                            />
+                                        </div>
+
+                                        <div className="mt-4 text-center">
+                                            <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                                                Scan to pay with PayPal
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col md:col-span-3">
+                                        <div className="bg-[color-mix(in_srgb,var(--background),#fff_5%)] rounded-xl p-6 h-full">
+                                            <h3 className="text-lg font-medium text-[var(--foreground)] mb-4 flex items-center">
+                                                <span className="bg-[#0d9ad1]/10 text-[#0d9ad1] w-7 h-7 flex items-center justify-center rounded-full mr-2 text-sm">1</span>
+                                                Payment Details
+                                            </h3>
+
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <label className="text-sm font-medium text-[var(--foreground)] mb-1 block">Send Amount</label>
+                                                    <div className="flex items-center">
+                                                        <div
+                                                            className="bg-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] p-3 rounded-md font-mono text-base flex-grow mr-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] transition-colors"
+                                                            onClick={() => copyToClipboard(subtotal.toString())}
+                                                            title="Click to copy amount"
+                                                        >
+                                                            <span className="font-bold">{formatPrice(subtotal)}</span>
+                                                        </div>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => copyToClipboard(subtotal.toString())}
+                                                            className="p-2 bg-[#0d9ad1]/10 text-[#0d9ad1] rounded-md"
+                                                        >
+                                                            {copiedCode === subtotal.toString() ? <FaCheck /> : <FaCopy />}
+                                                        </motion.button>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="text-sm font-medium text-[var(--foreground)] mb-1 block">PayPal Email</label>
+                                                    <div className="flex items-center">
+                                                        <div
+                                                            className="bg-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] p-3 rounded-md overflow-hidden text-ellipsis font-mono text-sm flex-grow mr-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] transition-colors"
+                                                            onClick={() => copyToClipboard(String(process.env.NEXT_PUBLIC_PAYPAL_EMAIL || 'email@example.com'))}
+                                                            title="Click to copy email"
+                                                        >
+                                                            {process.env.NEXT_PUBLIC_PAYPAL_EMAIL || 'email@example.com'}
+                                                        </div>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => copyToClipboard(String(process.env.NEXT_PUBLIC_PAYPAL_EMAIL || 'email@example.com'))}
+                                                            className="p-2 bg-[#0d9ad1]/10 text-[#0d9ad1] rounded-md"
+                                                        >
+                                                            {copiedCode === String(process.env.NEXT_PUBLIC_PAYPAL_EMAIL || 'email@example.com') ? <FaCheck /> : <FaCopy />}
+                                                        </motion.button>
+                                                    </div>
+                                                </div>
+
+                                                {order.paypalNote && (
+                                                    <div>
+                                                        <label className="text-sm font-medium text-[var(--foreground)] mb-1 block">Payment Note</label>
+                                                        <div className="flex items-center">
+                                                            <div className="bg-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] p-3 rounded-md overflow-hidden text-ellipsis font-mono text-sm flex-grow mr-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] transition-colors"
+                                                                onClick={() => copyToClipboard(order.paypalNote)}
+                                                                title="Click to copy note"
+                                                            >
+                                                                {order.paypalNote}
+                                                            </div>
+                                                            <motion.button
+                                                                whileHover={{ scale: 1.05 }}
+                                                                whileTap={{ scale: 0.95 }}
+                                                                onClick={() => copyToClipboard(order.paypalNote)}
+                                                                className="p-2 bg-[#0d9ad1]/10 text-[#0d9ad1] rounded-md"
+                                                            >
+                                                                {copiedCode === order.paypalNote ? <FaCheck /> : <FaCopy />}
+                                                            </motion.button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <h3 className="text-lg font-medium text-[var(--foreground)] mt-6 mb-4 flex items-center">
+                                                <span className="bg-[#0d9ad1]/10 text-[#0d9ad1] w-7 h-7 flex items-center justify-center rounded-full mr-2 text-sm">2</span>
+                                                Important Instructions
+                                            </h3>
+
+                                            <div className="bg-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] p-4 rounded-lg mb-4">
+                                                <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] mb-2">
+                                                    <span className="flex items-center text-red-500">
+                                                        <FaExclamationTriangle className="mr-2" /> Send as &quot;Friends and Family&quot; only!
+                                                    </span>
+                                                </p>
+                                                <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                                                    Your order will <span className="font-bold">NOT</span> be processed if payment is not sent using the &quot;Friends and Family&quot; option. This helps us avoid unnecessary fees and delays.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

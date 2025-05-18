@@ -65,11 +65,7 @@ export const checkoutRouter = createTRPCRouter({
                         };
                         break;
                     case PaymentType.PAYPAL:
-                        walletDetails = {
-                            amount: input.totalPrice.toFixed(2),
-                            address: "",
-                            url: await createPaypalCheckout(payloadForProviders),
-                        };
+                        walletDetails = await createPaypalCheckout(payloadForProviders);
                         break;
                     case PaymentType.CRYPTO:
                         if (!input.cryptoType) {
@@ -216,6 +212,7 @@ export const checkoutRouter = createTRPCRouter({
                         status: true,
                         createdAt: true,
                         paymentType: true,
+                        paypalNote: true,
                         OrderItem: {
                             select: {
                                 quantity: true,

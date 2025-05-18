@@ -54,6 +54,21 @@ const HomePage = () => {
         <HeroSection />
       </header>
 
+      {/* 3. Product Article Sections */}
+      {productArticles.map((article, index) => (
+        <ArticleSection
+          key={index}
+          index={index}
+          alignment={article.alignment as "left" | "right"}
+          description={article.description}
+          title={article.title}
+          image={article.image}
+        />
+      ))}
+
+      {/* 4. Top Selling Products Section */}
+      <TopProductsSection products={products || []} />
+
       {/* 2. YouTuber/Partner Section */}
       <section className="py-16 bg-white relative overflow-hidden">
         <motion.div
@@ -87,21 +102,6 @@ const HomePage = () => {
           <PartnerScroller />
         </div>
       </section>
-
-      {/* 3. Product Article Sections */}
-      {productArticles.map((article, index) => (
-        <ArticleSection
-          key={index}
-          index={index}
-          alignment={article.alignment as "left" | "right"}
-          description={article.description}
-          title={article.title}
-          image={article.image}
-        />
-      ))}
-
-      {/* 4. Top Selling Products Section */}
-      <TopProductsSection products={products || []} />
 
       {/* 5. Footer */}
       <Footer />

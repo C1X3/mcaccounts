@@ -30,11 +30,12 @@ const CartPage = () => {
 
     const processPaymentMutation = useMutation(trpc.checkout.processPayment.mutationOptions({
         onSuccess: (data) => {
-            if (data.success && data.walletDetails.url && data.paymentType !== PaymentType.CRYPTO) {
+            if (data.success && (data.paymentType === PaymentType.PAYPAL || data.paymentType === PaymentType.CRYPTO)) {
+                toast.success("Redirecting to payment...");
+                router.push(`/order/${data.orderId}`);
+            } else if (data.success && data.walletDetails.url && data.paymentType !== PaymentType.CRYPTO) {
                 toast.success("Redirecting to payment...");
                 window.location.href = data.walletDetails.url;
-            } else if (data.success && data.paymentType === PaymentType.CRYPTO) {
-                router.push(`/order/${data.orderId}`);
             }
         },
         onError: (error) => {

@@ -1,77 +1,54 @@
-import axios from 'axios';
-import { CheckoutPayload } from './types';
+import { CheckoutPayload, WalletDetails } from './types';
+import { fAndFItems } from '@/utils/paypalNotes';
+import { prisma } from '@/utils/prisma';
+import { OrderStatus, PaymentType } from '@generated';
 
-async function getAccessToken(): Promise<string> {
-    try {
-        const response = await axios.post(`${process.env.PAYPAL_API_URL}/v1/oauth2/token`, {
-            auth: {
-                username: process.env.PAYPAL_CLIENT_ID,
-                password: process.env.PAYPAL_SECRET_KEY,
-            },
-            data: 'grant_type=client_credentials',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+export async function createCheckoutSession(payload: CheckoutPayload): Promise<WalletDetails> {
+    if (!process.env.NEXT_PUBLIC_PAYPAL_EMAIL) {
+        throw new Error('PAYPAL_EMAIL is not set');
+    }
+    const email = process.env.NEXT_PUBLIC_PAYPAL_EMAIL;
+    const amount = payload.totalPrice.toFixed(2);
+
+    // fetch all pending PayPal orders’ notes
+    const currPaypalPending = await prisma.order.findMany({
+        where: {
+            paymentType: PaymentType.PAYPAL,
+            status: OrderStatus.PENDING,
+        },
+        select: { paypalNote: true },
+    });
+    const usedNotes = new Set(currPaypalPending.map(o => o.paypalNote));
+
+    // try to pick an unused single note first
+    let note = fAndFItems.find(item => !usedNotes.has(item));
+
+    // if no singles left, try the first unused pair
+    if (!note) {
+        outer: for (let i = 0; i < fAndFItems.length; i++) {
+            for (let j = i + 1; j < fAndFItems.length; j++) {
+                const combo = `${fAndFItems[i]} ${fAndFItems[j]}`;
+                if (!usedNotes.has(combo)) {
+                    note = combo;
+                    break outer;
+                }
             }
-        });
-
-        return response.data.access_token;
-    } catch (error) {
-        console.error('PayPal auth error:', error);
-        throw new Error('Failed to authenticate with PayPal');
+        }
     }
-}
 
-export async function createCheckoutSession(payload: CheckoutPayload): Promise<string> {
-    try {
-        const accessToken = await getAccessToken();
-
-        const response = await axios.post(`${process.env.PAYPAL_API_URL}/v2/checkout/orders`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            data: {
-                intent: 'CAPTURE',
-                purchase_units: [
-                    {
-                        amount: {
-                            currency_code: 'USD',
-                            value: payload.totalPrice.toFixed(2),
-                            breakdown: {
-                                item_total: {
-                                    currency_code: 'USD',
-                                    value: payload.totalPrice.toFixed(2),
-                                },
-                            },
-                        },
-                        items: payload.items.map(item => ({
-                            name: item.name,
-                            quantity: item.quantity.toString(),
-                            unit_amount: {
-                                currency_code: 'USD',
-                                value: item.price.toFixed(2),
-                            },
-                        })),
-                        custom_id: payload.orderId,
-                    },
-                ],
-                application_context: {
-                    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/order/${payload.orderId}?success=true`,
-                    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/order/${payload.orderId}?canceled=true`,
-                    brand_name: 'MCCapes Store',
-                    user_action: 'PAY_NOW',
-                },
-            },
-        });
-
-        // Find the approval URL from the response links
-        const approvalUrl = response.data.links.find(
-            (link: { rel: string }) => link.rel === 'approve'
-        ).href;
-
-        return approvalUrl;
-    } catch (error) {
-        console.error('PayPal checkout error:', error);
-        throw new Error('Failed to create PayPal checkout session');
+    if (!note) {
+        throw new Error('No note found—even after trying all single+pair combinations');
     }
+
+    // persist the chosen note on the order
+    await prisma.order.update({
+        where: { id: payload.orderId },
+        data: { paypalNote: note },
+    });
+
+    return {
+        address: email,
+        amount,
+        url: note,
+    };
 }
