@@ -7,8 +7,8 @@ import { FaEdit, FaTrash, FaPlus, FaEye, FaLock } from "react-icons/fa";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "react-hot-toast";
-import ProductFormModal from "@/components/admin/ProductFormModal";
-import { Prisma, Product } from "@generated";
+import ProductFormModal, { ProductFormModalSchema } from "@/components/admin/ProductFormModal";
+import { Product } from "@generated";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/server/client";
 
@@ -17,7 +17,7 @@ export default function AdminDashboard() {
     const [isPasswordIncorrect, setIsPasswordIncorrect] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<Prisma.ProductCreateInput | undefined>(undefined);
+    const [selectedProduct, setSelectedProduct] = useState<ProductFormModalSchema | undefined>(undefined);
 
     const router = useRouter();
     const trpc = useTRPC();
@@ -63,7 +63,7 @@ export default function AdminDashboard() {
     };
 
     const handleEditProduct = (product: Product) => {
-        const formProduct: Prisma.ProductCreateInput = {
+        const formProduct: ProductFormModalSchema = {
             id: product.id,
             name: product.name,
             description: product.description,

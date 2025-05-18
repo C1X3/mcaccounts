@@ -1,5 +1,5 @@
 import { HDNodeWallet, parseUnits } from "ethers";
-import bip39 from "bip39";
+import { mnemonicToSeedSync } from "bip39";
 import BIP32Factory from "bip32";
 import * as ecc from "tiny-secp256k1";
 import * as bitcoin from "bitcoinjs-lib";
@@ -66,7 +66,7 @@ export async function createWalletDetails(
     const depositIndex = (last?.depositIndex ?? 0) + 1;
 
     const MNEMONIC = process.env.MNEMONIC!;
-    const seed = bip39.mnemonicToSeedSync(MNEMONIC);
+    const seed = mnemonicToSeedSync(MNEMONIC);
     const root = bip32.fromSeed(seed);
 
     let address: string;

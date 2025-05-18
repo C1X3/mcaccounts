@@ -5,15 +5,32 @@ import { motion } from "framer-motion";
 import { Controller, useForm } from "react-hook-form";
 import { FaTimes } from "react-icons/fa";
 import { toast } from "react-hot-toast";
-import { Prisma } from "@generated";
 import { useTRPC } from "@/server/client";
 import { useMutation } from "@tanstack/react-query";
 import { FaStar, FaRegStar } from "react-icons/fa";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+export const schema = z.object({
+    id: z.string().optional(),
+    name: z.string(),
+    description: z.string(),
+    price: z.number(),
+    stock: z.array(z.string()),
+    image: z.string(),
+    additionalImages: z.array(z.string()),
+    category: z.string(),
+    badge: z.string(),
+    rating: z.number(),
+    features: z.array(z.string()),
+});
+
+export type ProductFormModalSchema = z.infer<typeof schema>;
 
 type ProductFormModalProps = {
     isOpen: boolean;
     onClose: () => void;
-    initialData?: Prisma.ProductCreateInput;
+    initialData?: z.infer<typeof schema>;
     isEditing?: boolean;
     onSuccess?: () => void;
 };
@@ -35,7 +52,8 @@ export default function ProductFormModal({
         handleSubmit,
         reset,
         setValue,
-    } = useForm<Prisma.ProductCreateInput>({
+    } = useForm<z.infer<typeof schema>>({
+        resolver: zodResolver(schema),
         defaultValues: initialData || {
             name: "",
             description: "",
@@ -111,7 +129,7 @@ export default function ProductFormModal({
         setValue("additionalImages", newImages);
     };
 
-    const onSubmit = (data: Prisma.ProductCreateInput) => {
+    const onSubmit = (data: z.infer<typeof schema>) => {
         // Include the additional images
         data.additionalImages = additionalImageUrls.concat(data.additionalImages as string[]);
 

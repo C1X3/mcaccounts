@@ -1,6 +1,4 @@
-"use server";
-
-import { prefetch, trpc } from "@/server/server";
+import { HydrateClient, prefetch, trpc } from "@/server/server";
 import HomePage from "@/views/homepage";
 
 const Page = async () => {
@@ -9,8 +7,12 @@ const Page = async () => {
   );
 
   return (
-    <HomePage />
+    <HydrateClient>
+      <HomePage />
+    </HydrateClient>
   );
 };
+
+export const dynamic = "force-dynamic";
 
 export default Page;

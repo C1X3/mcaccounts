@@ -1,4 +1,4 @@
-import { prefetch, trpc } from "@/server/server";
+import { HydrateClient, prefetch, trpc } from "@/server/server";
 import { prisma } from "@/utils/prisma";
 import OrderPage from "@/views/order/OrderPage";
 import { OrderStatus } from "@generated";
@@ -48,7 +48,13 @@ const Page = async ({ params, searchParams }: {
     prefetch(trpc.checkout.getCryptoWalletDetails.queryOptions({ orderId: id }));
     prefetch(trpc.checkout.getOrderStatus.queryOptions({ orderId: id }));
 
-    return <OrderPage id={id} />;
+    return (
+        <HydrateClient>
+            <OrderPage id={id} />
+        </HydrateClient>
+    );
 };
+
+export const dynamic = "force-dynamic";
 
 export default Page;

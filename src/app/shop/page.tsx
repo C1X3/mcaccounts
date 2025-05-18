@@ -1,5 +1,3 @@
-"use server";
-
 import { HydrateClient, prefetch, trpc } from "@/server/server";
 import ShopPage from "@/views/shop/ShopPage";
 
@@ -14,5 +12,7 @@ const Page = async () => {
         </HydrateClient>
     );
 };
+
+export const dynamic = "force-dynamic";
 
 export default Page;
