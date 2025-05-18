@@ -2,111 +2,106 @@ import { motion } from "framer-motion";
 import { FaChevronRight, FaPlayCircle } from "react-icons/fa";
 import { HiCube } from "react-icons/hi";
 
+const links = [
+  {
+    label: "Home",
+    href: "/",
+  },
+  {
+    label: "Shop",
+    href: "/shop",
+  },
+  {
+    label: "Vouches",
+    href: "/vouches",
+  },
+  {
+    label: "Discord",
+    href: "https://discord.gg/mc-capes-1315408127755157615"
+  }
+];
+
 const Footer = () => {
-    return (
-        <footer className="bg-[var(--surface-dark)] text-[var(--foreground)] py-12 relative overflow-hidden">
-        <motion.div className="absolute inset-0 bg-gradient-to-b from-[var(--surface)] to-transparent opacity-10 z-0" />
+  return (
+    <footer className="bg-[var(--surface-dark)] text-[var(--foreground)] py-12 relative overflow-hidden">
+      <motion.div className="absolute inset-0 bg-gradient-to-b from-[var(--surface)] to-transparent opacity-10 z-0" />
 
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h5 className="text-xl font-bold mb-4 gradient-text">MCCapes</h5>
-              <p className="text-gray-400 mb-4">
-                Premium Minecraft cosmetics for discerning players.
-              </p>
-              <div className="flex space-x-4">
-                {/* Social media icons */}
-                {["Facebook", "Twitter", "Instagram", "Discord"].map(
-                  (social) => (
-                    <a
-                      key={social}
-                      href="#"
-                      className="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--surface)] hover:bg-[var(--primary)] transition-colors"
-                    >
-                      {social.charAt(0)}
-                    </a>
-                  )
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h5 className="text-lg font-semibold mb-4 text-[var(--primary-light)]">
-                Shop
-              </h5>
-              <ul className="space-y-2">
-                {[
-                  "All Products",
-                  "Capes",
-                  "Skins",
-                  "Accessories",
-                  "Bundles",
-                  "Gift Cards",
-                ].map((item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      className="text-gray-400 hover:text-[var(--primary-light)] transition-colors flex items-center"
-                    >
-                      <FaChevronRight className="mr-2 text-xs" />
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h5 className="text-lg font-semibold mb-4 text-[var(--accent-light)]">
-                Company
-              </h5>
-              <ul className="space-y-2">
-                {[
-                  "About Us",
-                  "Contact",
-                  "FAQ",
-                  "Privacy Policy",
-                  "Terms of Service",
-                ].map((item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      className="text-gray-400 hover:text-[var(--accent-light)] transition-colors flex items-center"
-                    >
-                      <FaChevronRight className="mr-2 text-xs" />
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h5 className="text-lg font-semibold mb-4 text-[var(--tertiary-light)]">
-                Contact Us
-              </h5>
-              <address className="text-gray-400 not-italic space-y-2">
-                <p className="flex items-center">
-                  <HiCube className="mr-2" />
-                  support@mccapes.com
-                </p>
-                <p className="flex items-center">
-                  <FaPlayCircle className="mr-2" />
-                  Discord: MCCapes
-                </p>
-              </address>
-            </div>
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div>
+            <h5 className="text-xl font-bold mb-4 gradient-text">MCCapes</h5>
+            <p className="text-gray-400 mb-4">
+              Premium Minecraft cosmetics for discerning players.
+            </p>
           </div>
 
-          <div className="border-t border-[var(--surface-light)] mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-500 text-sm">
-              &copy; 2025 MCCapes. All rights reserved.
-            </p>
-            <p className="text-gray-500 text-sm mt-4 md:mt-0">mccapes.net</p>
+          <div>
+            <h5 className="text-lg font-semibold mb-4 text-[var(--primary-light)]">
+              Shop
+            </h5>
+            <ul className="space-y-2">
+              {links.map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    className="text-gray-400 hover:text-[var(--primary-light)] transition-colors flex items-center"
+                  >
+                    <FaChevronRight className="mr-2 text-xs" />
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h5 className="text-lg font-semibold mb-4 text-[var(--accent-light)]">
+              Company
+            </h5>
+            <ul className="space-y-2">
+              {[
+                "Privacy Policy",
+                "Terms of Service",
+              ].map((item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-[var(--accent-light)] transition-colors flex items-center"
+                  >
+                    <FaChevronRight className="mr-2 text-xs" />
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h5 className="text-lg font-semibold mb-4 text-[var(--tertiary-light)]">
+              Contact Us
+            </h5>
+            <address className="text-gray-400 not-italic space-y-2">
+              <p className="flex items-center">
+                <HiCube className="mr-2" />
+                support@mccapes.com
+              </p>
+              <p className="flex items-center">
+                <FaPlayCircle className="mr-2" />
+                <a href="https://discord.gg/mc-capes-1315408127755157615">Discord</a>
+              </p>
+            </address>
           </div>
         </div>
-      </footer>
-    );
+
+        <div className="border-t border-[var(--surface-light)] mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-500 text-sm">
+            &copy; 2025 MCCapes. All rights reserved.
+          </p>
+          <p className="text-gray-500 text-sm mt-4 md:mt-0">mccapes.net</p>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;
