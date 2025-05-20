@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar/Navbar";
 import ProductCard from "@/components/ProductCard";
@@ -11,8 +11,10 @@ import { motion } from "framer-motion";
 import { FaStar, FaShoppingCart } from "react-icons/fa";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useSearchParams } from "next/navigation";
 
 const ShopPage = () => {
+    const searchParams = useSearchParams();
     const trpc = useTRPC();
     const { addItem } = useCart();
     const {
@@ -24,6 +26,14 @@ const ShopPage = () => {
 
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
     const [searchQuery, setSearchQuery] = useState<string>("");
+
+    // Set search query from URL parameter
+    useEffect(() => {
+        const searchFromUrl = searchParams.get("search");
+        if (searchFromUrl) {
+            setSearchQuery(searchFromUrl);
+        }
+    }, [searchParams]);
 
     const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
 
@@ -46,8 +56,10 @@ const ShopPage = () => {
     }, [products, selectedCategory, searchQuery]);
 
     const topProduct = useMemo(() => {
-        return filteredProducts.sort((a, b) => b.price - a.price)[0];
-    }, [filteredProducts]);
+        return filteredProducts.length > 0 
+            ? filteredProducts.sort((a, b) => b.price - a.price)[0]
+            : products.length > 0 ? products.sort((a, b) => b.price - a.price)[0] : null;
+    }, [filteredProducts, products]);
 
     const handleAddToCart = () => {
         if (!topProduct) return;

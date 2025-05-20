@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 // Animations
 const fadeInUp = {
@@ -40,11 +42,14 @@ const items = [
   },
   {
     label: "Discord",
-    href: "https://discord.gg/mc-capes-1315408127755157615"
+    href: "https://discord.gg/mc-capes-1315408127755157615",
+    external: true,
   }
 ];
 
 const NavMenu = () => {
+  const pathname = usePathname();
+
   return (
     <motion.ul
       className="hidden md:flex space-x-8"
@@ -52,17 +57,27 @@ const NavMenu = () => {
       initial="hidden"
       animate="visible"
     >
-      {items.map((item) => (
-        <motion.li key={item.label} variants={fadeInUp} className="relative group">
-          <a
-            href={item.href}
-            className="font-medium transition-colors hover:text-[var(--primary-light)]"
-          >
-            {item.label}
-          </a>
-          <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--primary)] transition-all group-hover:w-full" />
-        </motion.li>
-      ))}
+      {items.map((item) => {
+        const isActive = item.external ? false : pathname === item.href || 
+          (item.href !== "/" && pathname?.startsWith(item.href));
+        
+        return (
+          <motion.li key={item.label} variants={fadeInUp} className="relative">
+            <Link
+              href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
+              className={`font-medium px-4 py-2 rounded-full transition-all ${
+                isActive 
+                  ? "bg-green-500 text-white" 
+                  : "hover:text-[var(--primary-light)]"
+              }`}
+            >
+              {item.label}
+            </Link>
+          </motion.li>
+        );
+      })}
     </motion.ul>
   );
 };
