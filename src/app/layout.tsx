@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MCCapes - Premium Minecraft Cosmetics",
+  title: "MCCapes",
   description:
     "Get exclusive high-quality Minecraft capes, skins and accessories to make your character stand out.",
   keywords: [
