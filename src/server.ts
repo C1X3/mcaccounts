@@ -1,4 +1,6 @@
-import 'module-alias/register';
+import dotenv from "dotenv";
+import "module-alias/register";
+dotenv.config(); // Load .env variables
 
 import axios from 'axios';
 import { CryptoType, OrderStatus } from '@generated';
@@ -7,13 +9,13 @@ import { parseUnits } from 'ethers';
 
 const BLOCKCYPHER_TOKEN = process.env.BLOCKCYPHER_TOKEN!;
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY!;
-const POLL_INTERVAL = 60 * 1000;
+const POLL_INTERVAL = 30 * 1000;
 
 // how many confirmations before we consider "final"
 const CONFIRMATION_THRESHOLDS: Record<CryptoType, number> = {
-    [CryptoType.BITCOIN]: 3,
-    [CryptoType.LITECOIN]: 6,
-    [CryptoType.ETHEREUM]: 12,
+    [CryptoType.BITCOIN]: 1,
+    [CryptoType.LITECOIN]: 1,
+    [CryptoType.ETHEREUM]: 1,
     [CryptoType.SOLANA]: 1,
 };
 
@@ -24,6 +26,10 @@ const PATH_MAP: Record<CryptoType, string> = {
     [CryptoType.ETHEREUM]: 'eth',
     [CryptoType.SOLANA]: '',
 };
+
+function normalizeHex(addr: string) {
+    return addr.toLowerCase().replace(/^0x/, "");
+}
 
 async function checkPayments() {
     const wallets = await prisma.wallet.findMany({
@@ -48,16 +54,27 @@ async function checkPayments() {
                     outputs: Array<{ addresses: string[], value: number }>;
                 }>;
 
+                console.log(w, txs);
+
                 const expectedUnits = chain === CryptoType.ETHEREUM
                     ? BigInt(parseUnits(expectedAmount.toString(), 18).toString())
                     : BigInt(Math.round(Number(expectedAmount) * 1e8));
 
+                console.log(expectedUnits);
+
+                const normalizedAddr = normalizeHex(address);
                 const match = txs.find(tx => {
                     const received = tx.outputs
-                        .filter(o => o.addresses.includes(address))
+                        .filter(o =>
+                            // for each output address array, see if **any** entry matches
+                            o.addresses.some(a => normalizeHex(a) === normalizedAddr)
+                        )
                         .reduce((sum, o) => sum + BigInt(o.value), BigInt(0));
+
                     return received >= expectedUnits;
                 });
+
+                console.log(match);
 
                 if (match) {
                     foundTxHash = match.hash;
@@ -80,7 +97,12 @@ async function checkPayments() {
                     confirmationStatus: string;
                 }>;
 
-                const matchSig = sigInfos.find(s => s.confirmationStatus === 'confirmed');
+                if (!sigInfos.length) {
+                    console.log(w, 'No signatures found');
+                    continue;
+                }
+
+                const matchSig = sigInfos.find(s => s.confirmationStatus === 'confirmed' || s.confirmationStatus === 'finalized');
                 if (matchSig) {
                     const balResp = await axios.post(helApiUrl, {
                         jsonrpc: "2.0",
@@ -89,6 +111,8 @@ async function checkPayments() {
                         params: [address]
                     });
                     const currentLamports = BigInt(balResp.data.result.value as number);
+
+                    console.log(w, currentLamports);
 
                     const expectedLamports = BigInt(parseUnits(expectedAmount.toString(), 9).toString());
                     if (currentLamports >= expectedLamports) {
@@ -127,6 +151,7 @@ async function checkPayments() {
 (async function pollLoop() {
     try {
         while (true) {
+            console.log('Checking payments...');
             await checkPayments();
             await new Promise(res => setTimeout(res, POLL_INTERVAL));
         }

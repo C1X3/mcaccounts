@@ -48,14 +48,14 @@ const HeroSection = () => {
               }}
             >
               <motion.h2
-                className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 animate-gradient-x"
+                className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-3 animate-gradient-x"
                 variants={{ hidden: {}, visible: {} }}
               >
                 Elevate Your <span>Minecraft</span> Experience
               </motion.h2>
 
               <motion.p
-                className="text-base md:text-lg mb-6 text-gray-600 max-w-md"
+                className="text-sm md:text-base mb-6 text-gray-600 max-w-md"
                 variants={{ hidden: {}, visible: {} }}
               >
                 Premium capes, skins, and accessories… all handcrafted and brought to life
@@ -94,16 +94,12 @@ const HeroSection = () => {
             <motion.div
               className="w-full md:w-1/2 flex justify-center"
               initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0, scale: 1.1 }}
               transition={{ delay: 0.3, duration: 1 }}
             >
               <motion.div
-                className="relative w-full h-[250px] md:h-[300px] lg:h-[400px] overflow-hidden shadow-2xl"
-                style={{
-                  borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%",
-                  background: "radial-gradient(circle at center, rgba(74,222,128,0.2), transparent 70%)",
-                }}
-                whileHover={{ scale: 1.03, rotate: 2 }}
+                className="relative w-[110%] md:w-[120%] lg:w-[130%] h-[400px] md:h-[500px] lg:h-[650px] overflow-visible transform -translate-x-4"
+                whileHover={{ scale: 1.05, rotate: 2 }}
                 whileTap={{ scale: 0.98 }}
                 drag
                 dragElastic={0.2}
@@ -111,10 +107,11 @@ const HeroSection = () => {
                 transition={{ type: "spring", stiffness: 200, damping: 20 }}
               >
                 <Image
-                  src="/images/Minecraft Hero.avif"
+                  src="/images/hero.webp"
                   alt="Minecraft Character with Premium Cape"
                   fill
-                  style={{ objectFit: "cover" }}
+                  style={{ objectFit: "contain" }}
+                  className="scale-110"
                   priority
                 />
               </motion.div>

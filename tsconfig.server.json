@@ -1,30 +1,21 @@
 {
     "compilerOptions": {
-      "rewriteRelativeImportExtensions": true,
-      "erasableSyntaxOnly": true,
-      "verbatimModuleSyntax": false,
-      "target": "ES2017",
-      "lib": ["dom", "dom.iterable", "esnext"],
+      "target": "ES2020",
+      "lib": ["ES2020"],
       "allowJs": true,
       "skipLibCheck": true,
       "strict": true,
       "esModuleInterop": true,
-      "module": "esnext",
-      "moduleResolution": "bundler",
+      "module": "CommonJS",
+      "moduleResolution": "node",
       "resolveJsonModule": true,
       "isolatedModules": true,
-      "jsx": "preserve",
-      "incremental": true,
-      "outDir": "./server",
-      "plugins": [
-        {
-          "name": "next"
-        }
-      ],
+      "outDir": "./dist",
       "paths": {
-        "@/*": ["./src/*"]
+        "@/*": ["./src/*"],
+        "@generated": ["./generated"]
       }
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-    "exclude": ["node_modules", "generated"]
+    "include": ["src/scripts/**/*.ts"],
+    "exclude": ["node_modules", "generated", ".next", "dist"]
   }

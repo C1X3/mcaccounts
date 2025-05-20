@@ -52,19 +52,6 @@ export const checkoutRouter = createTRPCRouter({
                     }
                 });
 
-                // Create OrderItems
-                await Promise.all(input.items.map(item => 
-                    prisma.orderItem.create({
-                        data: {
-                            orderId: order.id,
-                            productId: item.productId,
-                            quantity: item.quantity,
-                            price: item.price,
-                            codes: [],
-                        }
-                    })
-                ));
-
                 // 2. Generate payment link based on the selected payment method
                 let walletDetails: WalletDetails | undefined;
 

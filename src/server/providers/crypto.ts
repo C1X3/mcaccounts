@@ -1,3 +1,4 @@
+import { derivePath } from 'ed25519-hd-key';
 import { HDNodeWallet, parseUnits } from "ethers";
 import { mnemonicToSeedSync } from "bip39";
 import BIP32Factory from "bip32";
@@ -65,11 +66,12 @@ export async function createWalletDetails(
         orderBy: { depositIndex: "desc" },
         select: { depositIndex: true },
     });
-    const depositIndex = (last?.depositIndex ?? 0) + 1;
+    const depositIndex = last !== null ? last.depositIndex + 1 : 0;
 
     const MNEMONIC = process.env.MNEMONIC!;
     const seed = mnemonicToSeedSync(MNEMONIC);
     const root = bip32.fromSeed(seed);
+    const seedHex = seed.toString('hex');
 
     let address: string;
     switch (crypto) {
@@ -89,7 +91,12 @@ export async function createWalletDetails(
         }
 
         case CryptoType.SOLANA: {
-            const pair = Keypair.fromSeed(seed.subarray(0, 32));
+            const path = `m/44'/${BIP44_COIN[crypto]}'/${depositIndex}'/0'`;
+            console.log("Solana Derivation Path:", path);
+
+            const derivedSeed = derivePath(path, seedHex);
+            const privateKeyBytes = Buffer.from(derivedSeed.key.slice(0, 32));
+            const pair = Keypair.fromSeed(privateKeyBytes);
             address = pair.publicKey.toBase58();
             break;
         }

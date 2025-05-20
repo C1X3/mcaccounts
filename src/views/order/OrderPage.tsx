@@ -26,9 +26,9 @@ import { CryptoType, OrderStatus, PaymentType } from "@generated";
 
 // Confirmation thresholds for different crypto types
 const CONFIRMATION_THRESHOLDS: Record<CryptoType, number> = {
-    [CryptoType.BITCOIN]: 3,
-    [CryptoType.LITECOIN]: 6,
-    [CryptoType.ETHEREUM]: 12,
+    [CryptoType.BITCOIN]: 1,
+    [CryptoType.LITECOIN]: 1,
+    [CryptoType.ETHEREUM]: 1,
     [CryptoType.SOLANA]: 1,
 };
 
@@ -147,7 +147,9 @@ const OrderPage = ({ id }: { id: string }) => {
         });
     };
 
-    const showCryptoPaymentDetails = order?.paymentType === "CRYPTO" && order?.status === "PENDING" && walletDetails;
+    const isConfirmationComplete = walletDetails?.confirmations && walletDetails.chain ? 
+        walletDetails.confirmations >= CONFIRMATION_THRESHOLDS[walletDetails.chain] : false;
+    const showCryptoPaymentDetails = order?.paymentType === "CRYPTO" && order?.status === "PENDING" && walletDetails && !isConfirmationComplete;
 
     if (isLoading) {
         return (
@@ -214,6 +216,33 @@ const OrderPage = ({ id }: { id: string }) => {
                         <h1 className="text-3xl md:text-4xl font-bold text-[var(--foreground)] mb-4">Order Details</h1>
                         <div className="h-1 w-20 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] mx-auto rounded-full"></div>
                     </div>
+
+                    {order?.paymentType === PaymentType.CRYPTO && order.status === "PENDING" && isConfirmationComplete && (
+                        <div className="mb-8">
+                            <div className="bg-gradient-to-b from-green-500/10 to-green-500/5 rounded-xl p-6 border border-green-500/20 shadow-lg backdrop-blur-sm">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center">
+                                        <div className="w-10 h-10 flex items-center justify-center mr-3 bg-green-500/20 text-green-500 rounded-full">
+                                            <FaCheck size={20} />
+                                        </div>
+                                        <h2 className="text-xl font-bold text-[var(--foreground)]">
+                                            Payment Confirmed!
+                                        </h2>
+                                    </div>
+                                    <div className="px-4 py-2 bg-green-500 rounded-full text-white inline-flex items-center">
+                                        <FaCheck className="mr-2" />
+                                        Confirmed
+                                    </div>
+                                </div>
+                                <div className="flex items-center mt-2">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-green-500 mr-2"></div>
+                                    <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                                        Your payment has been confirmed! Your order is being processed and will be delivered shortly.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {showCryptoPaymentDetails && order.status === "PENDING" && (
                         <div className="mb-8">
@@ -307,11 +336,19 @@ const OrderPage = ({ id }: { id: string }) => {
 
                                             <div className="bg-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] p-4 rounded-lg mb-4">
                                                 <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                                                    {walletDetails.paid
+                                                    {walletDetails.txHash
                                                         ? <span className="flex items-center"><FaCheck className="text-green-500 mr-2" /> Payment received! Waiting for network confirmations.</span>
-                                                        : <span className="flex items-center"><FaClock className="text-yellow-500 mr-2" /> Waiting for payment. This may take a few minutes after sending.</span>
+                                                        : walletDetails.paid
+                                                            ? <span className="flex items-center"><FaCheck className="text-green-500 mr-2" /> Payment detected! Waiting for transaction confirmation.</span>
+                                                            : <span className="flex items-center"><FaClock className="text-yellow-500 mr-2" /> Waiting for payment. This may take a few minutes after sending.</span>
                                                     }
                                                 </p>
+                                                {walletDetails.txHash && (
+                                                    <div className="mt-2 flex items-center">
+                                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[var(--primary)] mr-2"></div>
+                                                        <span className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Processing payment confirmation...</span>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <ConfirmationProgress
