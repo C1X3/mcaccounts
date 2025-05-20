@@ -1,7 +1,6 @@
 "use client";
 
 import { Vouch } from "@/types/vouches";
-import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 
 interface VouchCardProps {
@@ -21,14 +20,6 @@ const VouchCard = ({ vouch }: VouchCardProps) => {
         >
             <div className="p-6">
                 <div className="flex items-center mb-4">
-                    <div className="relative h-12 w-12 mr-4">
-                        <Image
-                            src={vouch.authorAvatar}
-                            alt={vouch.author}
-                            fill
-                            className="rounded-full object-cover"
-                        />
-                    </div>
                     <div>
                         <h4 className="text-lg font-bold text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
                             {vouch.author}

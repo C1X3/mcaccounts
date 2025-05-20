@@ -39,6 +39,8 @@ model CustomerInformation {
 
     name  String
     email String
+
+    discord String?
 }
 
 model Order {

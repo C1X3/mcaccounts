@@ -23,10 +23,11 @@ const CartPage = () => {
     const { items, totalItems, totalPrice, isLoading, updateQuantity, removeItem, clearCart } = useCart();
     const [showPaymentOptions, setShowPaymentOptions] = useState(false);
     const [showCryptoOptions, setShowCryptoOptions] = useState(false);
-    const [customerInfo, setCustomerInfo] = useState({ name: "", email: "" });
+    const [customerInfo, setCustomerInfo] = useState({ name: "", email: "", discord: "" });
     const [showCustomerForm, setShowCustomerForm] = useState(false);
     const [paymentType, setPaymentType] = useState<PaymentType>(PaymentType.STRIPE);
     const [cryptoType, setCryptoType] = useState<CryptoType>(CryptoType.BITCOIN);
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     const processPaymentMutation = useMutation(trpc.checkout.processPayment.mutationOptions({
         onSuccess: (data) => {
@@ -167,12 +168,12 @@ const CartPage = () => {
                                         className="bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#333_10%)] to-[var(--background)] rounded-xl overflow-hidden border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] shadow-md backdrop-blur-sm"
                                     >
                                         <div className="p-6 flex flex-col sm:flex-row items-center">
-                                            <div className="flex-shrink-0 w-28 h-28 mb-4 sm:mb-0 relative rounded-xl overflow-hidden bg-gradient-to-br from-[color-mix(in_srgb,var(--primary),#fff_95%)] to-[color-mix(in_srgb,var(--secondary),#fff_95%)]">
+                                            <div className="flex-shrink-0 w-40 h-40 mb-4 sm:mb-0 relative rounded-xl overflow-hidden">
                                                 <Image
                                                     src={item.product.image}
                                                     alt={item.product.name}
                                                     fill
-                                                    className="object-contain p-2 drop-shadow-[0_5px_10px_rgba(0,0,0,0.2)]"
+                                                    className="object-cover"
                                                 />
                                             </div>
 
@@ -283,23 +284,12 @@ const CartPage = () => {
                                                         <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Subtotal</span>
                                                         <span className="text-[var(--foreground)] font-medium">{formatPrice(totalPrice)}</span>
                                                     </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Shipping</span>
-                                                        <span className="text-green-500 font-medium">Free</span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Tax</span>
-                                                        <span className="text-[var(--foreground)] font-medium">{formatPrice(totalPrice * 0.0725)}</span>
-                                                    </div>
                                                     <div className="pt-4 mt-4 border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
                                                         <div className="flex justify-between items-center">
                                                             <span className="text-lg font-bold text-[var(--foreground)]">Total</span>
                                                             <div className="text-right">
                                                                 <span className="block text-xl font-bold text-[var(--primary)]">
                                                                     {formatPrice(totalPrice + (totalPrice * 0.0725))}
-                                                                </span>
-                                                                <span className="text-xs text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                                                                    Including VAT
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -374,11 +364,41 @@ const CartPage = () => {
                                                         />
                                                     </div>
 
+                                                    <div>
+                                                        <label htmlFor="phone" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                                                            Discord Username
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            id="discord"
+                                                            value={customerInfo.discord}
+                                                            onChange={(e) => setCustomerInfo({ ...customerInfo, discord: e.target.value })}
+                                                            className="w-full p-3 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_15%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_80%)] text-[var(--foreground)]"
+                                                            placeholder="@JohnDoe"
+                                                            required
+                                                        />
+                                                    </div>
+
+                                                    <div className="flex items-start gap-3 mt-4">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="terms"
+                                                            className="mt-1 w-4 h-4 rounded-md bg-[color-mix(in_srgb,var(--background),#333_15%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_80%)] text-[var(--primary)]"
+                                                            required
+                                                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                                                            checked={termsAccepted}
+                                                        />
+                                                        <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                                                            By continuing, you agree to our <Link href="/terms" className="text-[var(--primary)] hover:text-[var(--secondary)]">Terms of Service</Link> and <Link href="/privacy" className="text-[var(--primary)] hover:text-[var(--secondary)]">Privacy Policy</Link>.
+                                                        </p>
+                                                    </div>
+
                                                     <motion.button
-                                                        whileHover={{ scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
+                                                        whileHover={{ scale: termsAccepted ? 1.02 : 1 }}
+                                                        whileTap={{ scale: termsAccepted ? 0.98 : 1 }}
                                                         type="submit"
-                                                        className="w-full py-4 mt-6 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"
+                                                        disabled={!termsAccepted}
+                                                        className={`w-full py-4 mt-6 ${termsAccepted ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)]' : 'bg-[color-mix(in_srgb,var(--foreground),var(--background)_80%)]'} text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all disabled:cursor-not-allowed`}
                                                     >
                                                         Continue to Payment
                                                     </motion.button>

@@ -1,16 +1,11 @@
 import ProductCard from "@/components/ProductCard";
 import { ProductGetAllOutput } from "@/server/routes/_app";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
-import { FaShoppingCart, FaChevronRight, FaStar } from "react-icons/fa";
+import { FaChevronRight } from "react-icons/fa";
 
 const TopProductsSection = ({ products }: { products: ProductGetAllOutput }) => {
     const router = useRouter();
-    const topProduct = useMemo(() => {
-        return products.sort((a, b) => b.rating - a.rating)[0];
-    }, [products]);
 
     return (
         <section className="py-24 bg-gradient-to-br from-[var(--background)] to-[color-mix(in_srgb,var(--background),#000_15%)] text-[var(--foreground)] relative overflow-hidden">
@@ -36,71 +31,12 @@ const TopProductsSection = ({ products }: { products: ProductGetAllOutput }) => 
                         </span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-extrabold mb-4 gradient-text">
-                        Top Selling Products
+                        Products
                     </h2>
                     <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] max-w-xl mx-auto text-lg">
                         Exclusive in-game items curated for top Minecraft players
                     </p>
                 </motion.div>
-
-                {/* Premium Product Spotlight */}
-                {topProduct && <motion.div
-                    className="mb-20 bg-gradient-to-r from-[color-mix(in_srgb,var(--background),#333_10%)] to-[color-mix(in_srgb,var(--background),#000_10%)] p-4 md:p-8 rounded-3xl backdrop-blur-sm border border-[color-mix(in_srgb,var(--foreground),var(--background)_80%)]"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.7, delay: 0.2 }}
-                >
-                    <div className="flex flex-col md:flex-row items-center gap-10">
-                        <motion.div
-                            className="w-full md:w-1/2 relative"
-                            whileHover={{ scale: 1.02 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                        >
-                            <div className="aspect-square relative rounded-2xl overflow-hidden bg-gradient-to-br from-[color-mix(in_srgb,var(--primary),#fff_80%)] to-[color-mix(in_srgb,var(--secondary),#fff_80%)] bg-opacity-20 p-8">
-                                <Image
-                                    src={topProduct.image || ""}
-                                    alt="Featured Product"
-                                    fill
-                                    style={{ objectFit: "contain" }}
-                                    className="p-8 drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]"
-                                />
-                                <div className="absolute top-4 right-4 bg-[var(--accent)] text-white px-3 py-1 rounded-full text-sm font-semibold">
-                                    FEATURED
-                                </div>
-                            </div>
-                        </motion.div>
-                        <div className="w-full md:w-1/2 space-y-6">
-                            <h3 className="text-3xl font-bold">{topProduct.name}</h3>
-                            <div className="flex items-center">
-                                <div className="flex text-yellow-400 mr-2">
-                                    {[...Array(5)].map((_, i) => (
-                                        <FaStar key={i} size={16} className={i < Math.floor(topProduct.rating || 5) ? "text-yellow-400" : "text-gray-600"} />
-                                    ))}
-                                </div>
-                                <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">{topProduct.rating} (198 reviews)</span>
-                            </div>
-                            <p className="text-[color-mix(in_srgb,var(--foreground),#888_30%)] text-lg leading-relaxed">
-                                {topProduct.description}. Our most iconic design, these wings make a statement in any server with realistic
-                                flame animation and special particle effects that activate while flying.
-                            </p>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <span className="text-3xl font-bold">${topProduct.price}</span>
-                                    <span className="text-[color-mix(in_srgb,var(--foreground),#888_60%)] ml-2 line-through">${((topProduct.price || 0) * 1.25).toFixed(2)}</span>
-                                </div>
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="flex items-center gap-2 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] hover:from-[color-mix(in_srgb,var(--primary),#000_10%)] hover:to-[color-mix(in_srgb,var(--secondary),#000_10%)] text-white font-medium py-3 px-6 rounded-xl shadow-lg shadow-[var(--primary-rgb)]/20"
-                                >
-                                    <FaShoppingCart size={18} />
-                                    Add to Cart
-                                </motion.button>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>}
 
                 {/* Product Grid with improved cards */}
                 <motion.div

@@ -73,7 +73,7 @@ export default function AdminDashboard() {
             image: product.image,
             additionalImages: product.additionalImages,
             category: product.category,
-            badge: product.badge,
+            badge: product.badge || undefined,
             rating: product.rating,
             features: product.features
         };

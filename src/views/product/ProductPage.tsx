@@ -137,11 +137,11 @@ const ProductPage = ({ product, stockCount }: { product?: Product, stockCount?: 
 
                     {/* Product information */}
                     <div>
-                        <div className="mb-4">
-                            <span className="inline-block px-3 py-1 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold rounded-full mb-2">
+                        <div className="mb-4 flex gap-2">
+                            {product.badge && <span className="inline-block px-3 py-1 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold rounded-full mb-2">
                                 {product.badge}
-                            </span>
-                            <span className="ml-2 inline-block px-3 py-1 bg-[color-mix(in_srgb,var(--background),#333_15%)] text-[var(--foreground)] text-xs font-medium rounded-full">
+                            </span>}
+                            <span className="inline-block px-3 py-1 bg-[color-mix(in_srgb,var(--background),#333_15%)] text-[var(--foreground)] text-xs font-medium rounded-full">
                                 {product.category}
                             </span>
                         </div>
@@ -286,6 +286,41 @@ const ProductPage = ({ product, stockCount }: { product?: Product, stockCount?: 
                     </div>
                 </div>
             </main>
+
+            {/* Customer Stats Section */}
+            <div className="container mx-auto px-4 pb-16">
+                <div className="text-center mb-3">
+                    <span className="inline-block px-4 py-1.5 bg-[color-mix(in_srgb,var(--background),#333_15%)] text-[var(--foreground)] text-sm font-medium rounded-full mb-4">
+                        The #1 Minecraft cape store
+                    </span>
+                </div>
+                
+                <h2 className="text-3xl font-bold text-center text-[var(--foreground)] mb-3">Our Customers</h2>
+                <p className="text-center text-[color-mix(in_srgb,var(--foreground),#888_40%)] mb-10">
+                    Here are some of our key stats that show our success!
+                </p>
+                
+                {/* Stats Card */}
+                <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] rounded-3xl p-8 mb-12 shadow-sm border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="text-center p-4 bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#fff_5%)] to-[color-mix(in_srgb,var(--background),#333_5%)] rounded-2xl">
+                            <div className="text-4xl font-bold text-[var(--foreground)]">516</div>
+                            <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Products Sold</div>
+                        </div>
+                        <div className="text-center p-4 bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#fff_5%)] to-[color-mix(in_srgb,var(--background),#333_5%)] rounded-2xl">
+                            <div className="text-4xl font-bold text-[var(--foreground)]">516</div>
+                            <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Happy Customers</div>
+                        </div>
+                        <div className="text-center p-4 bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#fff_5%)] to-[color-mix(in_srgb,var(--background),#333_5%)] rounded-2xl">
+                            <div className="flex items-center justify-center">
+                                <span className="text-4xl font-bold text-[var(--foreground)] mr-2">4.96</span>
+                                <FaStar className="text-yellow-400" size={24} />
+                            </div>
+                            <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Average Rating</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <Footer />
         </div>

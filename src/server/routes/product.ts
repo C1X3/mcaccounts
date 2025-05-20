@@ -47,7 +47,7 @@ export const productRouter = createTRPCRouter({
                 image: z.string().min(1),
                 additionalImages: z.array(z.string()),
                 category: z.string().min(1),
-                badge: z.string(),
+                badge: z.string().optional(),
                 rating: z.number().min(0).max(5),
                 features: z.array(z.string()),
             })

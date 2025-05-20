@@ -563,10 +563,6 @@ const OrderPage = ({ id }: { id: string }) => {
                                         <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Subtotal</span>
                                         <span className="text-[var(--foreground)]">{formatPrice(subtotal)}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Shipping</span>
-                                        <span className="text-green-500">Free</span>
-                                    </div>
                                     <div className="pt-3 mt-3 border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
                                         <div className="flex justify-between">
                                             <span className="font-bold text-[var(--foreground)]">Total</span>

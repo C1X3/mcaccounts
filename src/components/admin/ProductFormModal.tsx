@@ -21,7 +21,7 @@ export const schema = z.object({
     image: z.string(),
     additionalImages: z.array(z.string()),
     category: z.string(),
-    badge: z.string(),
+    badge: z.string().optional(),
     rating: z.number(),
     features: z.array(z.string()),
 });
@@ -384,7 +384,7 @@ export default function ProductFormModal({
                     {/* Badge */}
                     <div>
                         <label htmlFor="badge" className="block text-[var(--foreground)] mb-2">
-                            Badge *
+                            Badge
                         </label>
                         <Controller
                             name="badge"

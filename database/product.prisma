@@ -10,7 +10,7 @@ model Product {
   additionalImages String[]
   category         String
   rating           Float
-  badge            String
+  badge            String?
   features         String[]
 
   createdAt DateTime @default(now())

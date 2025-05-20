@@ -48,9 +48,9 @@ const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
                         className="drop-shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]"
                     />
                 </motion.div>
-                <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full">
+                {product.badge && <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full">
                     {product.badge}
-                </div>
+                </div>}
             </div>
 
 
