@@ -12,8 +12,10 @@ import { FaStar, FaShoppingCart } from "react-icons/fa";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const ShopPage = () => {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const trpc = useTRPC();
     const { addItem } = useCart();
@@ -98,6 +100,7 @@ const ShopPage = () => {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.7, delay: 0.2 }}
+                    onClick={() => router.push(`/shop/${topProduct.slug}`)}
                 >
                     <div className="flex flex-col md:flex-row items-center gap-10">
                         <motion.div
@@ -132,7 +135,7 @@ const ShopPage = () => {
                                         <FaStar key={i} size={16} className={i < Math.floor(topProduct.rating || 5) ? "text-yellow-400" : "text-gray-600"} />
                                     ))}
                                 </div>
-                                <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">{topProduct.rating} (198 reviews)</span>
+                                <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">{topProduct.rating}</span>
                             </div>
                             <p className="text-[color-mix(in_srgb,var(--foreground),#888_30%)] text-lg leading-relaxed">
                                 {topProduct.description}

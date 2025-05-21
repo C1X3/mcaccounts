@@ -52,12 +52,17 @@ export default function ProductFormModal({
 
     const [additionalImageUrls, setAdditionalImageUrls] = useState<string[]>([]);
     const [newImageUrl, setNewImageUrl] = useState("");
+    
+    // Add state for price input display
+    const [priceInputValue, setPriceInputValue] = useState("");
+    const [slashPriceInputValue, setSlashPriceInputValue] = useState("");
 
     const {
         control,
         handleSubmit,
         reset,
         setValue,
+        watch,
     } = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema) as Resolver<z.infer<typeof schema>>,
         defaultValues: initialData || {
@@ -72,7 +77,7 @@ export default function ProductFormModal({
             badge: "",
             rating: 0,
             features: [],
-            slashPrice: 0,
+            slashPrice: undefined,
             order: 0,
             hideHomePage: false,
             hideProductPage: false,
@@ -80,11 +85,32 @@ export default function ProductFormModal({
         },
     });
 
+    // Watch the price and slashPrice values
+    const watchedPrice = watch("price");
+    const watchedSlashPrice = watch("slashPrice");
+
+    // Update input display values when form values change
+    useEffect(() => {
+        setPriceInputValue(watchedPrice === 0 && priceInputValue === "" ? "" : watchedPrice.toString());
+    }, [watchedPrice]);
+
+    useEffect(() => {
+        if (watchedSlashPrice === undefined) {
+            setSlashPriceInputValue("");
+        } else if (watchedSlashPrice === 0 && slashPriceInputValue === "") {
+            // Keep it blank if user cleared it
+        } else {
+            setSlashPriceInputValue(watchedSlashPrice.toString());
+        }
+    }, [watchedSlashPrice]);
+
     // Reset form when initialData changes
     useEffect(() => {
         if (initialData) {
             reset(initialData);
             setAdditionalImageUrls(initialData.additionalImages as string[] || []);
+            setPriceInputValue(initialData.price.toString());
+            setSlashPriceInputValue(initialData.slashPrice !== undefined ? initialData.slashPrice.toString() : "");
         } else {
             reset({
                 name: "",
@@ -105,6 +131,8 @@ export default function ProductFormModal({
                 isFeatured: false,
             });
             setAdditionalImageUrls([]);
+            setPriceInputValue("");
+            setSlashPriceInputValue("");
         }
     }, [initialData, reset]);
 
@@ -246,6 +274,11 @@ export default function ProductFormModal({
                                         id="slug"
                                         type="text"
                                         {...field}
+                                        onChange={(e) => {
+                                            // Remove spaces from input
+                                            const value = e.target.value.replace(/\s+/g, '');
+                                            field.onChange(value);
+                                        }}
                                         className="w-full p-3 bg-[color-mix(in_srgb,var(--background),#333_15%)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]"
                                         placeholder="Enter product slug"
                                     />
@@ -305,9 +338,19 @@ export default function ProductFormModal({
                                         id="price"
                                         type="number"
                                         step="0.01"
-                                        value={field.value as number}
-                                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                                        onBlur={field.onBlur}
+                                        value={priceInputValue}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value;
+                                            setPriceInputValue(newValue);
+                                            field.onChange(newValue === "" ? 0 : parseFloat(newValue));
+                                        }}
+                                        onBlur={(e) => {
+                                            field.onBlur();
+                                            // Keep input blank but set form value to 0
+                                            if (e.target.value === "") {
+                                                field.onChange(0);
+                                            }
+                                        }}
                                         className="w-full p-3 bg-[color-mix(in_srgb,var(--background),#333_15%)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]"
                                         placeholder="Enter price"
                                     />
@@ -342,14 +385,15 @@ export default function ProductFormModal({
                                         rows={6}
                                         value={textValue}
                                         onChange={e => {
-                                            const lines = e.target.value
-                                                .split("\n")
-                                                .map(s => s.trim());
+                                            // Split by newlines but don't trim spaces
+                                            const lines = e.target.value.split("\n");
                                             field.onChange(lines);
                                         }}
                                         onBlur={() => {
-                                            // now you can drop purely-empty lines
-                                            const nonEmpty = field.value.filter(s => s !== "");
+                                            // Now filter out completely empty lines
+                                            const nonEmpty = Array.isArray(field.value) 
+                                                ? field.value.filter(s => s !== "")
+                                                : [];
                                             field.onChange(nonEmpty);
                                         }}
                                         placeholder="Enter one code per line"
@@ -443,8 +487,12 @@ export default function ProductFormModal({
                                         id="slashPrice"
                                         type="number"
                                         step="0.01"
-                                        value={field.value === undefined ? '' : field.value}
-                                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                                        value={slashPriceInputValue}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value;
+                                            setSlashPriceInputValue(newValue);
+                                            field.onChange(newValue === "" ? undefined : parseFloat(newValue));
+                                        }}
                                         onBlur={field.onBlur}
                                         className="w-full p-3 bg-[color-mix(in_srgb,var(--background),#333_15%)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]"
                                         placeholder="Enter original price (optional)"
@@ -593,12 +641,17 @@ export default function ProductFormModal({
                                         rows={6}
                                         value={textValue}
                                         onChange={(e) => {
-                                            const lines = e.target.value
-                                                .split("\n")
-                                                .map((s) => s.trim());
+                                            // Split by newlines but don't trim spaces
+                                            const lines = e.target.value.split("\n");
                                             field.onChange(lines);
                                         }}
-                                        onBlur={field.onBlur}
+                                        onBlur={() => {
+                                            // Now filter out completely empty lines
+                                            const nonEmpty = Array.isArray(field.value) 
+                                                ? field.value.filter(s => s !== "")
+                                                : [];
+                                            field.onChange(nonEmpty);
+                                        }}
                                         onKeyDown={(e) => {
                                             if (e.key === "Enter" && !e.shiftKey) {
                                                 e.stopPropagation();
