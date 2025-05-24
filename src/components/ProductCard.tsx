@@ -5,7 +5,19 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { ProductGetAllOutput } from "@/server/routes/_app";
 
+<<<<<<< HEAD
 const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
+=======
+type CardStyle = "normal" | "article";
+
+const ProductCard = ({
+    product,
+    styles = "normal",
+}: {
+    product: ProductGetAllOutput[number];
+    styles?: CardStyle;
+}) => {
+>>>>>>> 4fe6dbf (All of version 2)
     const router = useRouter();
     const { addItem } = useCart();
 
@@ -18,6 +30,128 @@ const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
         addItem(product);
     };
 
+<<<<<<< HEAD
+=======
+    // Common rating render
+    const Rating = () => (
+        <div className="flex items-center">
+            <div className="flex text-yellow-400 mr-2">
+                {[...Array(5)].map((_, i) => (
+                    <FaStar
+                        key={i}
+                        size={12}
+                        className={
+                            i < Math.floor(product.rating)
+                                ? "text-yellow-400"
+                                : "text-gray-600"
+                        }
+                    />
+                ))}
+            </div>
+            <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-xs">
+                {product.rating}
+            </span>
+        </div>
+    );
+
+    if (styles === "article") {
+        // Flat, left-to-right version
+        return (
+            <motion.div
+                key={product.id}
+                onClick={handleNavigateToProduct}
+                className="group flex items-center gap-6 p-4 rounded-2xl bg-[var(--background)] hover:shadow-lg transition-shadow duration-200 cursor-pointer relative overflow-hidden"
+                whileHover={{ y: -4, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
+            >
+                {/* Animated background elements */}
+                <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                        <motion.div
+                            key={i}
+                            className="absolute rounded-full bg-[var(--primary)]"
+                            style={{
+                                width: 10 + Math.random() * 50,
+                                height: 10 + Math.random() * 50,
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 100}%`,
+                            }}
+                            animate={{
+                                x: [0, Math.random() * 30 - 15],
+                                y: [0, Math.random() * 30 - 15],
+                                scale: [1, 1 + Math.random() * 0.2],
+                                opacity: [0.6, 0.8, 0.6]
+                            }}
+                            transition={{
+                                duration: 5 + Math.random() * 5,
+                                repeat: Infinity,
+                                repeatType: "reverse",
+                                ease: "easeInOut"
+                            }}
+                        />
+                    ))}
+                </div>
+
+                {/* Left: Image */}
+                <div className="relative w-1/3 h-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-50">
+                    <motion.div
+                        className="absolute inset-0"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    >
+                        <Image
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            style={{ objectFit: "cover" }}
+                        />
+                    </motion.div>
+                </div>
+
+                {/* Right: Content */}
+                <div className="flex flex-col justify-between flex-1 h-full">
+                    <div>
+                        <Rating />
+                        <h4 className="mt-1 text-lg font-semibold text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
+                            {product.name}
+                        </h4>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between">
+                        <span className="text-xl font-bold text-[var(--foreground)]">
+                            ${product.price}
+                            {product.slashPrice && (
+                                <span className="ml-2 text-sm line-through text-[color-mix(in_srgb,var(--foreground),#888_60%)]">
+                                    ${product.slashPrice.toFixed(2)}
+                                </span>
+                            )}
+                        </span>
+
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={handleAddToCart}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                className="p-2 bg-[var(--primary)] text-white rounded-lg hover:opacity-90 transition-opacity"
+                            >
+                                <FaShoppingCart size={16} />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleNavigateToProduct();
+                                }}
+                                className="px-3 py-1 text-sm font-medium border border-[var(--primary)] rounded-lg hover:bg-[var(--primary)] hover:text-white transition-colors"
+                            >
+                                View
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        );
+    }
+
+    // Default "normal" card (your existing implementation)
+>>>>>>> 4fe6dbf (All of version 2)
     return (
         <motion.div
             key={product.id}
@@ -29,7 +163,11 @@ const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
             whileHover={{
                 y: -8,
                 boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+<<<<<<< HEAD
                 borderColor: "var(--accent)"
+=======
+                borderColor: "var(--accent)",
+>>>>>>> 4fe6dbf (All of version 2)
             }}
             onClick={handleNavigateToProduct}
         >
@@ -48,6 +186,7 @@ const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
                         className="drop-shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]"
                     />
                 </motion.div>
+<<<<<<< HEAD
                 {product.badge && <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full">
                     {product.badge}
                 </div>}
@@ -64,6 +203,18 @@ const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
                     </div>
                     <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-xs">{product.rating}</span>
                 </div>
+=======
+                {product.badge && (
+                    <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full">
+                        {product.badge}
+                    </div>
+                )}
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+                <Rating />
+>>>>>>> 4fe6dbf (All of version 2)
                 <h4 className="text-lg font-bold text-[var(--foreground)] mb-2 group-hover:text-[var(--accent)] transition-colors">
                     {product.name}
                 </h4>
@@ -73,7 +224,15 @@ const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
                 <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-[var(--foreground)]">
                         ${product.price}
+<<<<<<< HEAD
                         {product.slashPrice && <span className="text-[color-mix(in_srgb,var(--foreground),#888_60%)] ml-2 line-through">${product.slashPrice.toFixed(2)}</span>}
+=======
+                        {product.slashPrice && (
+                            <span className="text-[color-mix(in_srgb,var(--foreground),#888_60%)] ml-2 line-through">
+                                ${product.slashPrice.toFixed(2)}
+                            </span>
+                        )}
+>>>>>>> 4fe6dbf (All of version 2)
                     </span>
                     <div className="flex space-x-2">
                         <button
@@ -107,4 +266,8 @@ const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
     );
 };
 
+<<<<<<< HEAD
 export default ProductCard;
+=======
+export default ProductCard;
+>>>>>>> 4fe6dbf (All of version 2)

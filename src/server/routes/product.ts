@@ -16,6 +16,7 @@ export const productRouter = createTRPCRouter({
                     ...(input.isProductPage && { hideProductPage: false }),
                 },
                 select: {
+<<<<<<< HEAD
                 id: true,
                 name: true,
                 slug: true,
@@ -43,6 +44,64 @@ export const productRouter = createTRPCRouter({
             stock: stockArr.length,
         }));
     }),
+=======
+                    id: true,
+                    name: true,
+                    slug: true,
+                    description: true,
+                    price: true,
+                    image: true,
+                    additionalImages: true,
+                    category: true,
+                    rating: true,
+                    badge: true,
+                    features: true,
+                    stock: true,
+                    slashPrice: true,
+                    hideHomePage: true,
+                    hideProductPage: true,
+                    isFeatured: true,
+                    order: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            });
+
+            return raw.map(({ stock: stockArr, ...rest }) => ({
+                ...rest,
+                stock: stockArr.length,
+            }));
+        }),
+
+    getBySlugForArticle: baseProcedure
+        .input(z.object({ slug: z.string() }))
+        .mutation(async ({ input }) => {
+            return await prisma.product.findUnique({
+                where: { slug: input.slug },
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    description: true,
+                    price: true,
+                    image: true,
+                    additionalImages: true,
+                    category: true,
+                    rating: true,
+                    badge: true,
+                    features: true,
+                    stock: true,
+                    slashPrice: true,
+                    hideHomePage: true,
+                    hideProductPage: true,
+                    isFeatured: true,
+                    order: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            });
+        }),
+>>>>>>> 4fe6dbf (All of version 2)
 
     getAllWithStock: adminProcedure.query(async () => {
         return await prisma.product.findMany({

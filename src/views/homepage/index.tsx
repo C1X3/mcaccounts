@@ -3,13 +3,18 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar/Navbar";
 import { useTRPC } from "@/server/client";
+<<<<<<< HEAD
 import ArticleSection from "@/views/homepage/ArticleSection";
+=======
+import ArticleSlider from "@/views/homepage/ArticleSlider";
+>>>>>>> 4fe6dbf (All of version 2)
 import HeroSection from "@/views/homepage/HeroSection";
 import PartnerScroller from "@/views/homepage/PartnerScroll";
 import TopProductsSection from "@/views/homepage/TopProductsSection";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 
+<<<<<<< HEAD
 // Featured product articles
 const productArticles = [
   {
@@ -36,6 +41,12 @@ const productArticles = [
 const HomePage = () => {
   const trpc = useTRPC();
   const { data: products } = useQuery(trpc.product.getAll.queryOptions({ isHomePage: true }));
+=======
+const HomePage = () => {
+  const trpc = useTRPC();
+  const { data: products } = useQuery(trpc.product.getAll.queryOptions({ isHomePage: true }));
+  const { data: articles } = useQuery(trpc.article.getAll.queryOptions({ includeInactive: false }));
+>>>>>>> 4fe6dbf (All of version 2)
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -46,6 +57,7 @@ const HomePage = () => {
         <HeroSection />
       </header>
 
+<<<<<<< HEAD
       {/* 3. Product Article Sections */}
       {productArticles.map((article, index) => (
         <ArticleSection
@@ -58,6 +70,12 @@ const HomePage = () => {
           productSlug={article.productSlug}
         />
       ))}
+=======
+      {/* 3. Product Article Slider */}
+      {articles && articles.length > 0 && (
+        <ArticleSlider articles={articles} products={products || []} />
+      )}
+>>>>>>> 4fe6dbf (All of version 2)
 
       {/* 4. Top Selling Products Section */}
       <TopProductsSection products={products || []} />

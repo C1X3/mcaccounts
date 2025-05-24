@@ -2,6 +2,12 @@ import { motion } from "framer-motion";
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+<<<<<<< HEAD
+=======
+import ProductCard from "@/components/ProductCard";
+import { ProductGetAllOutput } from "@/server/routes/_app";
+
+>>>>>>> 4fe6dbf (All of version 2)
 interface ArticleSectionProps {
     alignment: "left" | "right";
     description: string;
@@ -10,9 +16,16 @@ interface ArticleSectionProps {
     index: number;
     thumbnail?: string; // Optional thumbnail image
     productSlug: string;
+<<<<<<< HEAD
 }
 
 const ArticleSection = ({ alignment, description, title, video, index, thumbnail, productSlug }: ArticleSectionProps) => {
+=======
+    products: ProductGetAllOutput;
+}
+
+const ArticleSection = ({ alignment, description, title, video, index, thumbnail, productSlug, products }: ArticleSectionProps) => {
+>>>>>>> 4fe6dbf (All of version 2)
     const router = useRouter();
     const [showModal, setShowModal] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -87,7 +100,11 @@ const ArticleSection = ({ alignment, description, title, video, index, thumbnail
                         </motion.div>
 
                         {/* Video and content layout */}
+<<<<<<< HEAD
                         <motion.div 
+=======
+                        <motion.div
+>>>>>>> 4fe6dbf (All of version 2)
                             className="md:w-4/5 mx-auto mb-8 overflow-hidden"
                             variants={fadeInUp}
                         >
@@ -95,9 +112,15 @@ const ArticleSection = ({ alignment, description, title, video, index, thumbnail
                             <div className={`relative rounded-lg w-full md:w-1/2 ${floatClass} mb-4 overflow-hidden`}>
                                 {!isPlaying && thumbnailUrl ? (
                                     <div className="relative aspect-video w-full cursor-pointer" onClick={handleVideoPlay}>
+<<<<<<< HEAD
                                         <Image 
                                             src={thumbnailUrl} 
                                             alt={title} 
+=======
+                                        <Image
+                                            src={thumbnailUrl}
+                                            alt={title}
+>>>>>>> 4fe6dbf (All of version 2)
                                             layout="fill"
                                             objectFit="cover"
                                             className="rounded-lg"
@@ -143,14 +166,22 @@ const ArticleSection = ({ alignment, description, title, video, index, thumbnail
 
                             {/* If there's a 4th paragraph, render it below both */}
                             {paragraphs.length > 3 && (
+<<<<<<< HEAD
                                 <motion.p 
+=======
+                                <motion.p
+>>>>>>> 4fe6dbf (All of version 2)
                                     className="clear-both text-gray-600 text-lg mt-4"
                                     variants={fadeInUp}
                                 >
                                     {paragraphs[3]}
                                 </motion.p>
                             )}
+<<<<<<< HEAD
                             
+=======
+
+>>>>>>> 4fe6dbf (All of version 2)
                             {/* Clearfix to handle float properly */}
                             <div className="clear-both"></div>
                         </motion.div>
@@ -215,9 +246,15 @@ const ArticleSection = ({ alignment, description, title, video, index, thumbnail
                             <div className="mb-6 aspect-video relative">
                                 {!isPlaying && thumbnailUrl ? (
                                     <div className="relative aspect-video w-full cursor-pointer" onClick={handleVideoPlay}>
+<<<<<<< HEAD
                                         <Image 
                                             src={thumbnailUrl} 
                                             alt={title} 
+=======
+                                        <Image
+                                            src={thumbnailUrl}
+                                            alt={title}
+>>>>>>> 4fe6dbf (All of version 2)
                                             layout="fill"
                                             objectFit="cover"
                                             className="rounded-lg"
@@ -249,6 +286,11 @@ const ArticleSection = ({ alignment, description, title, video, index, thumbnail
                                 ))}
                             </div>
 
+<<<<<<< HEAD
+=======
+                            <ProductCard product={products.find(x => x.slug === productSlug) || products[0]} styles="article" />
+
+>>>>>>> 4fe6dbf (All of version 2)
                             <div className="mt-6 flex justify-end">
                                 <button
                                     onClick={() => setShowModal(false)}

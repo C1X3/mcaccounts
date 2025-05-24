@@ -2,6 +2,10 @@
 
 import DashboardTab from "@/components/admin/DashboardTab";
 import ProductsTab from "@/components/admin/ProductsTab";
+<<<<<<< HEAD
+=======
+import ArticlesTab from "@/components/admin/ArticlesTab";
+>>>>>>> 4fe6dbf (All of version 2)
 import InvoicesTab from "@/components/admin/InvoicesTab";
 import CouponsTab from "@/components/admin/CouponsTab";
 import AdminWrapper from "@/components/AdminWrapper";
@@ -16,6 +20,11 @@ export default function AdminDashboard() {
                 return <DashboardTab />;
             case "products":
                 return <ProductsTab />;
+<<<<<<< HEAD
+=======
+            case "articles":
+                return <ArticlesTab />;
+>>>>>>> 4fe6dbf (All of version 2)
             case "invoices":
                 return <InvoicesTab />;
             case "coupons":

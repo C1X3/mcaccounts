@@ -13,6 +13,10 @@
     "balances": "tsx --tsconfig tsconfig.server.json src/balances.ts"
   },
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "@aws-sdk/client-s3": "^3.817.0",
+>>>>>>> 4fe6dbf (All of version 2)
     "@hookform/resolvers": "^5.0.1",
     "@prisma/client": "6.8.2",
     "@react-email/components": "^0.0.41",
@@ -49,6 +53,10 @@
     "@eslint/compat": "^1.2.9",
     "@eslint/eslintrc": "^3",
     "@next/eslint-plugin-next": "^15.3.2",
+<<<<<<< HEAD
+=======
+    "@paralleldrive/cuid2": "^2.2.2",
+>>>>>>> 4fe6dbf (All of version 2)
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22",
     "@types/nodemailer": "^6.4.17",

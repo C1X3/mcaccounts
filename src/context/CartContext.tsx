@@ -11,7 +11,11 @@ import {
 } from '@/utils/cart';
 import toast from 'react-hot-toast';
 import { useTRPC } from '@/server/client';
+<<<<<<< HEAD
 import { useMutation, useQuery } from '@tanstack/react-query';
+=======
+import { useMutation } from '@tanstack/react-query';
+>>>>>>> 4fe6dbf (All of version 2)
 import { CouponType } from '@generated';
 
 type CartContextType = {
@@ -176,11 +180,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     // Apply coupon
     const applyCoupon = useCallback(async (code: string) => {
+<<<<<<< HEAD
         if (!code.trim()) return
+=======
+        if (!code.trim()) return;
+>>>>>>> 4fe6dbf (All of version 2)
 
         try {
             const coupon = await validateCoupon({ code: code.trim() });
             if (!coupon) {
+<<<<<<< HEAD
                 throw new Error('Invalid coupon code')
             }
 
@@ -193,16 +202,40 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             }
             setCoupon(coupon.code)
             setDiscountAmount(discount)
+=======
+                throw new Error('Invalid coupon code');
+            }
+
+            // then apply exactly the same discount logic:
+            let discount = 0;
+            if (coupon.type === CouponType.PERCENTAGE) {
+                discount = totalPrice * (coupon.discount / 100);
+            } else {
+                discount = Math.min(coupon.discount, totalPrice);
+            }
+            setCoupon(coupon.code);
+            setDiscountAmount(discount);
+>>>>>>> 4fe6dbf (All of version 2)
 
             const discountText =
                 coupon.type === CouponType.PERCENTAGE
                     ? `${coupon.discount}%`
+<<<<<<< HEAD
                     : `$${coupon.discount.toFixed(2)}`
             toast.success(`Coupon "${coupon.code}" applied! You saved ${discountText}`)
         } catch (err: any) {
             toast.error(err.message ?? 'Invalid coupon code')
         }
     }, [trpc, totalPrice]);
+=======
+                    : `$${coupon.discount.toFixed(2)}`;
+            toast.success(`Coupon "${coupon.code}" applied! You saved ${discountText}`);
+        } catch (err) {
+            console.error(err);
+            toast.error('Invalid coupon code');
+        }
+    }, [totalPrice, validateCoupon]);
+>>>>>>> 4fe6dbf (All of version 2)
 
     // Remove coupon
     const removeCoupon = () => {

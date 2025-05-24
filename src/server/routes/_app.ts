@@ -6,6 +6,10 @@ import { checkoutRouter } from "./checkout";
 import { couponRouter } from "./coupon";
 import { productRouter } from "./product";
 import { invoicesRouter } from "./invoices";
+<<<<<<< HEAD
+=======
+import { articleRouter } from "./article";
+>>>>>>> 4fe6dbf (All of version 2)
 
 export const appRouter = createTRPCRouter({
   product: productRouter,
@@ -14,6 +18,10 @@ export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,
   coupon: couponRouter,
   invoices: invoicesRouter,
+<<<<<<< HEAD
+=======
+  article: articleRouter,
+>>>>>>> 4fe6dbf (All of version 2)
 });
 
 export type AppRouter = typeof appRouter;

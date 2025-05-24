@@ -1,0 +1,16 @@
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  videoKey    String   // S3 object key for the uploaded video
+  thumbnailUrl String? // Optional custom thumbnail, will override YouTube thumbnail
+  color       String   @default("var(--primary)")
+  alignment   String   @default("left") // "left" or "right"
+  productSlug String
+  isActive    Boolean  @default(true)
+  order       Int      @default(0) // For sorting articles
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("articles")
+}
