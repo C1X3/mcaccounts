@@ -1,10 +1,6 @@
 import { z } from 'zod';
 import { prisma } from '@/utils/prisma';
-<<<<<<< HEAD
-import { baseProcedure, createTRPCRouter } from '../init';
-=======
 import { adminProcedure, baseProcedure, createTRPCRouter } from '../init';
->>>>>>> 4fe6dbf (All of version 2)
 import { TRPCError } from '@trpc/server';
 import { CryptoType, OrderStatus, PaymentType } from '@generated';
 import { createCheckoutSession as createStripeCheckout } from '../providers/stripe';
@@ -12,11 +8,7 @@ import { createCheckoutSession as createPaypalCheckout } from '../providers/payp
 import { createWalletDetails as createCryptoCheckout } from '../providers/crypto';
 import { WalletDetails } from '../providers/types';
 import { calculatePaymentFee } from '@/utils/fees';
-<<<<<<< HEAD
-import { sendOrderPlacedEmail } from '@/utils/email';
-=======
 import { sendOrderCompleteEmail, sendOrderPlacedEmail } from '@/utils/email';
->>>>>>> 4fe6dbf (All of version 2)
 
 export const checkoutRouter = createTRPCRouter({
     processPayment: baseProcedure
@@ -49,11 +41,6 @@ export const checkoutRouter = createTRPCRouter({
                 // Apply coupon discount if provided
                 let discountedSubtotal = subtotal;
                 let couponData = null;
-<<<<<<< HEAD
-                
-=======
-
->>>>>>> 4fe6dbf (All of version 2)
                 if (input.couponCode) {
                     try {
                         // Verify the coupon is valid
@@ -65,36 +52,20 @@ export const checkoutRouter = createTRPCRouter({
                                 usageCount: { lt: prisma.coupon.fields.usageLimit },
                             },
                         });
-<<<<<<< HEAD
-                        
-=======
-
->>>>>>> 4fe6dbf (All of version 2)
                         if (!coupon) {
                             throw new TRPCError({
                                 code: 'BAD_REQUEST',
                                 message: 'Coupon is invalid or expired',
                             });
                         }
-<<<<<<< HEAD
-                        
-=======
-
->>>>>>> 4fe6dbf (All of version 2)
                         // Update the coupon usage count
                         await prisma.coupon.update({
                             where: { id: coupon.id },
                             data: { usageCount: { increment: 1 } },
                         });
-<<<<<<< HEAD
-                        
-                        couponData = coupon;
-                        
-=======
 
                         couponData = coupon;
 
->>>>>>> 4fe6dbf (All of version 2)
                         // Apply the discount to the subtotal
                         if (input.discountAmount && input.discountAmount > 0) {
                             discountedSubtotal = subtotal - input.discountAmount;
@@ -105,17 +76,10 @@ export const checkoutRouter = createTRPCRouter({
                         // Continue without coupon if validation fails
                     }
                 }
-<<<<<<< HEAD
-                
-                // Calculate payment fee based on the discounted subtotal
-                const paymentFee = calculatePaymentFee(input.paymentType, discountedSubtotal);
-                
-=======
 
                 // Calculate payment fee based on the discounted subtotal
                 const paymentFee = calculatePaymentFee(input.paymentType, discountedSubtotal);
 
->>>>>>> 4fe6dbf (All of version 2)
                 // 1. Create a pending order in the database
                 const order = await prisma.order.create({
                     data: {
@@ -363,8 +327,6 @@ export const checkoutRouter = createTRPCRouter({
                 });
             }
         }),
-<<<<<<< HEAD
-=======
 
     manuallyProcessInvoice: adminProcedure
         .input(z.object({ orderId: z.string() }))
@@ -465,5 +427,4 @@ export const checkoutRouter = createTRPCRouter({
 
             return { success: true, order };
         }),
->>>>>>> 4fe6dbf (All of version 2)
 }); 

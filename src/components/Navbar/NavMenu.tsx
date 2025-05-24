@@ -37,13 +37,10 @@ const items = [
     href: "/shop",
   },
   {
-<<<<<<< HEAD
-=======
     label: "Videos",
     href: "/videos",
   },
   {
->>>>>>> 4fe6dbf (All of version 2)
     label: "Vouches",
     href: "/vouches",
   },

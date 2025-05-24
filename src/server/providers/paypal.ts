@@ -2,10 +2,6 @@ import { CheckoutPayload, WalletDetails } from './types';
 import { fAndFItems } from '@/utils/paypalNotes';
 import { prisma } from '@/utils/prisma';
 import { OrderStatus, PaymentType } from '@generated';
-<<<<<<< HEAD
-import { calculatePaymentFee } from '@/utils/fees';
-=======
->>>>>>> 4fe6dbf (All of version 2)
 
 export async function createCheckoutSession(payload: CheckoutPayload): Promise<WalletDetails> {
     if (!process.env.NEXT_PUBLIC_PAYPAL_EMAIL) {

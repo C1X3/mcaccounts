@@ -3,11 +3,7 @@ import { YouTubeApiResponse, YouTubeChannel } from "@/types/youtube";
 export const YOUTUBE_CHANNEL_IDS = [
   "UCZf6WKzzljB8LHyPHTPxHLA",
   "UC2KjRb9JQ9yAEIw8HMFUENg",
-<<<<<<< HEAD
-  "UCNLO8nw8mmHN5tMF0sprwSQ",
-=======
   "UCzS1DfNk-TnKXe2oRWxRRXw",
->>>>>>> 4fe6dbf (All of version 2)
   "UChNwsP0_jTrqYgq74DyfCIg",
   "UCXHiZWRYzDnzZE_Xm_1OEVA",
   "UCoDmUnYTz2ly28F6rdDdBNw",

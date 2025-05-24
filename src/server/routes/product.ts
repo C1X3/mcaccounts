@@ -16,35 +16,6 @@ export const productRouter = createTRPCRouter({
                     ...(input.isProductPage && { hideProductPage: false }),
                 },
                 select: {
-<<<<<<< HEAD
-                id: true,
-                name: true,
-                slug: true,
-                description: true,
-                price: true,
-                image: true,
-                additionalImages: true,
-                category: true,
-                rating: true,
-                badge: true,
-                features: true,
-                stock: true,
-                slashPrice: true,
-                hideHomePage: true,
-                hideProductPage: true,
-                isFeatured: true,
-                order: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
-
-        return raw.map(({ stock: stockArr, ...rest }) => ({
-            ...rest,
-            stock: stockArr.length,
-        }));
-    }),
-=======
                     id: true,
                     name: true,
                     slug: true,
@@ -101,7 +72,6 @@ export const productRouter = createTRPCRouter({
                 },
             });
         }),
->>>>>>> 4fe6dbf (All of version 2)
 
     getAllWithStock: adminProcedure.query(async () => {
         return await prisma.product.findMany({
@@ -177,7 +147,7 @@ export const productRouter = createTRPCRouter({
         )
         .mutation(async ({ input }) => {
             const { productOrders } = input;
-            
+
             // Update products in transaction
             const updates = productOrders.map(({ id, order }) =>
                 prisma.product.update({
@@ -185,9 +155,9 @@ export const productRouter = createTRPCRouter({
                     data: { order },
                 })
             );
-            
+
             await prisma.$transaction(updates);
-            
+
             return { success: true };
         }),
 

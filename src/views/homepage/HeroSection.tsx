@@ -117,8 +117,6 @@ const HeroSection = () => {
               </motion.div>
             </motion.div>
           </div>
-<<<<<<< HEAD
-=======
 
           {/* ABOUT US CARD SECTION */}
           <motion.div
@@ -304,7 +302,6 @@ const HeroSection = () => {
               }}
             />
           </motion.div>
->>>>>>> 4fe6dbf (All of version 2)
         </div>
       </div>
     </div>

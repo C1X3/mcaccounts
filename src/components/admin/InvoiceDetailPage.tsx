@@ -1,14 +1,6 @@
 'use client';
 
 import { useTRPC } from "@/server/client";
-<<<<<<< HEAD
-import { useQuery } from "@tanstack/react-query";
-import React from "react";
-import { FaDownload, FaBox, FaUser, FaTimes, FaShoppingBag, FaFileInvoice } from "react-icons/fa";
-import { OrderStatus, PaymentType } from "@generated";
-import Link from "next/link";
-import { invoicesRouter } from "@/server/routes/invoices";
-=======
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React from "react";
 import { FaBox, FaUser, FaShoppingBag, FaFileInvoice } from "react-icons/fa";
@@ -16,7 +8,6 @@ import { OrderStatus, PaymentType } from "@generated";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import Image from "next/image";
->>>>>>> 4fe6dbf (All of version 2)
 
 export default function InvoiceDetailPage({ id }: { id: string }) {
   const trpc = useTRPC();
@@ -27,8 +18,6 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
     }),
   );
 
-<<<<<<< HEAD
-=======
   const { mutate: manuallyProcessInvoice, isPending: isManuallyProcessing } = useMutation(
     trpc.checkout.manuallyProcessInvoice.mutationOptions({
       onSuccess: () => {
@@ -40,7 +29,6 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
     }),
   );
 
->>>>>>> 4fe6dbf (All of version 2)
   // Format date to more readable version
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleString("en-US", {
@@ -70,37 +58,10 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
     }
   };
 
-<<<<<<< HEAD
-  // Get status badge styling
-  const getStatusBadgeClass = (status: OrderStatus) => {
-    switch (status) {
-      case OrderStatus.PAID:
-        return "bg-green-100 text-green-800";
-      case OrderStatus.PENDING:
-        return "bg-yellow-100 text-yellow-800";
-      case OrderStatus.DELIVERED:
-        return "bg-blue-100 text-blue-800";
-      case OrderStatus.CANCELLED:
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  // Export invoice as PDF (this is a placeholder function)
-  const exportInvoice = () => {
-    alert("Export functionality would be implemented here");
-    // In a real implementation, this would generate a PDF with the invoice details
-  };
-
-  const handleManuallyProcessInvoice = () => {
-    alert("Manual processing functionality would be implemented here");
-=======
   const handleManuallyProcessInvoice = () => {
     manuallyProcessInvoice({
       orderId: id as string,
     });
->>>>>>> 4fe6dbf (All of version 2)
   };
 
   if (isLoading) {
@@ -132,23 +93,10 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
         </div>
         <div className="flex gap-2">
           <button 
-<<<<<<< HEAD
-            className="px-4 py-2 flex items-center gap-2 bg-transparent border border-gray-700 rounded-md hover:bg-gray-800 transition-colors"
-            onClick={() => window.history.back()}
-          >
-            <FaTimes /> Cancel
-          </button>
-          <button 
-            className="px-4 py-2 flex items-center gap-2 bg-transparent border border-gray-700 rounded-md hover:bg-gray-800 transition-colors"
-            onClick={handleManuallyProcessInvoice}
-          >
-            <FaFileInvoice /> Manually Process Invoice
-=======
             className="px-4 py-2 flex items-center gap-2 bg-transparent border border-gray-700 rounded-md hover:bg-gray-400 transition-colors"
             onClick={handleManuallyProcessInvoice}
           >
             <FaFileInvoice /> {isManuallyProcessing ? "Processing..." : "Manually Process Invoice"}
->>>>>>> 4fe6dbf (All of version 2)
           </button>
         </div>
       </div>
@@ -233,11 +181,7 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
               <span className="text-gray-600">Country</span>
               <div className="flex items-center gap-2">
                 <span>US</span>
-<<<<<<< HEAD
-                <img src="/images/flags/fr.png" alt="France" className="w-6 h-4" />
-=======
                 <Image src="https://flagsapi.com/US/flat/64.png" alt="US" className="w-6 h-4" />
->>>>>>> 4fe6dbf (All of version 2)
               </div>
             </div>
             
@@ -270,11 +214,7 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
             </thead>
             <tbody>
               {invoice.OrderItem.map((item) => (
-<<<<<<< HEAD
-                <tr className="border-b border-gray-100">
-=======
                 <tr className="border-b border-gray-100" key={item.id}>
->>>>>>> 4fe6dbf (All of version 2)
                   <td className="py-3 px-4">
                     <span className="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
                     {invoice.status}

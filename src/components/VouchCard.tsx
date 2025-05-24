@@ -19,29 +19,15 @@ const VouchCard = ({ vouch }: VouchCardProps) => {
             onClick={handleClick}
         >
             <div className="p-6">
-<<<<<<< HEAD
-                <div className="flex items-center mb-4">
-=======
                 <div className="flex items-center mb-2">
->>>>>>> 4fe6dbf (All of version 2)
                     <div>
                         <h4 className="text-lg font-bold text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
                             {vouch.author}
                         </h4>
-<<<<<<< HEAD
-                        <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-xs">
-                            {new Date(vouch.date).toLocaleDateString()}
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex text-yellow-400 mb-4">
-=======
                     </div>
                 </div>
 
                 <div className="flex text-yellow-400 mb-2">
->>>>>>> 4fe6dbf (All of version 2)
                     {[...Array(5)].map((_, i) => (
                         <FaStar
                             key={i}
@@ -51,11 +37,7 @@ const VouchCard = ({ vouch }: VouchCardProps) => {
                     ))}
                 </div>
 
-<<<<<<< HEAD
-                <p className="text-[color-mix(in_srgb,var(--foreground),#888_30%)] text-sm mb-2 min-h-[4rem]">
-=======
                 <p className="text-[color-mix(in_srgb,var(--foreground),#888_30%)] text-sm">
->>>>>>> 4fe6dbf (All of version 2)
                     &quot;{vouch.message}&quot;
                 </p>
             </div>
