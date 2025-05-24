@@ -5,9 +5,6 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { ProductGetAllOutput } from "@/server/routes/_app";
 
-<<<<<<< HEAD
-const ProductCard = ({ product }: { product: ProductGetAllOutput[number] }) => {
-=======
 type CardStyle = "normal" | "article";
 
 const ProductCard = ({
@@ -17,7 +14,6 @@ const ProductCard = ({
     product: ProductGetAllOutput[number];
     styles?: CardStyle;
 }) => {
->>>>>>> 4fe6dbf (All of version 2)
     const router = useRouter();
     const { addItem } = useCart();
 
@@ -30,8 +26,6 @@ const ProductCard = ({
         addItem(product);
     };
 
-<<<<<<< HEAD
-=======
     // Common rating render
     const Rating = () => (
         <div className="flex items-center">
@@ -151,7 +145,6 @@ const ProductCard = ({
     }
 
     // Default "normal" card (your existing implementation)
->>>>>>> 4fe6dbf (All of version 2)
     return (
         <motion.div
             key={product.id}
@@ -163,11 +156,7 @@ const ProductCard = ({
             whileHover={{
                 y: -8,
                 boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-<<<<<<< HEAD
                 borderColor: "var(--accent)"
-=======
-                borderColor: "var(--accent)",
->>>>>>> 4fe6dbf (All of version 2)
             }}
             onClick={handleNavigateToProduct}
         >
@@ -186,12 +175,10 @@ const ProductCard = ({
                         className="drop-shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]"
                     />
                 </motion.div>
-<<<<<<< HEAD
                 {product.badge && <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full">
                     {product.badge}
                 </div>}
             </div>
-
 
             {/* Content */}
             <div className="p-6">
@@ -203,7 +190,6 @@ const ProductCard = ({
                     </div>
                     <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-xs">{product.rating}</span>
                 </div>
-=======
                 {product.badge && (
                     <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full">
                         {product.badge}
@@ -214,7 +200,6 @@ const ProductCard = ({
             {/* Content */}
             <div className="p-6">
                 <Rating />
->>>>>>> 4fe6dbf (All of version 2)
                 <h4 className="text-lg font-bold text-[var(--foreground)] mb-2 group-hover:text-[var(--accent)] transition-colors">
                     {product.name}
                 </h4>
@@ -224,15 +209,11 @@ const ProductCard = ({
                 <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-[var(--foreground)]">
                         ${product.price}
-<<<<<<< HEAD
-                        {product.slashPrice && <span className="text-[color-mix(in_srgb,var(--foreground),#888_60%)] ml-2 line-through">${product.slashPrice.toFixed(2)}</span>}
-=======
                         {product.slashPrice && (
                             <span className="text-[color-mix(in_srgb,var(--foreground),#888_60%)] ml-2 line-through">
                                 ${product.slashPrice.toFixed(2)}
                             </span>
                         )}
->>>>>>> 4fe6dbf (All of version 2)
                     </span>
                     <div className="flex space-x-2">
                         <button
@@ -266,8 +247,4 @@ const ProductCard = ({
     );
 };
 
-<<<<<<< HEAD
 export default ProductCard;
-=======
-export default ProductCard;
->>>>>>> 4fe6dbf (All of version 2)
