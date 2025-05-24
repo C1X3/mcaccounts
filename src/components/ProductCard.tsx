@@ -182,23 +182,6 @@ const ProductCard = ({
 
             {/* Content */}
             <div className="p-6">
-                <div className="flex items-center mb-2">
-                    <div className="flex text-yellow-400 mr-2">
-                        {[...Array(5)].map((_, i) => (
-                            <FaStar key={i} size={12} className={i < Math.floor(product.rating) ? "text-yellow-400" : "text-gray-600"} />
-                        ))}
-                    </div>
-                    <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-xs">{product.rating}</span>
-                </div>
-                {product.badge && (
-                    <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full">
-                        {product.badge}
-                    </div>
-                )}
-            </div>
-
-            {/* Content */}
-            <div className="p-6">
                 <Rating />
                 <h4 className="text-lg font-bold text-[var(--foreground)] mb-2 group-hover:text-[var(--accent)] transition-colors">
                     {product.name}

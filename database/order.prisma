@@ -1,40 +1,43 @@
 enum PaymentType {
-    STRIPE
-    CRYPTO
-    PAYPAL
-    CASH_APP
-    VENMO
+  STRIPE
+  CRYPTO
+  PAYPAL
+  CASH_APP
+  VENMO
 }
 
 enum OrderStatus {
-    PENDING
-    PAID
-    DELIVERED
-    CANCELLED
+  PENDING
+  PAID
+  DELIVERED
+  CANCELLED
 }
 
 model OrderItem {
-    id String @id @default(cuid())
+  id String @id @default(cuid())
 
-    orderId String
-    order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-    productId String
-    product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-    quantity Int
-    price    Float
+  quantity Int
+  price    Float
 
-    codes String[]
+  codes String[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CustomerInformation {
   id      String  @id @default(cuid())
   name    String
   email   String
+
+  useragent String?
+  ipAddress String?
 
   discord String?
   order   Order?

@@ -16,6 +16,18 @@ interface Video {
 // your videos data
 const videos: Video[] = [
   {
+    title: "Untold History of EVERY Minecraft Cape (#1 in the list)",
+    description: "godnxss",
+    url: "https://www.youtube.com/embed/wGbQJwCBbR4",
+    thumbnail: "https://img.youtube.com/vi/wGbQJwCBbR4/maxresdefault.jpg",
+  },
+  {
+    title: "How to Get 2 NEW Minecraft Capes in 3 Minutes!",
+    description: "godnxss",
+    url: "https://www.youtube.com/embed/OpiUu4fyoJY",
+    thumbnail: "https://img.youtube.com/vi/OpiUu4fyoJY/maxresdefault.jpg",
+  },
+  {
     title: "I Won The Bedwars World Cup",
     description: "Dewier",
     url: "https://www.youtube.com/embed/S9qxDXXqEXA",
@@ -40,12 +52,6 @@ const videos: Video[] = [
     thumbnail: "https://img.youtube.com/vi/HFCel2yap3I/maxresdefault.jpg",
   },
   {
-    title: "Untold History of EVERY Minecraft Cape (#1 in the list)",
-    description: "godnxss",
-    url: "https://www.youtube.com/embed/wGbQJwCBbR4",
-    thumbnail: "https://img.youtube.com/vi/wGbQJwCBbR4/maxresdefault.jpg",
-  },
-  {
     title: "How I Got HT3 in Crystal PVP",
     description: "ItzBlake",
     url: "https://www.youtube.com/embed/xjjbzeYHgt8",
@@ -58,10 +64,10 @@ const videos: Video[] = [
     thumbnail: "https://img.youtube.com/vi/Em9XXfVCjy0/maxresdefault.jpg",
   },
   {
-    title: "How to Get 2 NEW Minecraft Capes in 3 Minutes!",
-    description: "godnxss",
-    url: "https://www.youtube.com/embed/OpiUu4fyoJY",
-    thumbnail: "https://img.youtube.com/vi/OpiUu4fyoJY/maxresdefault.jpg",
+    title: "YouTuber Who Stole $3,000 from Technoblade's Charity is Back",
+    description: "Blissolic",
+    url: "https://www.youtube.com/embed/Fh7Blmb-h5I",
+    thumbnail: "https://img.youtube.com/vi/Fh7Blmb-h5I/maxresdefault.jpg",
   },
 ];
 
