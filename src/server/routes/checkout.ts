@@ -323,9 +323,8 @@ export const checkoutRouter = createTRPCRouter({
     manuallyProcessInvoice: adminProcedure
         .input(z.object({ orderId: z.string() }))
         .mutation(async ({ input }) => {
-            const order = await prisma.order.update({
+            const order = await prisma.order.findUnique({
                 where: { id: input.orderId },
-                data: { status: OrderStatus.PAID },
                 include: {
                     customer: true,
                     OrderItem: {
@@ -335,6 +334,13 @@ export const checkoutRouter = createTRPCRouter({
                     },
                 },
             });
+
+            if (!order) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: 'Order not found',
+                });
+            }
 
             // Add a code to the item in prisma
             if (order.status === OrderStatus.PAID || order.status === OrderStatus.DELIVERED) {
@@ -393,11 +399,6 @@ export const checkoutRouter = createTRPCRouter({
                     orderDate: order.createdAt.toISOString(),
                 });
             } else if (order.status === OrderStatus.PENDING) {
-                await prisma.order.update({
-                    where: { id: input.orderId },
-                    data: { status: OrderStatus.PAID },
-                });
-
                 await sendOrderCompleteEmail({
                     customerName: order.customer.name,
                     customerEmail: order.customer.email,
@@ -416,6 +417,11 @@ export const checkoutRouter = createTRPCRouter({
                     orderDate: order.createdAt.toISOString(),
                 });
             }
+
+            await prisma.order.update({
+                where: { id: input.orderId },
+                data: { status: OrderStatus.PAID },
+            });
 
             return { success: true, order };
         }),
