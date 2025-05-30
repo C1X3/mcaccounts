@@ -97,6 +97,7 @@ export const productRouter = createTRPCRouter({
                 hideHomePage: z.boolean().default(false),
                 hideProductPage: z.boolean().default(false),
                 isFeatured: z.boolean().default(false),
+                stripeProductName: z.string()
             })
         )
         .mutation(async ({ input }) => {
@@ -124,6 +125,7 @@ export const productRouter = createTRPCRouter({
                 hideHomePage: z.boolean().optional(),
                 hideProductPage: z.boolean().optional(),
                 isFeatured: z.boolean().optional(),
+                stripeProductName: z.string().optional(),
             })
         )
         .mutation(async ({ input }) => {
