@@ -223,8 +223,8 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
                   </td>
                   <td className="py-3 px-4">
                     <div>
-                      <p className="font-medium">Experience Cape Code</p>
-                      <p className="text-sm text-gray-500">Experience Cape Code</p>
+                      <p className="font-medium">{item.product.name}</p>
+                      <p className="text-sm text-gray-500">{item.product.slug}</p>
                     </div>
                   </td>
                   <td className="py-3 px-4">{item.quantity}</td>
