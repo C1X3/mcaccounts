@@ -8,7 +8,9 @@ export const YOUTUBE_CHANNEL_IDS = [
   "UCXHiZWRYzDnzZE_Xm_1OEVA",
   "UCoDmUnYTz2ly28F6rdDdBNw",
   "UCSZjWwaOze7AfAUfo3dqYBQ",
-  "UCgBfyINBxXscTfTfXI0AT5Q"
+  "UCgBfyINBxXscTfTfXI0AT5Q",
+  "UCgQyImwRQU2iRlJc_Rz3rMg",
+  "UCH8CkkLskdhprMPO4EYsHVw"
 ];
 
 export const YOUTUBE_API_CONFIG = {

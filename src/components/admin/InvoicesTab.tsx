@@ -14,7 +14,7 @@ export default function InvoicesTab() {
   const [paymentFilter, setPaymentFilter] = useState<PaymentType | "ALL">("ALL");
   const [productFilter, setProductFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const { data: invoices = [] } = useQuery(trpc.invoices.getAll.queryOptions());
 
   // Navigate to invoice detail page
@@ -26,58 +26,63 @@ export default function InvoicesTab() {
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {
       // Search term filter
-      const matchesSearch = 
+      const matchesSearch =
         searchTerm === "" ||
         invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         invoice.customer?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         invoice.customer?.email.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       // Status filter
-      const matchesStatus = 
-        statusFilter === "ALL" || 
+      const matchesStatus =
+        statusFilter === "ALL" ||
         invoice.status === statusFilter;
-      
+
       // Payment method filter
-      const matchesPayment = 
-        paymentFilter === "ALL" || 
+      const matchesPayment =
+        paymentFilter === "ALL" ||
         invoice.paymentType === paymentFilter;
-      
+
       // Product filter
-      const matchesProduct = 
+      const matchesProduct =
         productFilter === "" ||
-        invoice.OrderItem?.some(item => 
+        invoice.OrderItem?.some(item =>
           item.product.name.toLowerCase().includes(productFilter.toLowerCase())
         );
-      
+
       return matchesSearch && matchesStatus && matchesPayment && matchesProduct;
     });
   }, [invoices, searchTerm, statusFilter, paymentFilter, productFilter]);
 
   // Calculate stats
-  const totalSales = invoices.reduce((sum, invoice) => 
-    invoice.status === OrderStatus.PAID || invoice.status === OrderStatus.DELIVERED 
-      ? sum + invoice.totalPrice 
+  const totalSales = invoices.reduce((sum, invoice) =>
+    invoice.status === OrderStatus.PAID || invoice.status === OrderStatus.DELIVERED
+      ? sum + invoice.totalPrice
       : sum, 0
   );
-  
+
   const pendingCount = invoices.filter(
     (invoice) => invoice.status === OrderStatus.PENDING
   ).length;
-  
+
   const completedCount = invoices.filter(
-    (invoice) => 
-      invoice.status === OrderStatus.PAID || 
+    (invoice) =>
+      invoice.status === OrderStatus.PAID ||
       invoice.status === OrderStatus.DELIVERED
   ).length;
 
   // Format date
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
+    return new Date(date).toLocaleString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true, // or false for 24-hour clock
     });
   };
+
 
   // Get payment method display name
   const getPaymentMethodName = (method: PaymentType) => {
@@ -116,13 +121,13 @@ export default function InvoicesTab() {
       "ID",
       "Status",
       "Customer Name",
-      "Customer Email", 
+      "Customer Email",
       "Products",
       "Total Price",
       "Payment Method",
       "Created At"
     ].join(",");
-    
+
     const rows = filteredInvoices.map(invoice => [
       invoice.id,
       invoice.status,
@@ -133,9 +138,9 @@ export default function InvoicesTab() {
       getPaymentMethodName(invoice.paymentType),
       new Date(invoice.createdAt).toISOString().split("T")[0]
     ].join(","));
-    
+
     const csvContent = [headers, ...rows].join("\n");
-    
+
     // Create download link
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -155,7 +160,7 @@ export default function InvoicesTab() {
           <FaReceipt />
           Invoices
         </h2>
-        
+
         <div className="flex gap-3 items-center">
           <div className="relative">
             <input
@@ -167,16 +172,16 @@ export default function InvoicesTab() {
             />
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[color-mix(in_srgb,var(--foreground),#888_40%)]" size={14} />
           </div>
-          
-          <button 
+
+          <button
             onClick={() => setShowFilters(!showFilters)}
             className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_5%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] text-[var(--foreground)] hover:bg-[color-mix(in_srgb,var(--background),#333_10%)] transition-colors"
             title="Toggle filters"
           >
             <FaFilter />
           </button>
-          
-          <button 
+
+          <button
             onClick={exportToCSV}
             className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--primary),#fff_80%)] border border-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary),#fff_70%)] transition-colors"
             title="Export to CSV"
@@ -185,7 +190,7 @@ export default function InvoicesTab() {
           </button>
         </div>
       </div>
-      
+
       {showFilters && (
         <div className="mb-6 p-4 bg-[color-mix(in_srgb,var(--background),#333_5%)] rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -202,7 +207,7 @@ export default function InvoicesTab() {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm text-[color-mix(in_srgb,var(--foreground),#888_20%)] mb-1">Payment Method</label>
               <select
@@ -216,7 +221,7 @@ export default function InvoicesTab() {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm text-[color-mix(in_srgb,var(--foreground),#888_20%)] mb-1">Product Name</label>
               <input
@@ -291,8 +296,8 @@ export default function InvoicesTab() {
               </tr>
             ) : (
               filteredInvoices.map((invoice) => (
-                <tr 
-                  key={invoice.id} 
+                <tr
+                  key={invoice.id}
                   className="border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] hover:bg-[color-mix(in_srgb,var(--background),#333_5%)] cursor-pointer"
                   onClick={() => navigateToInvoice(invoice.id)}
                 >
@@ -300,7 +305,7 @@ export default function InvoicesTab() {
                     {invoice.id.substring(0, 8)}...
                   </td>
                   <td className="py-4 px-2">
-                    <span 
+                    <span
                       className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(invoice.status)}`}
                     >
                       {invoice.status}
@@ -312,8 +317,16 @@ export default function InvoicesTab() {
                   <td className="py-4 px-2 text-[var(--foreground)]">
                     {invoice.customer?.email || "N/A"}
                   </td>
-                  <td className="py-4 px-2 text-[var(--foreground)]">
-                    {invoice.OrderItem?.length || 0}
+                  <td className="py-4 px-2 text-[var(--foreground)] max-w-[250px]">
+                    {invoice.OrderItem && invoice.OrderItem.length > 0 ? (
+                      <div className="max-h-[100px] overflow-y-auto">
+                        {invoice.OrderItem.map((item, index) => (
+                          <div key={index} className="mb-1">
+                            x{item.quantity} {item.product.name}
+                          </div>
+                        ))}
+                      </div>
+                    ) : "N/A"}
                   </td>
                   <td className="py-4 px-2 text-[var(--foreground)]">
                     ${invoice.totalPrice.toFixed(2)}

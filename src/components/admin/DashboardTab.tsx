@@ -1,6 +1,7 @@
 import { useTRPC } from "@/server/client";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   FaArrowDown,
@@ -48,11 +49,12 @@ const timeRangeOptions = [
 ];
 
 export default function DashboardTab() {
-  const [timeRange, setTimeRange] = useState<TimeRangeType>("past_week");
+  const [timeRange, setTimeRange] = useState<TimeRangeType>("today");
   const [showTimeRangeDropdown, setShowTimeRangeDropdown] = useState(false);
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
 
+  const router = useRouter();
   const trpc = useTRPC();
 
   const revenueData = useQuery(
@@ -74,6 +76,7 @@ export default function DashboardTab() {
           : undefined,
     })
   );
+  
   const chartDataQuery = useQuery(
     trpc.analytics.getChartData.queryOptions({
       timeRange,
@@ -131,6 +134,7 @@ export default function DashboardTab() {
       "Custom Range"
     );
   };
+
   return (
     <div className="space-y-6">
       {/* Display error message if there are any errors */}
@@ -363,70 +367,70 @@ export default function DashboardTab() {
         </div>
 
         {recentOrdersData.isLoading ? (
-          <div className="p-6">
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-12 bg-gray-100 rounded animate-pulse"
-                ></div>
-              ))}
-            </div>
+          <div className="p-6 space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-gray-50 rounded-lg p-4 animate-pulse flex flex-col md:flex-row md:items-center gap-4">
+                <div className="h-4 bg-gray-200 rounded w-16"></div>
+                <div className="h-4 bg-gray-200 rounded w-32"></div>
+                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                <div className="h-4 bg-gray-200 rounded w-10"></div>
+                <div className="h-4 bg-gray-200 rounded w-20"></div>
+              </div>
+            ))}
           </div>
         ) : recentOrders.length === 0 ? (
-          <div className="p-6 text-center text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-            No recent orders found
+          <div className="p-12 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+              <FaShoppingCart className="text-gray-400 text-xl" />
+            </div>
+            <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] font-medium">No recent orders found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[color-mix(in_srgb,var(--foreground),var,--background_85%]">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[color-mix(in_srgb,var(--foreground),#888_40%)] uppercase tracking-wider">
-                    Order ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[color-mix(in_srgb,var(--foreground),#888_40%)] uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[color-mix(in_srgb,var(--foreground),#888_40%)] uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[color-mix(in_srgb,var(--foreground),#888_40%)] uppercase tracking-wider">
-                    Items
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[color-mix(in_srgb,var(--foreground),#888_40%)] uppercase tracking-wider">
-                    Total
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((order, index) => (
-                  <tr
-                    key={order.id}
-                    className={`${index !== recentOrders.length - 1 ? "border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_95%)]" : ""} hover:bg-gray-50`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--foreground)]">
-                      {order.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--foreground)] flex items-center gap-2">
-                      <FaUser className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]" />
-                      {order.customer}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)] flex items-center gap-2">
-                      <FaClock className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]" />
-                      {format(parseISO(order.date), "MMM dd, yyyy")}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--foreground)] flex items-center gap-2">
-                      <FaBox className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]" />
-                      {order.items}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--foreground)]">
-                      {formatCurrency(order.total)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="p-4">
+            <div className="space-y-4">
+              {recentOrders.map((order) => (
+                <div key={order.id} 
+                className="cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-150 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                 onClick={() => router.push(`/admin/invoice/${order.id}`)}
+                 >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-[var(--primary)] bg-opacity-10 rounded-full p-2">
+                      <FaShoppingCart className="text-[var(--primary)]" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-[var(--foreground)]">Order #{order.id}</p>
+                      <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                        {format(parseISO(order.date), "MMM dd, yyyy")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="bg-gray-200 rounded-full p-2">
+                      <FaUser className="text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-[var(--foreground)]">{order.customer}</p>
+                      <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Customer</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="bg-gray-200 rounded-full p-2">
+                      <FaBox className="text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-[var(--foreground)]">{order.items}</p>
+                      <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Items</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-lg font-semibold text-[var(--primary)]">{formatCurrency(order.total)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

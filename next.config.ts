@@ -32,7 +32,6 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        // match any path on the admin host
         source: '/:path*',
         has: [
           {
@@ -40,8 +39,8 @@ const nextConfig: NextConfig = {
             value: 'dash.mccapes.net',
           },
         ],
-        // rewrite it to /admin/<whatever>
-        destination: '/admin/:path*',
+        destination: 'https://mccapes.net/admin/:path*',
+        permanent: true, // or false if you want a 307 instead of 308/301
       },
     ];
   },

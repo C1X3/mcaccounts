@@ -316,7 +316,10 @@ export const analyticsRouter = createTRPCRouter({
       // Get recent completed orders from database
       const recentOrders = await prisma.order.findMany({
         where: {
-          status: "PAID",
+          OR: [
+            { status: OrderStatus.PAID },
+            { status: OrderStatus.DELIVERED },
+          ],
         },
         select: {
           id: true,
