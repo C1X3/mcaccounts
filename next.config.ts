@@ -37,24 +37,13 @@ const nextConfig: NextConfig = {
         has: [
           {
             type: 'host',
-            value: 'admin.mccapes.net',
+            value: 'dash.mccapes.net',
           },
         ],
         // rewrite it to /admin/<whatever>
         destination: '/admin/:path*',
       },
-      // (optionally) catch the bare root
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'admin.mccapes.net',
-          },
-        ],
-        destination: '/admin',
-      },
-    ]
+    ];
   },
 };
 
