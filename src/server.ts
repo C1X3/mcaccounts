@@ -156,12 +156,9 @@ async function checkPayments() {
                         data: { stock: filteredStock },
                     });
 
-                    await prisma.orderItem.create({
+                    await prisma.orderItem.update({
+                        where: { id: item.id },
                         data: {
-                            orderId: order.id,
-                            productId: item.productId,
-                            quantity: item.quantity,
-                            price: item.price,
                             codes: oldestStock,
                         }
                     });

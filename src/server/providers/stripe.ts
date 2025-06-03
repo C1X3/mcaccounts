@@ -92,11 +92,14 @@ async function getOrCreatePrice(productId: string, price: number) {
     return prices.data[0].id;
 }
 
-async function getOrCreateStripeProduct(item: { productId: string; name: string; price: number }): Promise<string> {
+async function getOrCreateStripeProduct(item: { productId: string; name: string; price: number; quantity: number }) {
     const stripeProductId = await getOrCreateProduct(item);
     const priceId = await getOrCreatePrice(stripeProductId, item.price);
 
-    return priceId;
+    return {
+        priceId,
+        quantity: item.quantity,
+    };
 }
 
 export async function createCheckoutSession(payload: CheckoutPayload): Promise<string> {
@@ -110,14 +113,7 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<s
 
         // Create or get Stripe products for each item
         const productLineItems = await Promise.all(
-            payload.items.map(async (item) => {
-                const priceId = await getOrCreateStripeProduct(item);
-
-                return {
-                    price: priceId,
-                    quantity: item.quantity,
-                };
-            })
+            payload.items.map((item) => getOrCreateStripeProduct(item))
         );
 
         // Start with product line items
