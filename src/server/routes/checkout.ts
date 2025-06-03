@@ -9,6 +9,7 @@ import { createWalletDetails as createCryptoCheckout } from '../providers/crypto
 import { WalletDetails } from '../providers/types';
 import { calculatePaymentFee } from '@/utils/fees';
 import { sendOrderCompleteEmail } from '@/utils/email';
+import { headers } from 'next/headers';
 
 export const checkoutRouter = createTRPCRouter({
     processPayment: baseProcedure
@@ -81,6 +82,10 @@ export const checkoutRouter = createTRPCRouter({
                 // Calculate payment fee based on the discounted subtotal
                 const paymentFee = calculatePaymentFee(input.paymentType, discountedSubtotal);
 
+                const reqHeaders = await headers();
+                const ip = reqHeaders.get('CF-Connecting-IP') || reqHeaders.get('X-Forwarded-For') || reqHeaders.get('X-Real-IP');
+                const userAgent = reqHeaders.get('User-Agent');
+
                 // 1. Create a pending order in the database
                 const order = await prisma.order.create({
                     data: {
@@ -95,6 +100,8 @@ export const checkoutRouter = createTRPCRouter({
                                 name: input.customerInfo.name,
                                 email: input.customerInfo.email,
                                 discord: input.customerInfo.discord,
+                                ipAddress: ip,
+                                useragent: userAgent,
                             }
                         }
                     }

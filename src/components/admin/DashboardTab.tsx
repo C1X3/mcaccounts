@@ -328,8 +328,7 @@ export default function DashboardTab() {
                     borderColor: "rgba(0,0,0,0.1)",
                     color: "var(--foreground)",
                   }}
-                  formatter={(value, name, props) => {
-                    // Custom formatter that ignores the standard format
+                  formatter={() => {
                     return null;
                   }}
                   content={({ active, payload }) => {
