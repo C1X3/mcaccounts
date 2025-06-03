@@ -6,38 +6,44 @@ import { prisma } from '@/utils/prisma';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
-async function getOrCreateStripeProduct(item: { productId: string; name: string; price: number }): Promise<string> {
-    try {
-        const dbProduct = await prisma.product.findUnique({
-            where: { id: item.productId },
-        });
+async function getOrCreateProduct(item: { productId: string; name: string; price: number }) {
+    const dbProduct = await prisma.product.findUnique({
+        where: { id: item.productId },
+    });
 
-        if (!dbProduct) {
-            throw new Error(`Product ${item.productId} not found in database`);
-        }
+    if (!dbProduct) {
+        throw new Error(`Product ${item.productId} not found in database`);
+    }
 
-        if (dbProduct.stripeId) {
-            const prices = await stripe.prices.list({
-                product: dbProduct.stripeId,
+    if (dbProduct.stripeId) {
+        const product = await stripe.products.retrieve(dbProduct.stripeId);
+        if (!product) {
+            // Create the stripe product
+            const stripeProduct = await stripe.products.create({
+                name: dbProduct.stripeProductName!,
+                description: 'For buying this service, you will be added to the MC Tournaments server where you will have an opportunity to win fun prizes and compete with peers who are also into competition. The higher priced products will give you access to bigger and larger tournaments, while the lower priced products will give you access to smaller tournaments and will have different amenities. This product will also come with complementaries such as rare accessory designs and one on one support. To receive the complimentary gift you must check your email and ensure to check the spam folder if you are unable to find it.',
+                metadata: {
+                    productId: dbProduct.id,
+                },
+            });
+
+            await prisma.product.update({
+                where: { id: item.productId },
+                data: { stripeId: stripeProduct.id },
+            });
+
+            return stripeProduct.id;
+        } else if (!product.active) {
+            await stripe.products.update(dbProduct.stripeId, {
                 active: true,
             });
 
-            const matchingPrice = prices.data.find(price =>
-                Math.abs((price.unit_amount || 0) / 100 - dbProduct.price) < 0.01
-            );
-
-            if (matchingPrice) {
-                return dbProduct.stripeId;
-            } else {
-                await stripe.prices.create({
-                    product: dbProduct.stripeId,
-                    unit_amount: Math.round(dbProduct.price * 100),
-                    currency: 'usd',
-                });
-                return dbProduct.stripeId;
-            }
+            return dbProduct.stripeId;
         }
 
+        return dbProduct.stripeId;
+    } else {
+        // Create the stripe product
         const stripeProduct = await stripe.products.create({
             name: dbProduct.stripeProductName!,
             description: 'For buying this service, you will be added to the MC Tournaments server where you will have an opportunity to win fun prizes and compete with peers who are also into competition. The higher priced products will give you access to bigger and larger tournaments, while the lower priced products will give you access to smaller tournaments and will have different amenities. This product will also come with complementaries such as rare accessory designs and one on one support. To receive the complimentary gift you must check your email and ensure to check the spam folder if you are unable to find it.',
@@ -46,41 +52,51 @@ async function getOrCreateStripeProduct(item: { productId: string; name: string;
             },
         });
 
-        await stripe.prices.create({
-            product: stripeProduct.id,
-            unit_amount: Math.round(dbProduct.price * 100),
-            currency: 'usd',
-        });
-
         await prisma.product.update({
             where: { id: item.productId },
             data: { stripeId: stripeProduct.id },
         });
 
         return stripeProduct.id;
-    } catch (error) {
-        console.error('Error creating/retrieving Stripe product:', error);
-        throw new Error(`Failed to get or create product for ${item.name}`);
     }
 }
 
-async function getProductPrice(productId: string): Promise<string> {
-    try {
-        const prices = await stripe.prices.list({
+async function getOrCreatePrice(productId: string, price: number) {
+    const prices = await stripe.prices.list({
+        product: productId,
+        active: true,
+    });
+
+    if (prices.data.length === 0) {
+        await stripe.prices.create({
             product: productId,
-            active: true,
-            limit: 1,
+            unit_amount: Math.round(price * 100),
+            currency: 'usd',
         });
-
-        if (prices.data.length === 0) {
-            throw new Error(`No active price found for product ${productId}`);
-        }
-
-        return prices.data[0].id;
-    } catch (error) {
-        console.error('Error retrieving product price:', error);
-        throw new Error(`Failed to get price for product ${productId}`);
     }
+
+    const matchingPrice = prices.data.find(price =>
+        Math.abs(Number((price.unit_amount || 0) / 100) - Number(price)) < 0.01
+    );
+
+    if (matchingPrice) {
+        return matchingPrice.id;
+    }
+
+    await stripe.prices.create({
+        product: productId,
+        unit_amount: Math.round(price * 100),
+        currency: 'usd',
+    });
+
+    return prices.data[0].id;
+}
+
+async function getOrCreateStripeProduct(item: { productId: string; name: string; price: number }): Promise<string> {
+    const stripeProductId = await getOrCreateProduct(item);
+    const priceId = await getOrCreatePrice(stripeProductId, item.price);
+
+    return priceId;
 }
 
 export async function createCheckoutSession(payload: CheckoutPayload): Promise<string> {
@@ -95,8 +111,7 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<s
         // Create or get Stripe products for each item
         const productLineItems = await Promise.all(
             payload.items.map(async (item) => {
-                const stripeProductId = await getOrCreateStripeProduct(item);
-                const priceId = await getProductPrice(stripeProductId);
+                const priceId = await getOrCreateStripeProduct(item);
 
                 return {
                     price: priceId,

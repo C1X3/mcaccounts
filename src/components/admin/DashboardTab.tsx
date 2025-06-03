@@ -397,6 +397,12 @@ export default function DashboardTab() {
           </div>
         ) : (
           <div className="p-4">
+            <div className="hidden md:grid md:grid-cols-4 gap-4 px-4 py-2 mb-2 font-medium text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+              <div>Order Info</div>
+              <div>Customer</div>
+              <div>Items</div>
+              <div className="text-right">Total</div>
+            </div>
             <div className="space-y-4">
               {recentOrders.map((order) => (
                 <div
@@ -405,62 +411,60 @@ export default function DashboardTab() {
                     cursor-pointer
                     bg-gray-50 hover:bg-gray-100
                     transition-colors duration-150
-                    rounded-lg p-4
-                    flex flex-col md:flex-row md:items-start justify-between gap-4
-                  "
+                    rounded-lg p-4"
                   onClick={() => router.push(`/admin/invoice/${order.id}`)}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="bg-[var(--primary)] bg-opacity-10 rounded-full p-2">
-                      <FaShoppingCart className="text-[var(--primary)]" />
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-[var(--primary)] bg-opacity-10 rounded-full p-2">
+                        <FaShoppingCart className="text-[var(--primary)]" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-[var(--foreground)]">
+                          Order #{order.id}
+                        </p>
+                        <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                          {format(parseISO(order.date), "MMM dd, yyyy")}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-[var(--foreground)]">
-                        Order #{order.id}
-                      </p>
-                      <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                        {format(parseISO(order.date), "MMM dd, yyyy")}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="bg-gray-200 rounded-full p-2">
-                      <FaUser className="text-gray-500" />
+                    <div className="flex items-start gap-3">
+                      <div className="bg-gray-200 rounded-full p-2">
+                        <FaUser className="text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-[var(--foreground)]">
+                          {order.customer}
+                        </p>
+                        <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                          Customer
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-[var(--foreground)]">
-                        {order.customer}
-                      </p>
-                      <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                        Customer
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="bg-gray-200 rounded-full p-2">
-                      <FaBox className="text-gray-500" />
+                    <div className="flex items-start gap-3">
+                      <div className="bg-gray-200 rounded-full p-2">
+                        <FaBox className="text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-[var(--foreground)]">
+                          {order.items}
+                        </p>
+                        <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                          Items
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-[var(--foreground)]">
-                        {order.items}
-                      </p>
-                      <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                        Items
-                      </p>
-                    </div>
-                  </div>
 
-                  <div>
-                    <p className="text-lg font-semibold text-[var(--primary)]">
-                      {formatCurrency(order.total)}
-                    </p>
+                    <div className="md:text-right">
+                      <p className="text-lg font-semibold text-[var(--primary)]">
+                        {formatCurrency(order.total)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
-
-
             </div>
           </div>
         )}
