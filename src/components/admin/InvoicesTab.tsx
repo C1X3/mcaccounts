@@ -106,7 +106,7 @@ export default function InvoicesTab() {
       case OrderStatus.PENDING:
         return "bg-yellow-100 text-yellow-800";
       case OrderStatus.DELIVERED:
-        return "bg-blue-100 text-blue-800";
+        return "bg-green-100 text-green-800";
       case OrderStatus.CANCELLED:
         return "bg-red-100 text-red-800";
       default:
@@ -338,7 +338,7 @@ export default function InvoicesTab() {
                     <span
                       className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(invoice.status)}`}
                     >
-                      {invoice.status}
+                      {invoice.status === "PAID" ? "COMPLETED" : invoice.status}
                     </span>
                   </td>
 

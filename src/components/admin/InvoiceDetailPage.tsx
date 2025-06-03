@@ -77,6 +77,21 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
     });
   };
 
+  const getStatusBadgeClass = (status: OrderStatus) => {
+    switch (status) {
+      case OrderStatus.PAID:
+        return "bg-green-100 text-green-800";
+      case OrderStatus.PENDING:
+        return "bg-yellow-100 text-yellow-800";
+      case OrderStatus.DELIVERED:
+        return "bg-green-100 text-green-800";
+      case OrderStatus.CANCELLED:
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[50vh]">
@@ -138,8 +153,8 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
 
             <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">Status</span>
-              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-                {invoice.status || "Pending"}
+              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(invoice.status)}`}>
+                {invoice.status === "PAID" ? "COMPLETED" : invoice.status}
               </span>
             </div>
 
@@ -176,6 +191,11 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
             {invoice.paymentType === PaymentType.CRYPTO && <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">Transaction ID</span>
               <span>{invoice.Wallet?.[0]?.txHash || "N/A"}</span>
+            </div>}
+
+            {invoice.paymentType === PaymentType.PAYPAL && <div className="flex justify-between border-b border-gray-200 pb-2">
+              <span className="text-gray-600">Paypal Note</span>
+              <span>{invoice.paypalNote || "N/A"}</span>
             </div>}
 
             <div className="flex justify-between pb-2">
@@ -247,8 +267,8 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
               {invoice.OrderItem.map((item) => (
                 <tr className="border-b border-gray-100" key={item.id}>
                   <td className="py-3 px-4">
-                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-                      {invoice.status}
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(invoice.status)}`}>
+                      {invoice.status === OrderStatus.PAID ? "COMPLETED" : invoice.status}
                     </span>
                   </td>
                   <td className="py-3 px-4">
