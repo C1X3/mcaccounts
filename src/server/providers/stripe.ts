@@ -104,22 +104,25 @@ async function getOrCreateStripeProduct(item: { productId: string; name: string;
 
 export async function createCheckoutSession(payload: CheckoutPayload): Promise<string> {
     try {
-        // Calculate subtotal and fee
-        const subtotal = payload.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        // Calculate subtotal, discount, fee (unchanged)
+        const subtotal = payload.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
         const discountAmount = payload.discountAmount || 0;
         const discountedSubtotal = subtotal - discountAmount;
         const paymentFee = calculatePaymentFee(PaymentType.STRIPE, discountedSubtotal);
         const feePercentageText = formatFeePercentage(PaymentType.STRIPE);
 
-        // Create or get Stripe products for each item
+        // Build product line items with “price” instead of “priceId”
         const productLineItems = await Promise.all(
-            payload.items.map((item) => getOrCreateStripeProduct(item))
+            payload.items.map(async (item) => {
+                const { priceId, quantity } = await getOrCreateStripeProduct(item);
+                return { price: priceId, quantity };
+            })
         );
 
         // Start with product line items
         const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [...productLineItems];
 
-        // Add a discount line item if applicable (using inline price_data for dynamic discounts)
+        // Discount (if any)
         if (discountAmount > 0) {
             lineItems.push({
                 price_data: {
@@ -133,7 +136,7 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<s
             });
         }
 
-        // Add a fee line item (using inline price_data for dynamic fees)
+        // Processing fee
         lineItems.push({
             price_data: {
                 currency: 'usd',
@@ -165,3 +168,4 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<s
         throw new Error('Failed to create Stripe checkout session');
     }
 }
+
