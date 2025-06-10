@@ -60,11 +60,6 @@ export const checkoutRouter = createTRPCRouter({
                                 message: 'Coupon is invalid or expired',
                             });
                         }
-                        // Update the coupon usage count
-                        await prisma.coupon.update({
-                            where: { id: coupon.id },
-                            data: { usageCount: { increment: 1 } },
-                        });
 
                         couponData = coupon;
 

@@ -194,6 +194,13 @@ async function checkPayments() {
                             image: i.product.image
                         }))
                     });
+
+                    if (order.couponUsed) {
+                        await prisma.coupon.update({
+                            where: { id: order.couponUsed },
+                            data: { usageCount: { increment: 1 } },
+                        });
+                    }
                 }
             } else if (foundTxHash && confirmations < threshold) {
                 await prisma.wallet.update({

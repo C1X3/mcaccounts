@@ -130,6 +130,13 @@ export async function POST(request: Request) {
                         image: i.product.image
                     }))
                 });
+
+                if (fullOrderDetails.couponUsed) {
+                    await prisma.coupon.update({
+                        where: { id: fullOrderDetails.couponUsed },
+                        data: { usageCount: { increment: 1 } },
+                    });
+                }
             }
 
             console.log(`PaymentIntent for ${checkoutIntent.payment_status} was successful!`);

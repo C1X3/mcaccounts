@@ -188,6 +188,11 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
               <span>-</span>
             </div>
 
+            {invoice.couponUsed && <div className="flex justify-between border-b border-gray-200 pb-2">
+              <span className="text-gray-600">Coupon</span>
+              <span>{invoice.couponUsed}</span>
+            </div>}
+
             {invoice.paymentType === PaymentType.CRYPTO && <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">Transaction ID</span>
               <span>{invoice.Wallet?.[0]?.txHash || "N/A"}</span>

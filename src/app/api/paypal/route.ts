@@ -101,6 +101,13 @@ export async function POST(request: NextRequest) {
             });
         }
 
+        if (order.couponUsed) {
+            await prisma.coupon.update({
+                where: { id: order.couponUsed },
+                data: { usageCount: { increment: 1 } },
+            });
+        }
+
         await sendOrderCompleteEmail({
             customerName: order.customer.name,
             customerEmail: order.customer.email,
