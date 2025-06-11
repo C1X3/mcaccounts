@@ -174,6 +174,7 @@ export const analyticsRouter = createTRPCRouter({
         percentChange: parseFloat(percentChange.toFixed(1)),
       };
     }),
+
   // Get orders data
   getOrders: baseProcedure
     .input(
@@ -227,6 +228,7 @@ export const analyticsRouter = createTRPCRouter({
         percentChange: parseFloat(percentChange.toFixed(1)),
       };
     }),
+
   // Get chart data
   getChartData: baseProcedure
     .input(
@@ -246,29 +248,30 @@ export const analyticsRouter = createTRPCRouter({
       const totalHours = differenceInHours(end, start);
       const totalDays = differenceInDays(end, start);
 
-      if (totalHours <= 24) {
+      if (totalHours <= 24) {         // Up to 1 day (e.g., "Last 24 hours")
         bucketType = 'hour';
-        bucketSize = 1;
-      } else if (totalHours <= 48) {
+        bucketSize = 1;               // 24 points
+      } else if (totalHours <= 48) {  // Up to 2 days (e.g., "Last 48 hours")
         bucketType = 'hour';
-        bucketSize = 2;
-      } else if (totalHours <= 168) { // 7 days = 168 hours
-        bucketType = 'hour';
-        bucketSize = 6;
-      } else if (totalDays <= 30) {
+        bucketSize = 2;               // 24 points (48/2)
+      } else if (totalDays <= 7) {    // For ranges from >2 days up to 7 days (e.g., "Last 7 days")
+        // This includes the case where totalDays is exactly 7.
         bucketType = 'day';
-        bucketSize = 1;
-      } else if (totalDays <= 90) {
+        bucketSize = 1;               // Will result in up to 7 daily points.
+        // If totalDays is 3, you get 3 points. If 7, you get 7 points.
+      } else if (totalDays <= 30) {   // For ranges >7 days up to 30 days (e.g., "Last 30 days")
+        bucketType = 'day';
+        bucketSize = 1;               // Up to 30 daily points
+      } else if (totalDays <= 90) {   // For ranges >30 days up to 90 days (e.g., "Last 90 days")
         bucketType = 'week';
-        bucketSize = 1;
-      } else {
+        bucketSize = 1;               // Up to ~13 weekly points
+      } else {                        // For ranges >90 days
         bucketType = 'month';
-        bucketSize = 1;
+        bucketSize = 1;               // Monthly points
       }
 
       function floorToBucket(d: Date): Date {
         if (bucketType === 'hour') {
-          // e.g. if bucketSize = 2, and d = 2025-06-02T15:37:00, we want 2025-06-02T14:00:00
           const flooredHour = Math.floor(d.getHours() / bucketSize) * bucketSize;
           return new Date(
             d.getFullYear(),
@@ -280,26 +283,15 @@ export const analyticsRouter = createTRPCRouter({
             0
           );
         } else if (bucketType === 'day') {
-          // simply startOfDay
           return startOfDay(d);
         } else if (bucketType === 'week') {
-          // startOfWeek (defaults to Sunday start; adjust if you want Monday start, pass { weekStartsOn: 1 })
-          const weekStart = startOfWeek(d, { weekStartsOn: 0 });
-          // if bucketSize > 1, you could floor to 2-week or 3-week boundaries, but for now bucketSize=1
-          return weekStart;
-        } else {
-          // bucketType = 'month'
-          const m = startOfMonth(d);
-          // if bucketSize > 1 (e.g., 3-month buckets), you could do:
-          // const monthGroup = Math.floor(m.getMonth() / bucketSize) * bucketSize;
-          // return new Date(m.getFullYear(), monthGroup, 1);
-          return m;
+          // startOfWeek defaults to Sunday. Use { weekStartsOn: 1 } for Monday.
+          return startOfWeek(d, { weekStartsOn: 0 });
+        } else { // 'month'
+          return startOfMonth(d);
         }
       }
 
-      //
-      // 3) Helper: given a Date, “add one bucket” of the appropriate size
-      //
       function addOneBucket(d: Date): Date {
         if (bucketType === 'hour') {
           return addHours(d, bucketSize);
@@ -307,8 +299,7 @@ export const analyticsRouter = createTRPCRouter({
           return addDays(d, bucketSize);
         } else if (bucketType === 'week') {
           return addWeeks(d, bucketSize);
-        } else {
-          // 'month'
+        } else { // 'month'
           return addMonths(d, bucketSize);
         }
       }
@@ -319,9 +310,17 @@ export const analyticsRouter = createTRPCRouter({
       const buckets: Date[] = [];
       let cursor = floorToBucket(start);
 
-      while (cursor <= end) {
+      const effectiveEnd = end; // Use the original end for comparison with cursor
+
+      while (cursor <= effectiveEnd) {
         buckets.push(cursor);
-        cursor = addOneBucket(cursor);
+        const nextCursor = addOneBucket(cursor);
+        // Safety break if bucket size is 0 or negative (should not happen with current logic)
+        if (nextCursor <= cursor) {
+          console.error("Bucket generation stalled. Check bucketSize and addOneBucket logic.", { bucketType, bucketSize, cursor, nextCursor });
+          break;
+        }
+        cursor = nextCursor;
       }
 
       //
@@ -344,43 +343,33 @@ export const analyticsRouter = createTRPCRouter({
         },
       });
 
-      // Initialize a map from bucket‐ISO (string) → { revenue, orders }
       const bucketMap: Record<string, { revenue: number; orders: number }> = {};
       for (const b of buckets) {
         bucketMap[b.toISOString()] = { revenue: 0, orders: 0 };
       }
 
-      // For each order, find its bucket start, then accumulate
       for (const order of orders) {
-        const bucketStart = floorToBucket(order.createdAt);
-        const key = bucketStart.toISOString();
-        if (!bucketMap[key]) {
-          // In case an order falls exactly on “end + epsilon” or rounding, 
-          // but normally we pre‐filled all buckets up to end inclusive.
-          bucketMap[key] = { revenue: 0, orders: 0 };
+        const bucketStartForOrder = floorToBucket(order.createdAt);
+        const key = bucketStartForOrder.toISOString();
+
+        if (bucketMap[key]) {
+          bucketMap[key].revenue += order.totalPrice;
+          bucketMap[key].orders += 1;
         }
-        bucketMap[key].revenue += order.totalPrice;
-        bucketMap[key].orders += 1;
       }
 
-      //
-      // 6) Convert bucketMap → array in chronological order, formatting labels
-      //
       const chartData = buckets.map((b) => {
-        const data = bucketMap[b.toISOString()]!;
+        // Ensure data exists, though it should due to pre-initialization
+        const data = bucketMap[b.toISOString()] || { revenue: 0, orders: 0 };
         let label: string;
 
         if (bucketType === 'hour') {
-          // e.g. “Jun 02 14:00”
           label = format(b, 'MMM dd HH:00');
         } else if (bucketType === 'day') {
-          // e.g. “Jun 02”
-          label = format(b, 'MMM dd');
+          label = format(b, 'MMM dd'); // e.g., "Jun 02"
         } else if (bucketType === 'week') {
-          // show week’s starting day: “Jun 01” (Sunday)
-          label = format(b, 'MMM dd');
-        } else {
-          // month
+          label = format(b, 'MMM dd'); // Start of week, e.g., "Jun 01"
+        } else { // 'month'
           label = format(b, 'MMM yyyy');
         }
 

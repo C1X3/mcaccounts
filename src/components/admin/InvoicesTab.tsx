@@ -361,15 +361,18 @@ export default function InvoicesTab() {
 
                   {/* Products */}
                   <td className="py-4 px-2 text-[var(--foreground)] max-w-[250px]">
-                    {invoice.OrderItem && invoice.OrderItem.length > 0 ? (
-                      <div className="max-h-[100px] overflow-y-auto">
-                        {invoice.OrderItem.map((item, index) => (
-                          <div key={index} className="mb-1">
-                            x{item.quantity} {item.product.name}
-                          </div>
-                        ))}
-                      </div>
-                    ) : "N/A"}
+                    {invoice.OrderItem && invoice.OrderItem.length > 0 ? (() => {
+                      const sortedItems = [...invoice.OrderItem].sort((a, b) => b.product.price - a.product.price);
+                      const mostExpensive = sortedItems[0];
+                      const extraCount = sortedItems.length - 1;
+
+                      return (
+                        <div>
+                          {mostExpensive.product.name}
+                          {extraCount > 0 && ` +${extraCount} more`}
+                        </div>
+                      );
+                    })() : "N/A"}
                   </td>
 
                   {/* Price */}
