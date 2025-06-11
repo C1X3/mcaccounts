@@ -250,7 +250,7 @@ export const analyticsRouter = createTRPCRouter({
 
       if (totalHours <= 24) {         // Up to 1 day (e.g., "Last 24 hours")
         bucketType = 'hour';
-        bucketSize = 1;               // 24 points
+        bucketSize = 3;               // 8 points
       } else if (totalHours <= 48) {  // Up to 2 days (e.g., "Last 48 hours")
         bucketType = 'hour';
         bucketSize = 2;               // 24 points (48/2)
