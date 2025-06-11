@@ -64,6 +64,22 @@ async function getOrCreateProduct(item: {
     return brandNew.id;
 }
 
+async function getOrCreateCoupon(code: string, percentOff: number) {
+    const coupon = await stripe.coupons.list();
+    if (coupon.data.length > 0) {
+        const matching = coupon.data.find(x => x.name === code);
+        if (matching) return matching.id;
+    }
+
+    const newCoupon = await stripe.coupons.create({
+        percent_off: percentOff,
+        duration: 'once',
+        name: code
+    });
+
+    return newCoupon.id;
+}
+
 async function getOrCreatePrice(productId: string, price: number) {
     // 1) List all active prices on this product
     const prices = await stripe.prices.list({
@@ -129,20 +145,6 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<s
         // Start with product line items
         const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [...productLineItems];
 
-        // Discount (if any)
-        if (discountAmount > 0) {
-            lineItems.push({
-                price_data: {
-                    currency: 'usd',
-                    product_data: {
-                        name: `Discount${payload.couponCode ? ` (${payload.couponCode})` : ''}`,
-                    },
-                    unit_amount: -Math.round(discountAmount * 100),
-                },
-                quantity: 1,
-            });
-        }
-
         // Processing fee
         lineItems.push({
             price_data: {
@@ -162,6 +164,9 @@ export async function createCheckoutSession(payload: CheckoutPayload): Promise<s
             customer_email: payload.customerInfo.email,
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/order/${payload.orderId}?success=true`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/order/${payload.orderId}?canceled=true`,
+            discounts: payload.couponCode && discountAmount ? [{
+                coupon: await getOrCreateCoupon(payload.couponCode, discountAmount),
+            }] : [],
             metadata: {
                 orderId: payload.orderId,
                 couponCode: payload.couponCode || '',
