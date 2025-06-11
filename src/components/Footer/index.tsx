@@ -17,7 +17,7 @@ const links = [
   },
   {
     label: "Discord",
-    href: "https://discord.gg/mccapes"
+    href: "https://discord.mccapes.net"
   }
 ];
 
@@ -87,7 +87,7 @@ const Footer = () => {
               </p>
               <p className="flex items-center">
                 <FaPlayCircle className="mr-2" />
-                <a href="https://discord.gg/mccapes">Discord</a>
+                <a href="https://discord.mccapes.net">Discord</a>
               </p>
             </address>
           </div>

@@ -84,7 +84,7 @@ const MobileNavMenu = ({ closeMenu }: { closeMenu: () => void }) => {
     { label: "Home", href: "/" },
     { label: "Shop", href: "/shop" },
     { label: "Vouches", href: "/vouches" },
-    { label: "Discord", href: "https://discord.gg/mccapes", external: true },
+    { label: "Discord", href: "https://discord.mccapes.net", external: true },
   ];
 
   const pathname = usePathname();
