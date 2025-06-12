@@ -8,6 +8,7 @@ import { OrderStatus, PaymentType } from "@generated";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import { getPaymentMethodName, getStatusBadgeClass, formatDate } from "@/utils/invoiceUtils";
 
 export default function InvoiceDetailPage({ id }: { id: string }) {
   const trpc = useTRPC();
@@ -39,32 +40,6 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
       },
     }),
   );
-
-  // Format date to more readable version
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // Get payment method display name
-  const getPaymentMethodName = (method: PaymentType) => {
-    switch (method) {
-      case PaymentType.STRIPE:
-        return "Stripe";
-      case PaymentType.PAYPAL:
-        return "PayPal";
-      case PaymentType.CRYPTO:
-        return "Crypto";
-      default:
-        return method;
-    }
-  };
-
   const handleManuallyProcessInvoice = () => {
     manuallyProcessInvoice({
       orderId: id as string,
@@ -75,21 +50,6 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
     cancelInvoice({
       orderId: id as string,
     });
-  };
-
-  const getStatusBadgeClass = (status: OrderStatus) => {
-    switch (status) {
-      case OrderStatus.PAID:
-        return "bg-green-100 text-green-800";
-      case OrderStatus.PENDING:
-        return "bg-yellow-100 text-yellow-800";
-      case OrderStatus.DELIVERED:
-        return "bg-green-100 text-green-800";
-      case OrderStatus.CANCELLED:
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
   };
 
   if (isLoading) {
@@ -205,7 +165,7 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
 
             <div className="flex justify-between pb-2">
               <span className="text-gray-600">Created At</span>
-              <span>{formatDate(invoice.createdAt)}</span>
+              <span>{formatDate(invoice.createdAt, 'long')}</span>
             </div>
           </div>
         </div>

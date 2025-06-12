@@ -2,30 +2,48 @@ import { useTRPC } from "@/server/client";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState, useMemo } from "react";
 import { FaReceipt, FaSearch, FaDownload, FaFilter, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { OrderStatus, PaymentType } from "@generated";
+import { OrderStatus } from "@generated";
 import { useRouter } from "next/navigation";
+import InvoiceFilterModal from "./InvoiceFilterModal";
+import { getPaymentMethodName, getStatusBadgeClass, formatDate } from "@/utils/invoiceUtils";
+import { exportInvoicesToCSV } from "@/utils/csvExport";
+import { useInvoiceFilters } from "@/hooks/useInvoiceFilters";
 
 export default function InvoicesTab() {
   const trpc = useTRPC();
   const router = useRouter();
+  
+  // Use the custom hook for filter management
+  const {
+    filters,
+    tempFilters,
+    setTempStatusFilter,
+    setTempPaymentFilter,
+    setTempProductFilter,
+    setTempEmailFilter,
+    setTempDiscordFilter,
+    setTempCouponFilter,
+    setTempCodeFilter,
+    setTempPaypalNoteFilter,
+    setTempInvoiceIdFilter,
+    setTempDateProcessedFilter,
+    initializeTempFilters,
+    applyFilters,
+    resetFilters,
+  } = useInvoiceFilters();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | "ALL">("ALL");
-  const [paymentFilter, setPaymentFilter] = useState<PaymentType | "ALL">("ALL");
-  const [productFilter, setProductFilter] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(15);
 
   const { data: invoices = [] } = useQuery(trpc.invoices.getAll.queryOptions());
-
   // Navigate to invoice detail page
   const navigateToInvoice = (invoiceId: string) => {
     router.push(`/admin/invoice/${invoiceId}`);
   };
-
   // Filter invoices based on all filters
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {
@@ -52,10 +70,10 @@ export default function InvoicesTab() {
 
       // 2) Status filter (updated)
       const matchesStatus = (() => {
-        if (statusFilter === "ALL") {
+        if (filters.statusFilter === "ALL") {
           return true;
         }
-        if (statusFilter === OrderStatus.DELIVERED) {
+        if (filters.statusFilter === OrderStatus.DELIVERED) {
           // when "DELIVERED" is selected, include both PAID and DELIVERED
           return (
             invoice.status === OrderStatus.DELIVERED ||
@@ -63,23 +81,60 @@ export default function InvoicesTab() {
           );
         }
         // any other status (e.g. "PENDING" or "CANCELLED") must match exactly
-        return invoice.status === statusFilter;
+        return invoice.status === filters.statusFilter;
       })();
 
       // 3) Payment‐method filter (unchanged)
       const matchesPayment =
-        paymentFilter === "ALL" || invoice.paymentType === paymentFilter;
+        filters.paymentFilter === "ALL" || invoice.paymentType === filters.paymentFilter;
 
       // 4) Product‐name filter (unchanged)
       const matchesProduct =
-        productFilter === "" ||
+        filters.productFilter === "" ||
         invoice.OrderItem?.some((item) =>
-          item.product.name.toLowerCase().includes(productFilter.toLowerCase())
+          item.product.name.toLowerCase().includes(filters.productFilter.toLowerCase())
         );
 
-      return matchesSearch && matchesStatus && matchesPayment && matchesProduct;
+      // 5) Email filter (new)
+      const matchesEmail =
+        filters.emailFilter === "" || invoice.customer?.email.toLowerCase().includes(filters.emailFilter.toLowerCase());
+
+      // 6) Discord filter (new)
+      const matchesDiscord =
+        filters.discordFilter === "" || (invoice.customer?.discord && invoice.customer.discord.toLowerCase().includes(filters.discordFilter.toLowerCase()));
+
+      // 7) Coupon filter (new)
+      const matchesCoupon =
+        filters.couponFilter === "" || invoice.couponUsed?.toLowerCase().includes(filters.couponFilter.toLowerCase());
+
+      // 8) Code filter (new)
+      const matchesCode =
+        filters.codeFilter === "" ||
+        (invoice.OrderItem &&
+          invoice.OrderItem.some((item) =>
+            Array.isArray(item.codes) &&
+            item.codes.some((code: string) =>
+              code && code.toLowerCase().includes(filters.codeFilter.toLowerCase())
+            )
+          )
+        );
+
+      // 9) PayPal note filter (new)
+      const matchesPaypalNote =
+        filters.paypalNoteFilter === "" || (invoice.paypalNote && invoice.paypalNote.toLowerCase().includes(filters.paypalNoteFilter.toLowerCase()));
+
+      // 10) Invoice ID filter (new)
+      const matchesInvoiceId =
+        filters.invoiceIdFilter === "" || invoice.id?.toLowerCase().includes(filters.invoiceIdFilter.toLowerCase());
+
+      // 11) Date processed filter (new)
+      const matchesDateProcessed = !filters.dateProcessedFilter || 
+        (invoice.updatedAt && new Date(invoice.updatedAt).toISOString().split('T')[0] === filters.dateProcessedFilter);
+
+      return matchesSearch && matchesStatus && matchesPayment && matchesProduct && 
+             matchesEmail && matchesDiscord && matchesCoupon && matchesCode && matchesPaypalNote && matchesInvoiceId && matchesDateProcessed;
     });
-  }, [invoices, searchTerm, statusFilter, paymentFilter, productFilter]);
+  }, [invoices, searchTerm, filters]);
 
   // Pagination logic
   const totalItems = filteredInvoices.length;
@@ -106,161 +161,77 @@ export default function InvoicesTab() {
   const goToPreviousPage = () => {
     goToPage(currentPage - 1);
   };
-
   const goToNextPage = () => {
     goToPage(currentPage + 1);
   };
 
   // Calculate stats
-  const totalSales = invoices.reduce((sum, invoice) =>
+  const totalSales = filteredInvoices.reduce((sum, invoice) =>
     invoice.status === OrderStatus.PAID || invoice.status === OrderStatus.DELIVERED
       ? sum + invoice.totalPrice
       : sum, 0
   );
 
-  const pendingCount = invoices.filter(
+  const pendingCount = filteredInvoices.filter(
     (invoice) => invoice.status === OrderStatus.PENDING
   ).length;
 
-  const completedCount = invoices.filter(
+  const completedCount = filteredInvoices.filter(
     (invoice) =>
       invoice.status === OrderStatus.PAID ||
       invoice.status === OrderStatus.DELIVERED
   ).length;
 
-  // Format date
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      hour12: true, // or false for 24-hour clock
-    });
+  // Initialize the temporary filters with the current filter values
+  const openFilterModal = () => {
+    initializeTempFilters();
+    setShowFilterModal(true);
   };
 
-
-  // Get payment method display name
-  const getPaymentMethodName = (method: PaymentType) => {
-    switch (method) {
-      case PaymentType.STRIPE:
-        return "Stripe";
-      case PaymentType.PAYPAL:
-        return "PayPal";
-      case PaymentType.CRYPTO:
-        return "Crypto";
-      default:
-        return method;
-    }
+  // Apply the temporary filters to the actual filters
+  const handleApplyFilters = () => {
+    applyFilters();
+    setShowFilterModal(false);
+    // Reset to first page when applying new filters
+    setCurrentPage(1);
   };
 
-  // Get status badge styling
-  const getStatusBadgeClass = (status: OrderStatus) => {
-    switch (status) {
-      case OrderStatus.PAID:
-        return "bg-green-100 text-green-800";
-      case OrderStatus.PENDING:
-        return "bg-yellow-100 text-yellow-800";
-      case OrderStatus.DELIVERED:
-        return "bg-green-100 text-green-800";
-      case OrderStatus.CANCELLED:
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  // Export to CSV
-  const exportToCSV = () => {
-    // Create CSV content
-    const headers = [
-      "Status",
-      "Product",
-      "Code(s)",
-      "",
-      "Date Sold",
-      "Payment Method",
-      "Amount",
-      "Discount",
-      "Fees",
-      "",
-      "",
-      "",
-      "Buyer Email",
-      "Buyer Discord",
-      ""
-    ].join(",");
-
-    
-  // Map product name to short name for CSV export
-  const getProductShortName = (productName: string): string => {
-    if (productName.includes("Experience Cape Code")) return "MCE";
-    if (productName.includes("Home Twitch Cape Code")) return "Home";
-    if (productName.includes("Menace TikTok Cape Code")) return "Menace";
-    if (productName.includes("Follower's TikTok Cape Code")) return "TikTok";
-    if (productName.includes("Purple Heart Cape Code")) return "Twitch";
-    return productName; // Default to original name if no match
-  };
-
-    const rows = filteredInvoices.map(invoice => {
-      // For each product in the order, create a separate row
-      if (invoice.OrderItem && invoice.OrderItem.length > 0) {
-        return invoice.OrderItem.map(item => [
-          invoice.status,
-          getProductShortName(item.product.name), // Use short name for csv export
-          `"${item.codes.join(",")}"`, // Using comma as separator inside quotes
-          "",
-          new Date(invoice.createdAt).toISOString().split("T")[0],
-          getPaymentMethodName(invoice.paymentType),
-          (item.price * item.quantity).toFixed(2),
-          "0.00", // Placeholder for discount
-          "0.00", // Placeholder for fees
-          "",
-          "",
-          "",
-          invoice.customer?.email || "N/A",
-          invoice.customer?.discord || "N/A",
-          ""
-        ].join(",")).join("\n");
-      } else {
-        // Fallback for invoices without items
-        return [
-          "N/A",
-          "N/A",
-          "",
-          new Date(invoice.createdAt).toISOString().split("T")[0],
-          getPaymentMethodName(invoice.paymentType),
-          invoice.totalPrice.toFixed(2),
-          "0.00",
-          "0.00",
-          "",
-          "",
-          "",
-          invoice.customer?.email || "N/A",
-          invoice.customer?.discord || "N/A",
-          ""
-        ].join(",");
-      }
-    }).join("\n");
-
-    const csvContent = [headers, rows].join("\n");
-
-    // Create download link
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `invoices_export_${new Date().toISOString().split("T")[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Reset and apply filters (for the reset button in modal)
+  const handleResetAndApplyFilters = () => {
+    resetFilters();
+    setShowFilterModal(false);
+    setCurrentPage(1);
   };
 
   return (
     <div className="bg-[color-mix(in_srgb,var(--background),#333_15%)] p-6 rounded-xl border border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]">
+      <InvoiceFilterModal
+        showFilterModal={showFilterModal}
+        tempStatusFilter={tempFilters.statusFilter}
+        tempEmailFilter={tempFilters.emailFilter}
+        tempProductFilter={tempFilters.productFilter}
+        tempCouponFilter={tempFilters.couponFilter}
+        tempPaymentFilter={tempFilters.paymentFilter}
+        tempDiscordFilter={tempFilters.discordFilter}
+        tempCodeFilter={tempFilters.codeFilter}
+        tempPaypalNoteFilter={tempFilters.paypalNoteFilter}
+        tempInvoiceIdFilter={tempFilters.invoiceIdFilter}
+        tempDateProcessedFilter={tempFilters.dateProcessedFilter}
+        setTempDateProcessedFilter={setTempDateProcessedFilter}
+        setTempInvoiceIdFilter={setTempInvoiceIdFilter}
+        setTempStatusFilter={setTempStatusFilter}
+        setTempEmailFilter={setTempEmailFilter}
+        setTempProductFilter={setTempProductFilter}
+        setTempCouponFilter={setTempCouponFilter}
+        setTempPaymentFilter={setTempPaymentFilter}
+        setTempDiscordFilter={setTempDiscordFilter}
+        setTempCodeFilter={setTempCodeFilter}
+        setTempPaypalNoteFilter={setTempPaypalNoteFilter}
+        onClose={() => setShowFilterModal(false)}
+        onApplyFilters={handleApplyFilters}
+        onResetAndApplyFilters={handleResetAndApplyFilters}
+      />
+
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-[var(--foreground)] flex items-center gap-2">
           <FaReceipt />
@@ -268,79 +239,37 @@ export default function InvoicesTab() {
         </h2>
 
         <div className="flex gap-3 items-center">
+          <button
+            onClick={() => exportInvoicesToCSV(filteredInvoices)}
+            className="flex items-center gap-2 p-2 rounded-lg bg-[color-mix(in_srgb,var(--primary),#fff_80%)] border border-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary),#fff_70%)] transition-colors"
+            title="Export to CSV"
+            >
+            <FaDownload className="size-4" />
+            Export to CSV
+            </button>
+
+            <button
+            onClick={openFilterModal}
+            className="flex items-center gap-2 p-2 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_5%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] text-[var(--foreground)] hover:bg-[color-mix(in_srgb,var(--background),#333_10%)] transition-colors"
+            title="Filter"
+            >
+            <FaFilter className="size-4" />
+            Filter
+            </button>
+
+
           <div className="relative">
             <input
               type="text"
-              placeholder="Search invoices..."
+              placeholder="Quick Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_5%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
             />
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[color-mix(in_srgb,var(--foreground),#888_40%)]" size={14} />
           </div>
-
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_5%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] text-[var(--foreground)] hover:bg-[color-mix(in_srgb,var(--background),#333_10%)] transition-colors"
-            title="Toggle filters"
-          >
-            <FaFilter />
-          </button>
-
-          <button
-            onClick={exportToCSV}
-            className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--primary),#fff_80%)] border border-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[color-mix(in_srgb,var(--primary),#fff_70%)] transition-colors"
-            title="Export to CSV"
-          >
-            <FaDownload />
-          </button>
         </div>
       </div>
-
-      {showFilters && (
-        <div className="mb-6 p-4 bg-[color-mix(in_srgb,var(--background),#333_5%)] rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm text-[color-mix(in_srgb,var(--foreground),#888_20%)] mb-1">Status</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as OrderStatus | "ALL")}
-                className="w-full p-2 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_10%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] text-[var(--foreground)]"
-              >
-                <option value="ALL">All Statuses</option>
-                {Object.values(OrderStatus).filter(x => x !== OrderStatus.PAID).map((status) => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm text-[color-mix(in_srgb,var(--foreground),#888_20%)] mb-1">Payment Method</label>
-              <select
-                value={paymentFilter}
-                onChange={(e) => setPaymentFilter(e.target.value as PaymentType | "ALL")}
-                className="w-full p-2 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_10%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] text-[var(--foreground)]"
-              >
-                <option value="ALL">All Payment Methods</option>
-                {Object.values(PaymentType).map((type) => (
-                  <option key={type} value={type}>{getPaymentMethodName(type)}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm text-[color-mix(in_srgb,var(--foreground),#888_20%)] mb-1">Product Name</label>
-              <input
-                type="text"
-                placeholder="Filter by product..."
-                value={productFilter}
-                onChange={(e) => setProductFilter(e.target.value)}
-                className="w-full p-2 rounded-lg bg-[color-mix(in_srgb,var(--background),#333_10%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] text-[var(--foreground)]"
-              />
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
