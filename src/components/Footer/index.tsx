@@ -57,19 +57,18 @@ const Footer = () => {
           <div>
             <h5 className="text-lg font-semibold mb-4 text-[var(--accent-light)]">
               Company
-            </h5>
-            <ul className="space-y-2">
+            </h5>            <ul className="space-y-2">
               {[
-                "Privacy Policy",
-                "Terms of Service",
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
               ].map((item) => (
-                <li key={item}>
+                <li key={item.label}>
                   <a
-                    href="#"
+                    href={item.href}
                     className="text-gray-400 hover:text-[var(--accent-light)] transition-colors flex items-center"
                   >
                     <FaChevronRight className="mr-2 text-xs" />
-                    {item}
+                    {item.label}
                   </a>
                 </li>
               ))}
@@ -83,7 +82,7 @@ const Footer = () => {
             <address className="text-gray-400 not-italic space-y-2">
               <p className="flex items-center">
                 <HiCube className="mr-2" />
-                support@mccapes.com
+                mccapesbusiness@gmail.com
               </p>
               <p className="flex items-center">
                 <FaPlayCircle className="mr-2" />

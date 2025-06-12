@@ -83,6 +83,7 @@ const MobileNavMenu = ({ closeMenu }: { closeMenu: () => void }) => {
   const menuItems = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/shop" },
+    { label: "Videos", href: "/videos" },
     { label: "Vouches", href: "/vouches" },
     { label: "Discord", href: "https://discord.mccapes.net", external: true },
   ];
