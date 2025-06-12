@@ -1,4 +1,4 @@
-import { getPaymentMethodName } from "@/utils/invoiceUtils";
+import { getPaymentMethodName, getShortenedProductName, formatDateTimeForCSV } from "@/utils/invoiceUtils";
 import { PaymentType } from "@generated";
 
 export interface Invoice {
@@ -42,47 +42,53 @@ export const exportInvoicesToCSV = (invoices: Invoice[]) => {
   ].join(",");
 
   // Map invoices to CSV rows
-  const rows = invoices.map(invoice => {
-    // For each product in the order, create a separate row
-    if (invoice.OrderItem && invoice.OrderItem.length > 0) {
-      return invoice.OrderItem.map(item => [
-        invoice.status,
-        item.product.name,
-        `"${item.codes.join(",")}"`,
-        "",
-        new Date(invoice.createdAt).toISOString().split("T")[0],
-        getPaymentMethodName(invoice.paymentType),
-        (item.price * item.quantity).toFixed(2),
-        "0.00", // Placeholder for discount
-        "0.00", // Placeholder for fees
-        "",
-        "",
-        "",
-        invoice.customer?.email || "N/A",
-        invoice.customer?.discord || "N/A",
-        ""
-      ].join(",")).join("\n");
-    } else {
-      // Fallback for invoices without items
-      return [
-        invoice.status,
-        "N/A",
-        "",
-        "",
-        new Date(invoice.createdAt).toISOString().split("T")[0],
-        getPaymentMethodName(invoice.paymentType),
-        invoice.totalPrice.toFixed(2),
-        "0.00",
-        "0.00",
-        "",
-        "",
-        "",
-        invoice.customer?.email || "N/A",
-        invoice.customer?.discord || "N/A",
-        ""
-      ].join(",");
-    }
-  }).join("\n");
+  const rows = invoices
+    .map((invoice) => {
+      // For each product in the order, create a separate row
+      if (invoice.OrderItem && invoice.OrderItem.length > 0) {
+        return invoice.OrderItem.flatMap((item) =>
+          item.codes.map((code) =>
+            [
+              invoice.status,
+              getShortenedProductName(item.product.name),
+              `"${code}"`,
+              "",
+              formatDateTimeForCSV(invoice.createdAt),
+              getPaymentMethodName(invoice.paymentType),
+              item.price.toFixed(2),
+              "0.00",
+              "0.00",
+              "",
+              "",
+              "",
+              invoice.customer?.email || "N/A",
+              invoice.customer?.discord || "N/A",
+              "",
+            ].join(",")
+          )
+        ).join("\n");
+      } else {
+        // Fallback for invoices without items
+        return [
+          invoice.status,
+          "N/A",
+          "",
+          "",
+          formatDateTimeForCSV(invoice.createdAt),
+          getPaymentMethodName(invoice.paymentType),
+          invoice.totalPrice.toFixed(2),
+          "0.00",
+          "0.00",
+          "",
+          "",
+          "",
+          invoice.customer?.email || "N/A",
+          invoice.customer?.discord || "N/A",
+          "",
+        ].join(",");
+      }
+    })
+    .join("\n");
 
   const csvContent = [headers, rows].join("\n");
 

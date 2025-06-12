@@ -14,6 +14,37 @@ export const getPaymentMethodName = (method: PaymentType): string => {
   }
 };
 
+// Utility function to format date for CSV export
+export const formatDateTimeForCSV = (date: Date): string => {
+  const d = new Date(date);
+  const month = d.getMonth() + 1; // getMonth() is 0-indexed
+  const day = d.getDate();
+  const year = d.getFullYear();
+  const hours = d.getHours();
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  const seconds = d.getSeconds().toString().padStart(2, '0');
+  
+  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+};
+
+// Utility function to get product name based on the code for CSV and Mobile UI invoices
+export const getShortenedProductName = (name: string): string => {
+  // if the name is Experience Cape Code make it MCE
+  if (name === "Experience Cape Code") {
+    return "MCE";
+  } else if (name === "Purple Heart Cape Code") {
+    return "Twitch";
+  } else if (name === "Follower's TikTok Cape Code") {
+    return "TikTok";
+  } else if (name === "Home Twitch Cape Code") {
+    return "Home";
+  } else if (name === "Menace TikTok Cape Code") {
+    return "Menace";
+  } else {
+    return name;
+  }
+};
+
 // Utility function to get status badge styling
 export const getStatusBadgeClass = (status: OrderStatus): string => {
   switch (status) {
