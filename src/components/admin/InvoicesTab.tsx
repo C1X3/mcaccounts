@@ -1,7 +1,7 @@
 import { useTRPC } from "@/server/client";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState, useMemo } from "react";
-import { FaReceipt, FaSearch, FaDownload, FaFilter } from "react-icons/fa";
+import { FaReceipt, FaSearch, FaDownload, FaFilter, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { OrderStatus, PaymentType } from "@generated";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +14,10 @@ export default function InvoicesTab() {
   const [paymentFilter, setPaymentFilter] = useState<PaymentType | "ALL">("ALL");
   const [productFilter, setProductFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
 
   const { data: invoices = [] } = useQuery(trpc.invoices.getAll.queryOptions());
 
@@ -28,9 +32,23 @@ export default function InvoicesTab() {
       // 1) Search‐term filter (unchanged)
       const matchesSearch =
         searchTerm === "" ||
-        invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        invoice.customer?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        invoice.customer?.email.toLowerCase().includes(searchTerm.toLowerCase());
+        (invoice.id && invoice.id.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (invoice.status && invoice.status.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (invoice.customer?.name && invoice.customer.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (invoice.customer?.email && invoice.customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (invoice.customer?.discord && invoice.customer.discord.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (invoice.paymentType && invoice.paymentType.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (invoice.couponUsed && invoice.couponUsed.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (invoice.OrderItem &&
+          invoice.OrderItem.some((item) =>
+        (item.product?.name && item.product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (Array.isArray(item.codes) &&
+          item.codes.some((code: string) =>
+            code && code.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        )
+          )
+        );
 
       // 2) Status filter (updated)
       const matchesStatus = (() => {
@@ -62,6 +80,36 @@ export default function InvoicesTab() {
       return matchesSearch && matchesStatus && matchesPayment && matchesProduct;
     });
   }, [invoices, searchTerm, statusFilter, paymentFilter, productFilter]);
+
+  // Pagination logic
+  const totalItems = filteredInvoices.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  
+  // Ensure current page is valid
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  if (safeCurrentPage !== currentPage) {
+    setCurrentPage(safeCurrentPage);
+  }
+  
+  // Get current page's invoices
+  const currentInvoices = useMemo(() => {
+    const startIndex = (safeCurrentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredInvoices.slice(startIndex, endIndex);
+  }, [filteredInvoices, safeCurrentPage, itemsPerPage]);
+
+  // Pagination controls
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.min(Math.max(1, page), totalPages));
+  };
+
+  const goToPreviousPage = () => {
+    goToPage(currentPage - 1);
+  };
+
+  const goToNextPage = () => {
+    goToPage(currentPage + 1);
+  };
 
   // Calculate stats
   const totalSales = invoices.reduce((sum, invoice) =>
@@ -145,13 +193,24 @@ export default function InvoicesTab() {
       ""
     ].join(",");
 
+    
+  // Map product name to short name for CSV export
+  const getProductShortName = (productName: string): string => {
+    if (productName.includes("Experience Cape Code")) return "MCE";
+    if (productName.includes("Home Twitch Cape Code")) return "Home";
+    if (productName.includes("Menace TikTok Cape Code")) return "Menace";
+    if (productName.includes("Follower's TikTok Cape Code")) return "TikTok";
+    if (productName.includes("Purple Heart Cape Code")) return "Twitch";
+    return productName; // Default to original name if no match
+  };
+
     const rows = filteredInvoices.map(invoice => {
       // For each product in the order, create a separate row
       if (invoice.OrderItem && invoice.OrderItem.length > 0) {
         return invoice.OrderItem.map(item => [
           invoice.status,
-          item.product.name,
-          invoice.OrderItem.map(x => x.codes.join(",")).join(","), // Using product ID as code
+          getProductShortName(item.product.name), // Use short name for csv export
+          `"${item.codes.join(",")}"`, // Using comma as separator inside quotes
           "",
           new Date(invoice.createdAt).toISOString().split("T")[0],
           getPaymentMethodName(invoice.paymentType),
@@ -291,7 +350,7 @@ export default function InvoicesTab() {
           </div>
           <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
             <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Invoices</h3>
-            <p className="text-2xl font-bold text-[var(--foreground)]">{invoices.length}</p>
+            <p className="text-2xl font-bold text-[var(--foreground)]">{filteredInvoices.length}</p>
           </div>
           <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
             <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Pending</h3>
@@ -332,14 +391,14 @@ export default function InvoicesTab() {
             </tr>
           </thead>
           <tbody>
-            {filteredInvoices.length === 0 ? (
+            {currentInvoices.length === 0 ? (
               <tr className="border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] text-center">
                 <td colSpan={8} className="py-12 text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
                   No invoices found
                 </td>
               </tr>
             ) : (
-              filteredInvoices.map((invoice) => (
+              currentInvoices.map((invoice) => (
                 <tr
                   key={invoice.id}
                   className="border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] hover:bg-[color-mix(in_srgb,var(--background),#333_5%)] cursor-pointer"
@@ -400,6 +459,65 @@ export default function InvoicesTab() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      <div className="mt-6 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-[var(--foreground)] text-sm">
+            Showing {Math.min(totalItems, (currentPage - 1) * itemsPerPage + 1)} - {Math.min(totalItems, currentPage * itemsPerPage)} of {totalItems} invoices
+          </span>
+          <select
+            className="ml-2 p-1 rounded-md bg-[color-mix(in_srgb,var(--background),#333_5%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] text-[var(--foreground)]"
+            value={itemsPerPage}
+            onChange={(e) => {
+              const newPageSize = Number(e.target.value);
+              setItemsPerPage(newPageSize);
+              // Adjust current page to maintain approximately the same starting item
+              const firstItemIndex = (currentPage - 1) * itemsPerPage;
+              const newPage = Math.floor(firstItemIndex / newPageSize) + 1;
+              setCurrentPage(newPage);
+            }}
+          >
+            <option value={10}>10 per page</option>
+            <option value={15}>15 per page</option>
+            <option value={25}>25 per page</option>
+            <option value={50}>50 per page</option>
+            <option value={100}>100 per page</option>
+          </select>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={goToPreviousPage}
+            disabled={currentPage <= 1}
+            className={`p-2 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background_90%)] text-[var(--foreground)] ${
+              currentPage <= 1
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-[color-mix(in_srgb,var(--background),#333_10%)] transition-colors'
+            }`}
+          >
+            <FaChevronLeft size={14} />
+          </button>
+          
+          <div className="flex items-center">
+            <span className="mx-2 text-[var(--foreground)]">
+              Page {currentPage} of {totalPages}
+            </span>
+          </div>
+          
+          <button
+            onClick={goToNextPage}
+            disabled={currentPage >= totalPages}
+            className={`p-2 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background_90%)] text-[var(--foreground)] ${
+              currentPage >= totalPages
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-[color-mix(in_srgb,var(--background),#333_10%)] transition-colors'
+            }`}
+          >
+            <FaChevronRight size={14} />
+          </button>
+        </div>
+      </div>
     </div>
   );
-} 
+}
