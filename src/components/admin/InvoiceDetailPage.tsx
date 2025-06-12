@@ -134,7 +134,7 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
             </div>            <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">Subtotal</span>
               <span>
-                ${invoice.totalPrice ? invoice.totalPrice.toFixed(2) : "129.99"}
+                ${(invoice.totalPrice - (invoice.couponDetails?.type === 'PERCENTAGE' ? (invoice.totalPrice * invoice.couponDetails.discount / 100) : invoice.couponDetails?.discount || 0)).toFixed(2) || "N/A"}
                 {invoice.couponDetails && (
                   <span className="text-green-600 ml-2">
                     ({invoice.couponDetails.type === 'PERCENTAGE' ? `-${invoice.couponDetails.discount}%` : `-$${invoice.couponDetails.discount.toFixed(2)}`})
@@ -145,12 +145,12 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
 
             <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">Gateway Fee</span>
-              <span>${invoice.paymentFee ? invoice.paymentFee.toFixed(2) : "3.20"}</span>
+              <span>${invoice.paymentFee ? invoice.paymentFee.toFixed(2) : "0.00"}</span>
             </div>
 
             <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">Total Price</span>
-              <span>${(invoice.totalPrice + invoice.paymentFee).toFixed(2)}</span>
+              <span>${(invoice.totalPrice - (invoice.couponDetails?.type === 'PERCENTAGE' ? (invoice.totalPrice * invoice.couponDetails.discount / 100) : invoice.couponDetails?.discount || 0) + invoice.paymentFee).toFixed(2)}</span>
             </div>
 
             {invoice.couponUsed && <div className="flex justify-between border-b border-gray-200 pb-2">
@@ -192,12 +192,12 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
           <div className="space-y-3">
             <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">E-mail Address</span>
-              <span>{invoice.customer?.email || "rea321052@gmail.com"}</span>
+              <span>{invoice.customer?.email || "N/A"}</span>
             </div>
 
             <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">IP Address</span>
-              <span>{invoice.customer?.ipAddress || "5.238.169.147"}</span>
+              <span>{invoice.customer?.ipAddress || "N/A"}</span>
             </div>
 
             <div className="flex justify-between border-b border-gray-200 pb-2">
@@ -210,7 +210,7 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
 
             <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">User Agent</span>
-              <span className="text-sm truncate max-w-[300px]">{invoice.customer?.useragent || "Mozilla/5.0 (Linux, Android 10, K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/24.0 Chrome/117.0.0.0 Mobile Safari/537.36"}</span>
+              <span className="text-sm truncate max-w-[300px]">{invoice.customer?.useragent || "N/A"}</span>
             </div>
 
             <div className="flex justify-between border-b border-gray-200 pb-2">

@@ -364,7 +364,7 @@ export default function InvoicesTab() {
 
                   {/* Price */}
                   <td className="py-4 px-2 text-[var(--foreground)]">
-                    ${invoice.totalPrice.toFixed(2)}
+                    ${(invoice.totalPrice - invoice.discountAmount).toFixed(2)}
                   </td>
 
                   {/* Payment Method */}

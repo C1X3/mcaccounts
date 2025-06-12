@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Reorder, AnimatePresence } from "framer-motion";
+import { Reorder } from "framer-motion";
 import { FaEdit, FaTrash, FaPlus, FaGripVertical, FaNewspaper, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -126,115 +126,145 @@ export default function ArticlesTab() {
         );
     }    return (
         <div className="bg-[color-mix(in_srgb,var(--background),#333_15%)] p-6 rounded-xl border border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]">
-            {/* Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-[var(--foreground)] flex items-center gap-2">
                     <FaNewspaper />
                     Articles
                 </h2>
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="bg-[var(--primary)] text-white px-4 py-2 rounded-lg hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center gap-2"
-                >
-                    <FaPlus />
-                    Add Article                </button>
+                <div className="flex gap-3 items-center flex-wrap">
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="flex items-center gap-2 p-2 rounded-lg bg-[var(--primary)] text-white hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors"
+                    >
+                        <FaPlus className="size-4" />
+                        <span className="hidden md:inline">Add Article</span>
+                    </button>
+
+
+                </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
-                    <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Total Articles</h3>
-                    <p className="text-2xl font-bold text-[var(--foreground)]">{orderedArticles.length}</p>
-                </div>
-                <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
-                    <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Active Articles</h3>
-                    <p className="text-2xl font-bold text-[var(--foreground)]">
-                        {orderedArticles.filter(a => a.isActive).length}
-                    </p>
-                </div>
-                <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
-                    <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Inactive Articles</h3>
-                    <p className="text-2xl font-bold text-[var(--foreground)]">
-                        {orderedArticles.filter(a => !a.isActive).length}
-                    </p>                </div>
-            </div>
-
-            {/* Article List */}
-            <div className="bg-white rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] mt-6">
-                <div className="p-4 border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
-                    <h2 className="text-lg font-semibold text-[var(--foreground)]">Articles</h2>
-                    <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                        Drag and drop to reorder articles
-                    </p>
-                </div>
-
-                {orderedArticles.length === 0 ? (
-                    <div className="p-8 text-center text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                        <FaNewspaper className="mx-auto mb-4 text-4xl" />
-                        <p>No articles yet. Create your first article!</p>
-                    </div>                ) : (                    <div className="p-4">
-                        <Reorder.Group
-                            axis="y"
-                            values={orderedArticles}
-                            onReorder={handleReorder}
-                            className="space-y-2"
-                        >
-                            <AnimatePresence>
-                                {orderedArticles.map((article) => (                                    <Reorder.Item
-                                        key={article.id}
-                                        value={article}
-                                        dragListener={!isDragDisabled}
-                                        className="bg-[color-mix(in_srgb,var(--background),#333_3%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] hover:border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] transition-colors"
-                                    ><div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3 flex-1">
-                                                <FaGripVertical
-                                                    className="text-[color-mix(in_srgb,var(--foreground),#888_50%)] cursor-move"
-                                                    onMouseDown={() => setIsDragDisabled(false)}
-                                                    onMouseUp={() => setIsDragDisabled(true)}
-                                                />
-
-                                                <div className="flex-1">
-                                                    <h3 className="font-medium text-[var(--foreground)] mb-1">
-                                                        {article.title}
-                                                    </h3>
-                                                    <div className="hidden md:flex items-center gap-4 text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                                                        <span>Product: {article.productSlug}</span>
-                                                        <span>Alignment: {article.alignment}</span>
-                                                        <span>Order: {article.order}</span>
-                                                    </div>
-                                                </div>                                                <div className="hidden md:flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => handleToggleStatus(article)}
-                                                        className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${article.isActive
-                                                            ? "bg-green-100 text-green-800"
-                                                            : "bg-red-100 text-red-800"
-                                                            }`}
-                                                    >
-                                                        {article.isActive ? <FaToggleOn /> : <FaToggleOff />}
-                                                        {article.isActive ? "Active" : "Inactive"}
-                                                    </button>
-                                                </div>
-                                            </div>                                            <div className="flex items-center gap-2 ml-4">
-                                                <button
-                                                    onClick={() => handleEditArticle(article)}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded"
-                                                >
-                                                    <FaEdit />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteArticle(article)}
-                                                    className="hidden md:block p-2 text-red-600 hover:bg-red-50 rounded"
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </Reorder.Item>
-                                ))}
-                            </AnimatePresence>
-                        </Reorder.Group>
+            <div className="mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
+                        <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Total Articles</h3>
+                        <p className="text-2xl font-bold text-[var(--foreground)]">{orderedArticles.length}</p>
                     </div>
-                )}
+                    <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
+                        <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Active Articles</h3>
+                        <p className="text-2xl font-bold text-[var(--foreground)]">
+                            {orderedArticles.filter(a => a.isActive).length}
+                        </p>
+                    </div>
+                    <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
+                        <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Inactive Articles</h3>
+                        <p className="text-2xl font-bold text-[var(--foreground)]">
+                            {orderedArticles.filter(a => !a.isActive).length}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)] mb-4">
+                Drag and drop to reorder articles
+            </div>
+
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                        <tr className="border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]">
+                            <th className="text-left py-4 px-2 text-[var(--foreground)] w-10">
+                                Order
+                            </th>
+                            <th className="text-left py-4 px-2 text-[var(--foreground)]">
+                                Title
+                            </th>
+                            <th className="text-left py-4 px-4 text-[var(--foreground)]">
+                                Product
+                            </th>
+                            <th className="text-left py-4 px-2 text-[var(--foreground)]">
+                                Status
+                            </th>
+                            <th className="text-right py-4 px-2 text-[var(--foreground)]">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <Reorder.Group
+                        as="tbody"
+                        axis="y"
+                        values={orderedArticles}
+                        onReorder={handleReorder}
+                        className="relative"
+                    >
+                        {orderedArticles.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="py-12 text-center text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                                    <FaNewspaper className="mx-auto mb-4 text-4xl" />
+                                    <p>No articles found</p>
+                                </td>
+                            </tr>
+                        ) : (
+                            orderedArticles.map((article) => (
+                                <Reorder.Item
+                                    key={article.id}
+                                    value={article}
+                                    as="tr"
+                                    dragListener={!isDragDisabled}
+                                    className="border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] hover:bg-[color-mix(in_srgb,var(--background),#333_10%)]"
+                                >
+                                    <td className="py-4 px-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)] cursor-move">
+                                        <FaGripVertical className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]" />
+                                    </td>
+                                    <td className="py-4 px-2 text-[var(--foreground)] max-w-[250px]">
+                                        <div className="font-medium">{article.title}</div>
+                                        <div className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)] truncate">
+                                            {article.description.substring(0, 75)}
+                                        </div>
+                                    </td>
+                                    <td className="py-4 px-4 text-[var(--foreground)]">
+                                        {article.productSlug}
+                                    </td>
+                                    <td className="py-4 px-2">
+                                        <button
+                                            onClick={() => handleToggleStatus(article)}
+                                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                                                article.isActive
+                                                    ? "bg-green-100 text-green-800"
+                                                    : "bg-red-100 text-red-800"
+                                            }`}
+                                        >
+                                            {article.isActive ? <FaToggleOn /> : <FaToggleOff />}
+                                            {article.isActive ? "Active" : "Inactive"}
+                                        </button>
+                                    </td>
+                                    <td className="py-4 px-2">
+                                        <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={() => handleEditArticle(article)}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                title="Edit Article"
+                                                onMouseEnter={() => setIsDragDisabled(true)}
+                                                onMouseLeave={() => setIsDragDisabled(false)}
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteArticle(article)}
+                                                className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                title="Delete Article"
+                                                onMouseEnter={() => setIsDragDisabled(true)}
+                                                onMouseLeave={() => setIsDragDisabled(false)}
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </Reorder.Item>
+                            ))
+                        )}
+                    </Reorder.Group>
+                </table>
             </div>
 
             {/* Modals */}

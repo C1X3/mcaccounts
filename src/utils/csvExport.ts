@@ -6,6 +6,8 @@ export interface Invoice {
   status: string;
   createdAt: Date;
   totalPrice: number;
+  paymentFee: number;
+  discountAmount: number;
   paymentType: PaymentType;
   customer?: {
     email?: string | null;
@@ -46,39 +48,63 @@ export const exportInvoicesToCSV = (invoices: Invoice[]) => {
     .map((invoice) => {
       // For each product in the order, create a separate row
       if (invoice.OrderItem && invoice.OrderItem.length > 0) {
-        return invoice.OrderItem.flatMap((item) =>
-          item.codes.map((code) =>
-            [
-              invoice.status,
-              getShortenedProductName(item.product.name),
-              `"${code}"`,
-              "",
-              formatDateTimeForCSV(invoice.createdAt),
-              getPaymentMethodName(invoice.paymentType),
-              item.price.toFixed(2),
-              "0.00",
-              "0.00",
-              "",
-              "",
-              "",
-              invoice.customer?.email || "N/A",
-              invoice.customer?.discord || "N/A",
-              "",
-            ].join(",")
-          )
-        ).join("\n");
+        return invoice.OrderItem.flatMap((item) => {
+          // If the item has codes, create one row per code
+          if (item.codes && item.codes.length > 0) {
+            return item.codes.map((code) =>
+              [
+                invoice.status,
+                getShortenedProductName(item.product.name),
+                `"${code}"`,
+                "",
+                formatDateTimeForCSV(invoice.createdAt),
+                getPaymentMethodName(invoice.paymentType),
+                item.price.toFixed(2),
+                invoice.discountAmount.toFixed(2),
+                invoice.paymentFee.toFixed(2),
+                "",
+                "",
+                "",
+                invoice.customer?.email || "N/A",
+                invoice.customer?.discord || "N/A",
+                "",
+              ].join(",")
+            );
+          } else {
+            // If no codes (e.g., cancelled), create one row for the item
+            return [
+              [
+                invoice.status,
+                getShortenedProductName(item.product.name),
+                "N/A",
+                "",
+                formatDateTimeForCSV(invoice.createdAt),
+                getPaymentMethodName(invoice.paymentType),
+                item.price.toFixed(2),
+                invoice.discountAmount.toFixed(2),
+                invoice.paymentFee.toFixed(2),
+                "",
+                "",
+                "",
+                invoice.customer?.email || "N/A",
+                invoice.customer?.discord || "N/A",
+                "",
+              ].join(",")
+            ];
+          }
+        }).join("\n");
       } else {
         // Fallback for invoices without items
         return [
           invoice.status,
           "N/A",
-          "",
+          "N/A",
           "",
           formatDateTimeForCSV(invoice.createdAt),
           getPaymentMethodName(invoice.paymentType),
           invoice.totalPrice.toFixed(2),
-          "0.00",
-          "0.00",
+          invoice.discountAmount.toFixed(2),
+          invoice.paymentFee.toFixed(2),
           "",
           "",
           "",
