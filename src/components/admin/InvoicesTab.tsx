@@ -8,6 +8,7 @@ import InvoiceFilterModal from "./InvoiceFilterModal";
 import { getPaymentMethodName, getStatusBadgeClass, formatDate } from "@/utils/invoiceUtils";
 import { exportInvoicesToCSV } from "@/utils/csvExport";
 import { useInvoiceFilters } from "@/hooks/useInvoiceFilters";
+import { formatPrice } from "@/utils/formatting";
 
 export default function InvoicesTab() {
   const trpc = useTRPC();
@@ -274,7 +275,7 @@ export default function InvoicesTab() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
             <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Total Sales</h3>
-            <p className="text-2xl font-bold text-[var(--foreground)]">${totalSales.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-[var(--foreground)]">{formatPrice(totalSales)}</p>
           </div>
           <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
             <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm mb-1">Invoices</h3>
@@ -364,7 +365,7 @@ export default function InvoicesTab() {
 
                   {/* Price */}
                   <td className="py-4 px-2 text-[var(--foreground)]">
-                    ${(invoice.totalPrice - invoice.discountAmount).toFixed(2)}
+                    {formatPrice(invoice.totalPrice - invoice.discountAmount)}
                   </td>
 
                   {/* Payment Method */}
