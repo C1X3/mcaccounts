@@ -169,7 +169,7 @@ export default function InvoicesTab() {
   // Calculate stats
   const totalSales = filteredInvoices.reduce((sum, invoice) =>
     invoice.status === OrderStatus.PAID || invoice.status === OrderStatus.DELIVERED
-      ? sum + invoice.totalPrice
+      ? sum + (invoice.totalPrice - invoice.discountAmount)
       : sum, 0
   );
 
