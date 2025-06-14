@@ -124,7 +124,7 @@ export async function POST(request: Request) {
 
                 if (fullOrderDetails.couponUsed) {
                     await prisma.coupon.update({
-                        where: { id: fullOrderDetails.couponUsed },
+                        where: { code: fullOrderDetails.couponUsed },
                         data: { usageCount: { increment: 1 } },
                     });
                 }

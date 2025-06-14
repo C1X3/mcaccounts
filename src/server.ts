@@ -193,7 +193,7 @@ async function checkPayments() {
 
                     if (order.couponUsed) {
                         await prisma.coupon.update({
-                            where: { id: order.couponUsed },
+                            where: { code: order.couponUsed },
                             data: { usageCount: { increment: 1 } },
                         });
                     }

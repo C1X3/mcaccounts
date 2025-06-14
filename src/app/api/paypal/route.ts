@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
 
         if (order.couponUsed) {
             await prisma.coupon.update({
-                where: { id: order.couponUsed },
+                where: { code: order.couponUsed },
                 data: { usageCount: { increment: 1 } },
             });
         }
