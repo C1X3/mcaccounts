@@ -1,6 +1,6 @@
 import { useTRPC } from "@/server/client";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -26,7 +26,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CryptoType } from "@generated";
+import { CryptoType, PaymentType } from "@generated";
+import { PaymentMethodLogo } from "@/components/PaymentMethodLogo";
 
 // Define time range type
 type TimeRangeType =
@@ -106,6 +107,25 @@ export default function DashboardTab() {
     })
   );
 
+  // Add the new analytics queries
+  const latestCompletedOrdersData = useQuery(
+    trpc.analytics.getLatestCompletedOrders.queryOptions({
+      limit: 5,
+    })
+  );
+
+  const topProductsData = useQuery(
+    trpc.analytics.getTopProducts.queryOptions({
+      limit: 5,
+    })
+  );
+
+  const topCustomersData = useQuery(
+    trpc.analytics.getTopCustomers.queryOptions({
+      limit: 5,
+    })
+  );
+
   // Add the mutation for sending crypto balance
   const sendBalanceMutation = useMutation(trpc.crypto.sendBalance.mutationOptions({
     onSuccess: () => {
@@ -123,13 +143,19 @@ export default function DashboardTab() {
   const orders = ordersData.data || { count: 0, percentChange: 0 };
   const chartData = chartDataQuery.data || [];
   const recentOrders = recentOrdersData.data || [];
+  const latestCompletedOrders = latestCompletedOrdersData.data || [];
+  const topProducts = topProductsData.data || [];
+  const topCustomers = topCustomersData.data || [];
 
   // Error handling for API requests
   const hasErrors =
     revenueData.error ||
     ordersData.error ||
     chartDataQuery.error ||
-    recentOrdersData.error;
+    recentOrdersData.error ||
+    latestCompletedOrdersData.error ||
+    topProductsData.error ||
+    topCustomersData.error;
   const errorMessage = hasErrors
     ? "There was an error loading the dashboard data. Please try again later."
     : "";
@@ -420,108 +446,297 @@ export default function DashboardTab() {
           </div>
         )}{" "}
       </div>
-      {/* Recent Orders */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-[color-mix(in_srgb,var(--foreground),var,--background_85%)]">
-          <h3 className="text-lg font-semibold text-[var(--foreground)] flex items-center gap-2">
+      {/* Latest Completed Orders */}
+      <div className="mb-4 md:mb-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
             <FaShoppingCart />
             Latest Completed Orders
           </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto text-start">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Products</span>
+                  </th>
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Price</span>
+                  </th>
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Payment Method</span>
+                  </th>
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">E-mail</span>
+                  </th>
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Time</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 whitespace-nowrap">
+                {latestCompletedOrdersData.isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-32"></div></td>
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-40"></div></td>
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
+                    </tr>
+                  ))
+                ) : latestCompletedOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-3 py-12 text-center text-gray-500">
+                      No completed orders found
+                    </td>
+                  </tr>
+                ) : (
+                  latestCompletedOrders.map((order) => (
+                    <tr key={order.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/admin/invoice/${order.id}`)}>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="text-sm text-[var(--foreground)]">{order.products}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-md">
+                                  {formatCurrency(order.price)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="inline-flex items-center gap-2 text-sm text-[var(--foreground)]">
+                                  <PaymentMethodLogo 
+                                    paymentType={order.paymentType} 
+                                    cryptoType={order.cryptoType || undefined}
+                                    size="sm"
+                                  />
+                                  {order.paymentType === PaymentType.CRYPTO && order.cryptoType ? 
+                                    `${order.cryptoType.charAt(0).toUpperCase() + order.cryptoType.slice(1).toLowerCase()}` :
+                                    order.paymentType === PaymentType.STRIPE ? 'Stripe' :
+                                    order.paymentType === PaymentType.PAYPAL ? 'PayPal' :
+                                    order.paymentType
+                                  }
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="text-sm text-[var(--foreground)]">{order.email}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="text-sm text-[var(--foreground)]">
+                                  {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Products and Top Customers */}
+      <div className="mb-4 grid grid-cols-1 gap-6 md:mb-6 md:grid-cols-2">
+        {/* Top 5 Products */}
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
+            <FaBox />
+            Top 5 Products
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto text-start">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Product</span>
+                  </th>
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Total Sales</span>
+                  </th>
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Total Revenue</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 whitespace-nowrap">
+                {topProductsData.isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-48"></div></td>
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-12"></div></td>
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
+                    </tr>
+                  ))
+                ) : topProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-3 py-12 text-center text-gray-500">
+                      No product data found
+                    </td>
+                  </tr>
+                ) : (
+                  topProducts.map((product, index) => (
+                    <tr key={`${product.name}-${index}`}>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="text-sm text-[var(--foreground)]">
+                                  {product.name}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="text-sm text-[var(--foreground)]">{product.totalSales}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="text-sm text-[var(--foreground)]">{formatCurrency(product.totalRevenue)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        {recentOrdersData.isLoading ? (
-          <div className="p-6 space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-gray-50 rounded-lg p-4 animate-pulse flex flex-col md:flex-row md:items-center gap-4">
-                <div className="h-4 bg-gray-200 rounded w-16"></div>
-                <div className="h-4 bg-gray-200 rounded w-32"></div>
-                <div className="h-4 bg-gray-200 rounded w-24"></div>
-                <div className="h-4 bg-gray-200 rounded w-10"></div>
-                <div className="h-4 bg-gray-200 rounded w-20"></div>
-              </div>
-            ))}
+        {/* Top 5 Customers */}
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
+            <FaUser />
+            Top 5 Customers
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto text-start">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Customer Email</span>
+                  </th>
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Total Orders</span>
+                  </th>
+                  <th className="px-3 py-3.5 text-left">
+                    <span className="text-sm font-semibold text-[var(--foreground)]">Total Spent</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 whitespace-nowrap">
+                {topCustomersData.isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-40"></div></td>
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-12"></div></td>
+                      <td className="px-3 py-4"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
+                    </tr>
+                  ))
+                ) : topCustomers.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-3 py-12 text-center text-gray-500">
+                      No customer data found
+                    </td>
+                  </tr>
+                ) : (
+                  topCustomers.map((customer) => (
+                    <tr key={customer.email}>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="text-sm text-[var(--foreground)]">{customer.email}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="text-sm text-[var(--foreground)]">{customer.totalOrders}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-0 first-of-type:ps-1 last-of-type:pe-1 sm:first-of-type:ps-3 sm:last-of-type:pe-3">
+                        <div className="grid w-full gap-y-1 px-3 py-4">
+                          <div className="flex">
+                            <div className="flex max-w-max">
+                              <div className="inline-flex items-center gap-1.5">
+                                <span className="text-sm text-[var(--foreground)]">{formatCurrency(customer.totalSpent)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        ) : recentOrders.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-              <FaShoppingCart className="text-gray-400 text-xl" />
-            </div>
-            <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] font-medium">No recent orders found</p>
-          </div>
-        ) : (
-          <div className="p-4">
-            <div className="hidden md:grid md:grid-cols-4 gap-4 px-4 py-2 mb-2 font-medium text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-              <div>Order Info</div>
-              <div>Customer</div>
-              <div>Items</div>
-              <div className="text-right">Total</div>
-            </div>
-            <div className="space-y-4">
-              {recentOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="
-                    cursor-pointer
-                    bg-gray-50 hover:bg-gray-100
-                    transition-colors duration-150
-                    rounded-lg p-4"
-                  onClick={() => router.push(`/admin/invoice/${order.id}`)}
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-[var(--primary)] bg-opacity-10 rounded-full p-2">
-                        <FaShoppingCart className="text-[var(--primary)]" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-[var(--foreground)]">
-                          <span className="md:hidden">Order #{order.id.substring(0, 15)}...</span>
-                          <span className="hidden md:inline">Order #{order.id}</span>
-                        </p>
-                        <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                          {format(parseISO(order.date), "MMM dd, yyyy")}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="bg-gray-200 rounded-full p-2">
-                        <FaUser className="text-gray-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-[var(--foreground)]">
-                          {order.customer}
-                        </p>
-                        <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                          Customer
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="bg-gray-200 rounded-full p-2">
-                        <FaBox className="text-gray-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-[var(--foreground)]">
-                          {order.items}
-                        </p>
-                        <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                          Items
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="md:text-right">
-                      <p className="text-lg font-semibold text-[var(--primary)]">
-                        {formatCurrency(order.total)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Crypto Balances Section */}

@@ -430,4 +430,182 @@ export const analyticsRouter = createTRPCRouter({
         items: order.OrderItem.reduce((sum, item) => sum + item.quantity, 0),
       }));
     }),
+
+  // Get top 5 products by sales volume
+  getTopProducts: baseProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(20).default(5),
+      })
+    )
+    .query(async ({ input }) => {
+      const { limit } = input;
+
+      // Get all order items with product info from completed orders
+      const orderItems = await prisma.orderItem.findMany({
+        where: {
+          order: {
+            OR: [
+              { status: OrderStatus.PAID },
+              { status: OrderStatus.DELIVERED },
+            ],
+          },
+        },
+        include: {
+          product: {
+            select: {
+              name: true,
+              stripeProductName: true,
+            },
+          },
+          order: {
+            select: {
+              totalPrice: true,
+            },
+          },
+        },
+      });
+
+      // Group by product and calculate totals
+      const productStats = orderItems.reduce((acc, item) => {
+        const productKey = item.productId;
+        const productName = item.product.name;
+        const stripeProductName = item.product.stripeProductName || item.product.name;
+        
+        if (!acc[productKey]) {
+          acc[productKey] = {
+            id: productKey,
+            name: productName,
+            stripeProductName: stripeProductName,
+            totalSales: 0,
+            totalRevenue: 0,
+          };
+        }
+        
+        acc[productKey].totalSales += item.quantity;
+        acc[productKey].totalRevenue += item.price * item.quantity;
+        
+        return acc;
+      }, {} as Record<string, { id: string; name: string; stripeProductName: string; totalSales: number; totalRevenue: number }>);
+
+      // Convert to array and sort by total revenue
+      return Object.values(productStats)
+        .sort((a, b) => b.totalRevenue - a.totalRevenue)
+        .slice(0, limit)
+        .map(product => ({
+          name: product.name,
+          stripeProductName: product.stripeProductName,
+          totalSales: product.totalSales,
+          totalRevenue: product.totalRevenue,
+        }));
+    }),
+
+  // Get top 5 customers by total spending
+  getTopCustomers: baseProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(20).default(5),
+      })
+    )
+    .query(async ({ input }) => {
+      const { limit } = input;
+
+      // Get all completed orders with customer info
+      const orders = await prisma.order.findMany({
+        where: {
+          OR: [
+            { status: OrderStatus.PAID },
+            { status: OrderStatus.DELIVERED },
+          ],
+        },
+        include: {
+          customer: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      });
+
+      // Group by customer email and calculate totals
+      const customerStats = orders.reduce((acc, order) => {
+        const customerEmail = order.customer.email;
+        
+        if (!acc[customerEmail]) {
+          acc[customerEmail] = {
+            email: customerEmail,
+            totalOrders: 0,
+            totalSpent: 0,
+          };
+        }
+        
+        acc[customerEmail].totalOrders += 1;
+        acc[customerEmail].totalSpent += order.totalPrice;
+        
+        return acc;
+      }, {} as Record<string, { email: string; totalOrders: number; totalSpent: number }>);
+
+      // Convert to array and sort by total spent
+      return Object.values(customerStats)
+        .sort((a, b) => b.totalSpent - a.totalSpent)
+        .slice(0, limit);
+    }),
+
+  // Get recent completed orders with detailed information for the table
+  getLatestCompletedOrders: baseProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(50).default(10),
+      })
+    )
+    .query(async ({ input }) => {
+      const { limit } = input;
+
+      // Get recent completed orders from database with all needed info
+      const recentOrders = await prisma.order.findMany({
+        where: {
+          OR: [
+            { status: OrderStatus.PAID },
+            { status: OrderStatus.DELIVERED },
+          ],
+        },
+        include: {
+          customer: {
+            select: {
+              email: true,
+            },
+          },
+          OrderItem: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+          Wallet: {
+            select: {
+              chain: true,
+            },
+            take: 1,
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: limit,
+      });
+
+      // Map to the format expected by the UI
+      return recentOrders.map((order) => ({
+        id: order.id,
+        products: order.OrderItem.map(item => item.product.name).join(", "),
+        price: order.totalPrice,
+        paymentType: order.paymentType,
+        cryptoType: order.Wallet.length > 0 ? order.Wallet[0].chain : null,
+        email: order.customer.email,
+        createdAt: order.createdAt.toISOString(),
+      }));
+    }),
 });
