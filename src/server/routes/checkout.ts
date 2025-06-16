@@ -307,13 +307,48 @@ export const checkoutRouter = createTRPCRouter({
         )
         .mutation(async ({ input }) => {
             try {
+                // Get the current order status
+                const currentOrder = await prisma.order.findUnique({
+                    where: { id: input.orderId },
+                    select: { status: true }
+                });
+
+                if (!currentOrder) {
+                    throw new TRPCError({
+                        code: 'NOT_FOUND',
+                        message: 'Order not found',
+                    });
+                }
+
+                // Only allow specific legitimate transitions
+                const allowedTransitions: Record<string, string[]> = {
+                    'PENDING': [], // PENDING can't be set by this endpoint (only webhooks)
+                    'PAID': ['DELIVERED'], // PAID orders can only be marked as DELIVERED
+                    'DELIVERED': [], // DELIVERED is final state
+                    'CANCELLED': [], // CANCELLED is final state
+                };
+
+                const currentStatus = currentOrder.status;
+                const newStatus = input.status;
+
+                // Check if the transition is allowed
+                if (!allowedTransitions[currentStatus]?.includes(newStatus)) {
+                    throw new TRPCError({
+                        code: 'BAD_REQUEST',
+                        message: `Invalid status transition from ${currentStatus} to ${newStatus}`,
+                    });
+                }
+
                 const order = await prisma.order.update({
                     where: { id: input.orderId },
                     data: { status: input.status },
                 });
 
                 return { success: true, order };
-            } catch {
+            } catch (error) {
+                if (error instanceof TRPCError) {
+                    throw error;
+                }
                 throw new TRPCError({
                     code: 'INTERNAL_SERVER_ERROR',
                     message: 'Failed to update order status',

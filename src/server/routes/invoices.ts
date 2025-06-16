@@ -95,7 +95,7 @@ export const invoicesRouter = createTRPCRouter({
       });
     }),
 
-  getInvoicesByCustomer: baseProcedure
+  getInvoicesByCustomer: adminProcedure
     .input(z.object({ email: z.string().email() }))
     .query(async ({ input }) => {
       return await prisma.order.findMany({

@@ -16,7 +16,7 @@ import {
   addMonths,
 } from "date-fns";
 import { z } from "zod";
-import { baseProcedure, createTRPCRouter } from "../init";
+import { adminProcedure, createTRPCRouter } from "../init";
 import { OrderStatus } from "@generated";
 
 // Define time range schema
@@ -102,7 +102,7 @@ const getDateRange = (
 
 export const analyticsRouter = createTRPCRouter({
   // Get revenue data
-  getRevenue: baseProcedure
+  getRevenue: adminProcedure
     .input(
       z.object({
         timeRange: timeRangeSchema,
@@ -176,7 +176,7 @@ export const analyticsRouter = createTRPCRouter({
     }),
 
   // Get orders data
-  getOrders: baseProcedure
+  getOrders: adminProcedure
     .input(
       z.object({
         timeRange: timeRangeSchema,
@@ -230,7 +230,7 @@ export const analyticsRouter = createTRPCRouter({
     }),
 
   // Get chart data
-  getChartData: baseProcedure
+  getChartData: adminProcedure
     .input(
       z.object({
         timeRange: timeRangeSchema,
@@ -383,7 +383,7 @@ export const analyticsRouter = createTRPCRouter({
       return chartData;
     }),
   // Get recent completed orders
-  getRecentOrders: baseProcedure
+  getRecentOrders: adminProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(50).default(5),
@@ -432,7 +432,7 @@ export const analyticsRouter = createTRPCRouter({
     }),
 
   // Get top 5 products by sales volume
-  getTopProducts: baseProcedure
+  getTopProducts: adminProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(20).default(5),
@@ -501,7 +501,7 @@ export const analyticsRouter = createTRPCRouter({
     }),
 
   // Get top 5 customers by total spending
-  getTopCustomers: baseProcedure
+  getTopCustomers: adminProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(20).default(5),
@@ -552,7 +552,7 @@ export const analyticsRouter = createTRPCRouter({
     }),
 
   // Get recent completed orders with detailed information for the table
-  getLatestCompletedOrders: baseProcedure
+  getLatestCompletedOrders: adminProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(50).default(10),
@@ -576,7 +576,8 @@ export const analyticsRouter = createTRPCRouter({
             },
           },
           OrderItem: {
-            include: {
+            select: {
+              price: true,
               product: {
                 select: {
                   name: true,
@@ -598,14 +599,25 @@ export const analyticsRouter = createTRPCRouter({
       });
 
       // Map to the format expected by the UI
-      return recentOrders.map((order) => ({
-        id: order.id,
-        products: order.OrderItem.map(item => item.product.name).join(", "),
-        price: order.totalPrice,
-        paymentType: order.paymentType,
-        cryptoType: order.Wallet.length > 0 ? order.Wallet[0].chain : null,
-        email: order.customer.email,
-        createdAt: order.createdAt.toISOString(),
-      }));
+      return recentOrders.map((order) => {
+        // Sort order items by price (most expensive first)
+        const sortedItems = [...order.OrderItem].sort((a, b) => b.price - a.price);
+        const mostExpensive = sortedItems[0];
+        const additionalCount = sortedItems.length - 1;
+        
+        return {
+          id: order.id,
+          products: mostExpensive 
+            ? (additionalCount > 0 
+                ? `${mostExpensive.product.name} +${additionalCount} more`
+                : mostExpensive.product.name)
+            : "N/A",
+          price: order.totalPrice,
+          paymentType: order.paymentType,
+          cryptoType: order.Wallet.length > 0 ? order.Wallet[0].chain : null,
+          email: order.customer.email,
+          createdAt: order.createdAt.toISOString(),
+        };
+      });
     }),
 });

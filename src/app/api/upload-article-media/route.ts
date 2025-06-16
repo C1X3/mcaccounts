@@ -2,10 +2,22 @@ import { s3Client, S3_BUCKET_NAME, S3_ENDPOINT } from "@/utils/minio";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { createId } from "@paralleldrive/cuid2";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+    // Check authentication
+    const cooks = await cookies();
+    const authenticatedCookie = cooks.get("authenticated");
+    const isAuthenticated = authenticatedCookie?.value === process.env.ADMIN_PASSWORD;
+
+    if (!isAuthenticated) {
+        return NextResponse.json(
+            { error: "Unauthorized" },
+            { status: 401 }
+        );
+    }
     // Validate content-type (must be video)
     const contentType = request.headers.get("content-type") || "";
     const isVideo = contentType.startsWith("video/");

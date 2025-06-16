@@ -67,64 +67,75 @@ export default function DashboardTab() {
   const router = useRouter();
   const trpc = useTRPC();
 
-  const cryptoBalances = useQuery(
-    trpc.crypto.getCryptoBalance.queryOptions()
-  );
+  // Check authentication first
+  const authQuery = useQuery(trpc.auth.isAuthenticated.queryOptions());
 
-  const revenueData = useQuery(
-    trpc.analytics.getRevenue.queryOptions({
+  const cryptoBalances = useQuery({
+    ...trpc.crypto.getCryptoBalance.queryOptions(),
+    enabled: authQuery.data === true,
+  });
+
+  const revenueData = useQuery({
+    ...trpc.analytics.getRevenue.queryOptions({
       timeRange,
       customRange:
         timeRange === "custom"
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
-    })
-  );
+    }),
+    enabled: authQuery.data === true,
+  });
 
-  const ordersData = useQuery(
-    trpc.analytics.getOrders.queryOptions({
+  const ordersData = useQuery({
+    ...trpc.analytics.getOrders.queryOptions({
       timeRange,
       customRange:
         timeRange === "custom"
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
-    })
-  );
+    }),
+    enabled: authQuery.data === true,
+  });
 
-  const chartDataQuery = useQuery(
-    trpc.analytics.getChartData.queryOptions({
+  const chartDataQuery = useQuery({
+    ...trpc.analytics.getChartData.queryOptions({
       timeRange,
       customRange:
         timeRange === "custom"
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
-    })
-  );
+    }),
+    enabled: authQuery.data === true,
+  });
 
-  const recentOrdersData = useQuery(
-    trpc.analytics.getRecentOrders.queryOptions({
+  const recentOrdersData = useQuery({
+    ...trpc.analytics.getRecentOrders.queryOptions({
       limit: 5,
-    })
-  );
+    }),
+    enabled: authQuery.data === true,
+  });
 
   // Add the new analytics queries
-  const latestCompletedOrdersData = useQuery(
-    trpc.analytics.getLatestCompletedOrders.queryOptions({
+  const latestCompletedOrdersData = useQuery({
+    ...trpc.analytics.getLatestCompletedOrders.queryOptions({
       limit: 5,
-    })
-  );
+    }),
+    enabled: authQuery.data === true,
+  });
 
-  const topProductsData = useQuery(
-    trpc.analytics.getTopProducts.queryOptions({
+  const topProductsData = useQuery({
+    ...trpc.analytics.getTopProducts.queryOptions({
       limit: 5,
-    })
-  );
+    }),
+    enabled: authQuery.data === true,
+  });
 
-  const topCustomersData = useQuery(
-    trpc.analytics.getTopCustomers.queryOptions({
+  const topCustomersData = useQuery({
+    ...trpc.analytics.getTopCustomers.queryOptions({
       limit: 5,
-    })
-  );
+    }),
+    enabled: authQuery.data === true,
+  });
 
   // Add the mutation for sending crypto balance
   const sendBalanceMutation = useMutation(trpc.crypto.sendBalance.mutationOptions({
