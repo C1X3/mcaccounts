@@ -123,7 +123,7 @@ export default function ProductsTab() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-[var(--foreground)] flex items-center gap-2">
             <FaBox />
-            Products Management
+            Products
           </h2>
           <button
             onClick={() => setIsAddModalOpen(true)}

@@ -137,7 +137,7 @@ export default function ArticlesTab() {
                         className="flex items-center gap-2 p-2 rounded-lg bg-[var(--primary)] text-white hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors"
                     >
                         <FaPlus className="size-4" />
-                        <span className="hidden md:inline">Add Article</span>
+                        <span>Add Article</span>
                     </button>
 
 
