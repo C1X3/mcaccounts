@@ -466,7 +466,7 @@ export default function DashboardTab() {
           <div className="overflow-x-auto">
             <table className="w-full table-auto text-start">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-gray-200 bg-gray-100">
                   <th className="px-3 py-3.5 text-left">
                     <span className="text-sm font-semibold text-[var(--foreground)]">Products</span>
                   </th>
@@ -595,7 +595,7 @@ export default function DashboardTab() {
           <div className="overflow-x-auto">
             <table className="w-full table-auto text-start">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-gray-200 bg-gray-100">
                   <th className="px-3 py-3.5 text-left">
                     <span className="text-sm font-semibold text-[var(--foreground)]">Product</span>
                   </th>
@@ -677,7 +677,7 @@ export default function DashboardTab() {
           <div className="overflow-x-auto">
             <table className="w-full table-auto text-start">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-gray-200 bg-gray-100">
                   <th className="px-3 py-3.5 text-left">
                     <span className="text-sm font-semibold text-[var(--foreground)]">Customer Email</span>
                   </th>
