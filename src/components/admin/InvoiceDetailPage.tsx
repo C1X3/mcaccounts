@@ -3,7 +3,7 @@
 import { useTRPC } from "@/server/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { FaBox, FaUser, FaShoppingBag, FaFileInvoice, FaTrash, FaTimes, FaExclamationTriangle } from "react-icons/fa";
+import { FaBox, FaUser, FaShoppingBag, FaFileInvoice, FaTrash, FaTimes, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
 import { OrderStatus, PaymentType } from "@generated";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -15,6 +15,7 @@ import { PaymentMethodLogo } from "@/components/PaymentMethodLogo";
 export default function InvoiceDetailPage({ id }: { id: string }) {
   const trpc = useTRPC();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const { data: invoice, isLoading, error } = useQuery(
     trpc.invoices.getById.queryOptions({
@@ -43,6 +44,19 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
       },
     }),
   );
+
+  const { mutate: deleteInvoice, isPending: isDeleting } = useMutation(
+    trpc.invoices.delete.mutationOptions({
+      onSuccess: () => {
+        toast.success("Invoice permanently deleted");
+        // Redirect to invoices list after deletion
+        window.location.href = "/admin?tab=invoices";
+      },
+      onError: () => {
+        toast.error("Failed to delete invoice");
+      },
+    }),
+  );
   const handleManuallyProcessInvoice = () => {
     setShowConfirmModal(true);
   };
@@ -56,6 +70,17 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
 
   const handleCancelInvoice = () => {
     cancelInvoice({
+      orderId: id as string,
+    });
+  };
+
+  const handleDeleteInvoice = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteInvoice = () => {
+    setShowDeleteModal(false);
+    deleteInvoice({
       orderId: id as string,
     });
   };
@@ -99,9 +124,15 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
               className="px-4 py-2 flex items-center gap-2 bg-transparent border border-gray-700 rounded-md hover:bg-gray-400 transition-colors"
               onClick={handleCancelInvoice}
             >
-              <FaTrash /> {isCancelling ? "Cancelling..." : "Cancel Invoice"}
+              <FaTimesCircle /> {isCancelling ? "Cancelling..." : "Cancel Invoice"}
             </button>
           </div>}
+          <button
+            className="px-4 py-2 flex items-center gap-2 bg-transparent border border-red-600 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors"
+            onClick={handleDeleteInvoice}
+          >
+            <FaTrash /> {isDeleting ? "Deleting..." : "Delete Invoice"}
+          </button>
         </div>
       </div>
 
@@ -338,6 +369,78 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
                 className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isManuallyProcessing ? "Processing..." : "Confirm Processing"}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-[var(--background)] rounded-2xl p-6 max-w-md w-full shadow-2xl"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-full">
+                  <FaTrash className="text-red-600" size={20} />
+                </div>
+                <h2 className="text-xl font-bold text-[var(--foreground)]">
+                  Delete Invoice
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="p-2 rounded-full hover:bg-[color-mix(in_srgb,var(--background),#333_15%)] transition-colors"
+              >
+                <FaTimes size={16} className="text-[var(--foreground)]" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="mb-6">
+              <p className="text-[var(--foreground)] mb-4">
+                Are you sure you want to permanently delete this invoice?
+              </p>
+              
+              <div className="bg-[color-mix(in_srgb,var(--background),#333_10%)] rounded-lg p-4 mb-4">
+                <p className="text-sm text-[var(--foreground)] font-medium mb-2">This action will:</p>
+                <ul className="text-sm text-[var(--foreground)] space-y-1">
+                  <li>• Permanently delete the invoice #{invoice.id.substring(0, 8)}</li>
+                  <li>• Remove all associated order items</li>
+                  <li>• Remove all invoice data from the system</li>
+                </ul>
+              </div>
+
+              <p className="text-sm text-red-400 font-medium">
+                ⚠️ THIS ACTION CANNOT BE UNDONE. The invoice will be permanently lost.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-[var(--foreground)] hover:bg-[color-mix(in_srgb,var(--background),#333_10%)] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteInvoice}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isDeleting ? "Deleting..." : "Delete Permanently"}
               </button>
             </div>
           </motion.div>

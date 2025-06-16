@@ -142,10 +142,20 @@ export async function POST(request: Request) {
 
             const orderId = expiryIntent.metadata.orderId;
 
-            await prisma.order.update({
-                where: { id: orderId },
+            // Use updateMany to avoid errors if the order was already deleted
+            const result = await prisma.order.updateMany({
+                where: { 
+                    id: orderId,
+                    status: OrderStatus.PENDING // Only update if still pending
+                },
                 data: { status: OrderStatus.CANCELLED },
             });
+
+            if (result.count === 0) {
+                console.log(`Order ${orderId} not found or already processed - skipping cancellation`);
+            } else {
+                console.log(`Order ${orderId} cancelled due to Stripe session expiry`);
+            }
 
             break;
         default:
