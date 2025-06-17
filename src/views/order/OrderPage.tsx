@@ -106,11 +106,8 @@ const ConfirmationProgress = ({ confirmations, cryptoType }: { confirmations: nu
 
 const OrderPage = ({ id }: { id: string }) => {
     const trpc = useTRPC();
-    const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-    const { data: order, isLoading: isOrderLoading, refetch: refetchOrder } = useQuery(trpc.checkout.getOrderStatus.queryOptions(
-        { orderId: id },
-
+    const [copiedCode, setCopiedCode] = useState<string | null>(null);    const { data: order, isLoading: isOrderLoading, refetch: refetchOrder } = useQuery(trpc.checkout.getOrderStatus.queryOptions(
+        { orderId: id }
     ));
 
     const { data: walletDetails, isLoading: walletLoading } = useQuery(
@@ -119,10 +116,8 @@ const OrderPage = ({ id }: { id: string }) => {
 
     const markAsDelivered = useMutation(trpc.checkout.updateOrderStatus.mutationOptions());
     const isWalletLoading = useMemo(() => order?.paymentType === PaymentType.CRYPTO && walletLoading, [order, walletLoading]);
-    const isLoading = useMemo(() => isOrderLoading || isWalletLoading, [isOrderLoading, isWalletLoading]);
-
-    const finalPrice = useMemo(() => {
-        if (!order) return 0;
+    const isLoading = useMemo(() => isOrderLoading || isWalletLoading, [isOrderLoading, isWalletLoading]);    const finalPrice = useMemo(() => {
+        if (!order || !order.totalPrice) return 0;
         return order.totalPrice - (order.discountAmount ?? 0) + (order.paymentFee ?? 0);
     }, [order]);
 
@@ -452,21 +447,21 @@ const OrderPage = ({ id }: { id: string }) => {
                                                 {order.paypalNote && (
                                                     <div>
                                                         <label className="text-sm font-medium text-[var(--foreground)] mb-1 block">Payment Note</label>
-                                                        <div className="flex items-center">
-                                                            <div className="bg-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] p-3 rounded-md overflow-hidden text-ellipsis font-mono text-sm flex-grow mr-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] transition-colors"
-                                                                onClick={() => copyToClipboard(order.paypalNote)}
-                                                                title="Click to copy note"
-                                                            >
-                                                                {order.paypalNote}
-                                                            </div>
-                                                            <motion.button
-                                                                whileHover={{ scale: 1.05 }}
-                                                                whileTap={{ scale: 0.95 }}
-                                                                onClick={() => copyToClipboard(order.paypalNote)}
-                                                                className="p-2 bg-[#0d9ad1]/10 text-[#0d9ad1] rounded-md"
-                                                            >
-                                                                {copiedCode === order.paypalNote ? <FaCheck /> : <FaCopy />}
-                                                            </motion.button>
+                                                        <div className="flex items-center">                                                        <div
+                                                            className="bg-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] p-3 rounded-md overflow-hidden text-ellipsis font-mono text-sm flex-grow mr-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] transition-colors"
+                                                            onClick={() => copyToClipboard(order.paypalNote || '')}
+                                                            title="Click to copy note"
+                                                        >
+                                                            {order.paypalNote}
+                                                        </div>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => copyToClipboard(order.paypalNote || '')}
+                                                            className="p-2 bg-[#0d9ad1]/10 text-[#0d9ad1] rounded-md"
+                                                        >
+                                                            {copiedCode === order.paypalNote ? <FaCheck /> : <FaCopy />}
+                                                        </motion.button>
                                                         </div>
                                                     </div>
                                                 )}
@@ -497,23 +492,21 @@ const OrderPage = ({ id }: { id: string }) => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="md:col-span-2 space-y-6">
                             {/* Order Status Card */}
-                            <div className="bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#333_10%)] to-[var(--background)] rounded-xl p-6 border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] shadow-md backdrop-blur-sm">
-                                <div className="flex justify-between items-center flex-wrap gap-4">
+                            <div className="bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#333_10%)] to-[var(--background)] rounded-xl p-6 border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] shadow-md backdrop-blur-sm">                                <div className="flex justify-between items-center flex-wrap gap-4">
                                     <div>
-                                        <h2 className="text-xl font-bold text-[var(--foreground)]">Order #{order.id.substring(0, 8)}</h2>
+                                        <h2 className="text-xl font-bold text-[var(--foreground)]">Order #{(order.orderId || '').substring(0, 8)}</h2>
                                         <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm">
-                                            Placed on {new Date(order.createdAt).toLocaleDateString()}
+                                            {order.createdAt && `Placed on ${new Date(order.createdAt).toLocaleDateString()}`}
                                         </p>
                                     </div>
-                                    <StatusBadge status={order.status} />
+                                    {order.status && <StatusBadge status={order.status} />}
                                 </div>
-                            </div>
-
-                            {/* Order Items */}
+                            </div>                            {/* Order Items */}
                             <div className="bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#333_10%)] to-[var(--background)] rounded-xl p-6 border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] shadow-md backdrop-blur-sm">
                                 <h2 className="text-xl font-bold mb-4 text-[var(--foreground)]">Items</h2>
+                                
                                 <div className="space-y-4">
-                                    {order.OrderItem.map((item) => (
+                                    {order.OrderItem?.map((item) => (
                                         <div key={item.product.id} className="flex flex-col py-3 border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] last:border-0">
                                             <div className="flex items-center space-x-4">
                                                 <div className="w-16 h-16 relative bg-gradient-to-br from-[color-mix(in_srgb,var(--primary),#fff_95%)] to-[color-mix(in_srgb,var(--secondary),#fff_95%)] rounded-lg overflow-hidden flex-shrink-0">
@@ -540,22 +533,22 @@ const OrderPage = ({ id }: { id: string }) => {
 
                                             {/* Show codes only for PAID or DELIVERED orders */}
                                             {(order.status === "PAID" || order.status === "DELIVERED") &&
-                                                ('codes' in item && Array.isArray(item.codes) && item.codes.length > 0) && (
+                                                item.codes && Array.isArray(item.codes) && item.codes.length > 0 && (
                                                     <div className="mt-4 w-full">
                                                         <div className="flex justify-between items-center mb-2">
-                                                            <h4 className="font-medium text-sm text-[var(--foreground)]">Your Code{(item.codes as string[]).length > 1 ? "s" : ""}:</h4>
+                                                            <h4 className="font-medium text-sm text-[var(--foreground)]">Your Code{item.codes.length > 1 ? "s" : ""}:</h4>
                                                             <motion.button
                                                                 whileHover={{ scale: 1.05 }}
                                                                 whileTap={{ scale: 0.95 }}
-                                                                onClick={() => copyToClipboard((item.codes as string[]).join('\n'))}
+                                                                onClick={() => copyToClipboard(item.codes.join('\n'))}
                                                                 className="flex items-center px-2 py-1 text-xs bg-[color-mix(in_srgb,var(--primary),#fff_90%)] text-[var(--primary)] rounded"
                                                             >
-                                                                {copiedCode === (item.codes as string[]).join('\n') ? "Copied All!" : "Copy All"}
+                                                                {copiedCode === item.codes.join('\n') ? "Copied All!" : "Copy All"}
                                                                 <FaCopy className="ml-1" />
                                                             </motion.button>
                                                         </div>
                                                         <div className="bg-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] rounded-md p-3 overflow-x-auto">
-                                                            {(item.codes as string[]).map((code: string, index: number) => (
+                                                            {item.codes.map((code: string, index: number) => (
                                                                 <div key={index} className="flex items-center justify-between mb-2 last:mb-0">
                                                                     <pre
                                                                         className="text-sm font-mono text-[var(--foreground)] cursor-pointer flex-grow px-2 py-1 rounded hover:bg-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]"
@@ -582,6 +575,23 @@ const OrderPage = ({ id }: { id: string }) => {
                                                         </div>
                                                     </div>
                                                 )}
+
+                                            {/* Show message when codes are not available due to payment status */}
+                                            {(order.status === "PENDING" || order.status === "CANCELLED") && (
+                                                <div className="mt-4 w-full">
+                                                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-md p-3">
+                                                        <div className="flex items-center">
+                                                            <FaClock className="text-yellow-500 mr-2" />
+                                                            <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                                                                {order.status === "PENDING" 
+                                                                    ? "Your code will be available once payment is confirmed."
+                                                                    : "This order has been cancelled. Codes are not available."
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -593,26 +603,24 @@ const OrderPage = ({ id }: { id: string }) => {
                             <div className="bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#333_10%)] to-[var(--background)] rounded-xl p-6 border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] shadow-md backdrop-blur-sm sticky top-6">
                                 <h2 className="text-xl font-bold mb-4 text-[var(--foreground)] pb-2 border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
                                     Order Summary
-                                </h2>
-
-                                <div className="space-y-4 mb-6">
+                                </h2>                                <div className="space-y-4 mb-6">
                                     <div className="flex justify-between">
                                         <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Subtotal</span>
-                                        <span className="text-[var(--foreground)]">{formatPrice(order.totalPrice)}</span>
+                                        <span className="text-[var(--foreground)]">{order.totalPrice ? formatPrice(order.totalPrice) : 'N/A'}</span>
                                     </div>
 
                                     {order.couponUsed && (
                                         <div className="flex justify-between text-green-500">
                                             <span>Discount ({order.couponUsed})</span>
-                                            <span>-{formatPrice(order.discountAmount)}</span>
+                                            <span>-{order.discountAmount ? formatPrice(order.discountAmount) : 'N/A'}</span>
                                         </div>
                                     )}
 
                                     <div className="flex justify-between">
                                         <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                                            Payment Fee ({formatFeePercentage(order.paymentType)})
+                                            Payment Fee {order.paymentType ? `(${formatFeePercentage(order.paymentType)})` : ''}
                                         </span>
-                                        <span className="text-[var(--foreground)]">{formatPrice(order.paymentFee)}</span>
+                                        <span className="text-[var(--foreground)]">{order.paymentFee ? formatPrice(order.paymentFee) : 'N/A'}</span>
                                     </div>
 
                                     <div className="pt-3 mt-3 border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
@@ -621,23 +629,23 @@ const OrderPage = ({ id }: { id: string }) => {
                                             <span className="font-bold text-[var(--primary)]">{formatPrice(finalPrice)}</span>
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* Payment Method */}
+                                </div>                                {/* Payment Method */}
                                 <div className="pt-3 border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
                                     <p className="text-sm font-medium text-[var(--foreground)] mb-2">Payment Method</p>
                                     <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                                        {order.paymentType.replace('_', ' ')}
+                                        {order.paymentType ? order.paymentType.replace('_', ' ') : 'N/A'}
                                         {order.paymentType === "CRYPTO" && walletDetails?.chain && ` (${walletDetails.chain})`}
                                     </p>
                                 </div>
 
                                 {/* Customer Info */}
-                                <div className="pt-3 mt-3 border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
-                                    <p className="text-sm font-medium text-[var(--foreground)] mb-2">Customer</p>
-                                    <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">{order.customer.name}</p>
-                                    <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">{order.customer.email}</p>
-                                </div>
+                                {order.customer && (
+                                    <div className="pt-3 mt-3 border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
+                                        <p className="text-sm font-medium text-[var(--foreground)] mb-2">Customer</p>
+                                        <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">{order.customer.name}</p>
+                                        <p className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">{order.customer.email}</p>
+                                    </div>
+                                )}
 
                                 <Link href="/shop">
                                     <motion.button

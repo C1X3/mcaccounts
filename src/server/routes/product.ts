@@ -42,12 +42,10 @@ export const productRouter = createTRPCRouter({
                 ...rest,
                 stock: stockArr.length,
             }));
-        }),
-
-    getBySlugForArticle: baseProcedure
+        }),    getBySlugForArticle: baseProcedure
         .input(z.object({ slug: z.string() }))
         .mutation(async ({ input }) => {
-            return await prisma.product.findUnique({
+            const product = await prisma.product.findUnique({
                 where: { slug: input.slug },
                 select: {
                     id: true,
@@ -71,6 +69,14 @@ export const productRouter = createTRPCRouter({
                     updatedAt: true,
                 },
             });
+
+            if (!product) return null;
+
+            const { stock: stockArr, ...rest } = product;
+            return {
+                ...rest,
+                stock: stockArr.length,
+            };
         }),
 
     getAllWithStock: adminProcedure.query(async () => {
