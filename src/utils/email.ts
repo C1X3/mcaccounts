@@ -1,6 +1,7 @@
 import { render } from "@react-email/render";
 import nodemailer from "nodemailer";
 import { OrderCompleteTemplate } from "@/views/emails/order-complete";
+import { CodeReplacedTemplate } from "@/views/emails/code-replaced";
 import { PaymentType } from "@generated";
 
 // Configure the email transport
@@ -86,6 +87,39 @@ export async function sendOrderCompleteEmail({
   return sendEmail({
     to: customerEmail,
     subject: `Order Complete: Your purchase is ready!`,
+    html,
+  });
+}
+
+export async function sendCodeReplacedEmail({
+  customerName,
+  customerEmail,
+  orderId,
+  productName,
+  oldCode,
+  newCode,
+}: {
+  customerName: string;
+  customerEmail: string;
+  orderId: string;
+  productName: string;
+  oldCode: string;
+  newCode: string;
+}) {
+  const html = await render(
+    CodeReplacedTemplate({
+      customerName,
+      customerEmail,
+      orderId,
+      productName,
+      oldCode,
+      newCode,
+    })
+  );
+
+  return sendEmail({
+    to: customerEmail,
+    subject: `Code Replacement Notice - Order #${orderId.substring(0, 8)}`,
     html,
   });
 }

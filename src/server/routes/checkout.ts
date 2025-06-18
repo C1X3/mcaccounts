@@ -575,4 +575,98 @@ export const checkoutRouter = createTRPCRouter({
 
             return { success: true, order };
         }),
+
+    replaceCode: adminProcedure
+        .input(z.object({ 
+            itemId: z.string(),
+            codeIndex: z.number(),
+        }))
+        .mutation(async ({ input }) => {
+            const orderItem = await prisma.orderItem.findUnique({
+                where: { id: input.itemId },
+                include: { 
+                    product: true,
+                    order: {
+                        include: {
+                            customer: true
+                        }
+                    }
+                }
+            });
+
+            if (!orderItem) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: 'Order item not found',
+                });
+            }
+
+            if (input.codeIndex >= orderItem.codes.length) {
+                throw new TRPCError({
+                    code: 'BAD_REQUEST',
+                    message: 'Invalid code index',
+                });
+            }
+
+            // Get the next available code from stock
+            if (orderItem.product.stock.length === 0) {
+                throw new TRPCError({
+                    code: 'BAD_REQUEST',
+                    message: 'No codes available in stock for this product',
+                });
+            }
+
+            const newCode = orderItem.product.stock[0]; // Take the first available code
+            const oldCode = orderItem.codes[input.codeIndex];
+
+            // Create a new array with the replaced code
+            const updatedCodes = [...orderItem.codes];
+            updatedCodes[input.codeIndex] = newCode;
+
+            // Update the order item with the new codes array and remove code from product stock
+            await prisma.$transaction([
+                // Update the order item with new codes
+                prisma.orderItem.update({
+                    where: { id: input.itemId },
+                    data: { codes: updatedCodes }
+                }),
+                // Remove the code from product stock
+                prisma.product.update({
+                    where: { id: orderItem.product.id },
+                    data: {
+                        stock: {
+                            set: orderItem.product.stock.slice(1) // Remove the first code
+                        }
+                    }
+                })
+            ]);
+
+            // Send email notification to customer
+            if (orderItem.order.customer?.email) {
+                const { sendCodeReplacedEmail } = await import("@/utils/email");
+                
+                try {
+                    await sendCodeReplacedEmail({
+                        customerName: orderItem.order.customer.name || "Customer",
+                        customerEmail: orderItem.order.customer.email,
+                        orderId: orderItem.order.id,
+                        productName: orderItem.product.name,
+                        oldCode,
+                        newCode: newCode,
+                    });
+                } catch (emailError) {
+                    console.error("Failed to send code replacement email:", emailError);
+                    // Don't throw error - code replacement should still succeed even if email fails
+                }
+            }
+
+            // NOTE: We do NOT add the old code back to stock as codes cannot be resold once sent to users
+
+            return { 
+                success: true, 
+                oldCode, 
+                newCode: newCode,
+                updatedCodes 
+            };
+        }),
 });

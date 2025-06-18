@@ -2,8 +2,8 @@
 
 import { useTRPC } from "@/server/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
-import { FaBox, FaUser, FaShoppingBag, FaFileInvoice, FaTrash, FaTimes, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaBox, FaUser, FaShoppingBag, FaFileInvoice, FaTrash, FaTimes, FaTimesCircle, FaExclamationTriangle, FaEye, FaCopy, FaSync, FaExternalLinkAlt } from "react-icons/fa";
 import { OrderStatus, PaymentType } from "@generated";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -16,12 +16,59 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
   const trpc = useTRPC();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<{
+    id: string;
+    codes: string[];
+    product: {
+      name: string;
+    };
+  } | null>(null);
+  const [pendingReplaceCode, setPendingReplaceCode] = useState<{
+    itemId: string;
+    codeIndex: number;
+    oldCode: string;
+  } | null>(null);
+  const [countryInfo, setCountryInfo] = useState<{ code: string; name: string } | null>(null);
 
   const { data: invoice, isLoading, error } = useQuery(
     trpc.invoices.getById.queryOptions({
       orderId: id as string,
     }),
   );
+
+  // Fetch country information based on IP address
+  useEffect(() => {
+    if (invoice?.customer?.ipAddress) {
+      // Check if IP is localhost/private
+      const ip = invoice.customer.ipAddress;
+      if (ip === '127.0.0.1' || ip === 'localhost' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.16.')) {
+        setCountryInfo({ code: 'UNAVAIL', name: 'Unavailable (Local IP)' });
+        return;
+      }
+      
+      fetch(`https://ipapi.co/${invoice.customer.ipAddress}/json/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.country_code && data.country_name) {
+            setCountryInfo({
+              code: data.country_code,
+              name: data.country_name
+            });
+          } else {
+            // If the API returns data but no country info
+            setCountryInfo({ code: 'UNAVAIL', name: 'Unavailable' });
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching country info:", err);
+          setCountryInfo({ code: 'UNAVAIL', name: 'Unavailable' });
+        });
+    } else {
+      // No IP address provided
+      setCountryInfo({ code: 'UNAVAIL', name: 'Unavailable (No IP)' });
+    }
+  }, [invoice?.customer?.ipAddress]);
 
   const { mutate: manuallyProcessInvoice, isPending: isManuallyProcessing } = useMutation(
     trpc.checkout.manuallyProcessInvoice.mutationOptions({
@@ -57,6 +104,57 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
       },
     }),
   );
+
+  const { mutate: replaceCode, isPending: isReplacingCode } = useMutation(
+    trpc.checkout.replaceCode.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(`Code replaced: ${data.oldCode} → ${data.newCode}`);
+        // Refresh the invoice data
+        window.location.reload();
+      },
+      onError: () => {
+        toast.error("Failed to replace code");
+      },
+    }),
+  );
+
+  const handleReplaceCode = async (itemId: string, codeIndex: number, oldCode: string) => {
+    // Check if this is the same code that's pending confirmation
+    if (pendingReplaceCode && 
+        pendingReplaceCode.itemId === itemId && 
+        pendingReplaceCode.codeIndex === codeIndex &&
+        pendingReplaceCode.oldCode === oldCode) {
+      // This is the second click, perform the actual replacement
+      replaceCode({
+        itemId,
+        codeIndex,
+      });
+      // Reset the pending state
+      setPendingReplaceCode(null);
+    } else {
+      // First click, set as pending and wait for confirmation
+      setPendingReplaceCode({
+        itemId,
+        codeIndex,
+        oldCode
+      });
+      
+      // Automatically clear the pending state after 5 seconds
+      setTimeout(() => {
+        setPendingReplaceCode((current) => {
+          // Only clear if it's still the same pending replacement
+          if (current && 
+              current.itemId === itemId && 
+              current.codeIndex === codeIndex &&
+              current.oldCode === oldCode) {
+            return null;
+          }
+          return current;
+        });
+      }, 5000);
+    }
+  };
+
   const handleManuallyProcessInvoice = () => {
     setShowConfirmModal(true);
   };
@@ -113,12 +211,14 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
           <p className="text-gray-400 text-sm">View the details of the invoice.</p>
         </div>
         <div className="flex gap-2">
-          <button
-            className="px-4 py-2 flex items-center gap-2 bg-transparent border border-gray-700 rounded-md hover:bg-gray-400 transition-colors"
-            onClick={handleManuallyProcessInvoice}
-          >
-            <FaFileInvoice /> {isManuallyProcessing ? "Processing..." : "Manually Process Invoice"}
-          </button>
+          {(invoice.status === OrderStatus.PENDING || invoice.status === OrderStatus.CANCELLED) && (
+            <button
+              className="px-4 py-2 flex items-center gap-2 bg-transparent border border-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+              onClick={handleManuallyProcessInvoice}
+            >
+              <FaFileInvoice /> {isManuallyProcessing ? "Processing..." : "Manually Process Invoice"}
+            </button>
+          )}
           {invoice.status == OrderStatus.PENDING && <div className="flex gap-2">
             <button
               className="px-4 py-2 flex items-center gap-2 bg-transparent border border-gray-700 rounded-md hover:bg-gray-400 transition-colors"
@@ -127,6 +227,12 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
               <FaTimesCircle /> {isCancelling ? "Cancelling..." : "Cancel Invoice"}
             </button>
           </div>}
+          <Link
+            href={`/order/${invoice.id}`}
+            className="px-4 py-2 flex items-center gap-2 bg-transparent border border-blue-600 text-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition-colors"
+          >
+            <FaEye /> View Invoice
+          </Link>
           <button
             className="px-4 py-2 flex items-center gap-2 bg-transparent border border-red-600 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors"
             onClick={handleDeleteInvoice}
@@ -241,8 +347,22 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
             <div className="flex justify-between border-b border-gray-200 pb-2">
               <span className="text-gray-600">Country</span>
               <div className="flex items-center gap-2">
-                <span>{"US"}</span>
-                <Image src="https://flagsapi.com/US/flat/64.png" alt="US" className="w-6 h-4" width={64} height={64} />
+                {countryInfo ? (
+                  <>
+                    <span>{countryInfo.name}</span>
+                    {countryInfo.code !== 'UNAVAIL' && (
+                      <Image 
+                        src={`https://flagsapi.com/${countryInfo.code}/flat/64.png`} 
+                        alt={countryInfo.code} 
+                        className="w-6 h-4" 
+                        width={64} 
+                        height={64} 
+                      />
+                    )}
+                  </>
+                ) : (
+                  <span className="text-gray-500">Unavailable</span>
+                )}
               </div>
             </div>
 
@@ -274,8 +394,7 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
                 <th className="text-left py-3 px-4 font-medium text-gray-600">Product & Variant</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-600">Quantity</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-600">Total Price</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Code(s)</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600">Delivered</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-600">Deliverable</th>
               </tr>
             </thead>
             <tbody>
@@ -294,8 +413,22 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
                   </td>
                   <td className="py-3 px-4">{item.quantity}</td>
                   <td className="py-3 px-4">${(item.price * item.quantity).toFixed(2)}</td>
-                  <td className="py-3 px-4">{item.codes.join(", ")}</td>
-                  <td className="py-3 px-4">{invoice.status === OrderStatus.DELIVERED ? "Yes" : "No"}</td>
+                  <td className="py-3 px-4">
+                    {item.codes && item.codes.length > 0 ? (
+                      <button
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setShowCodeModal(true);
+                        }}
+                        className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        <FaExternalLinkAlt size={12} />
+                        View
+                      </button>
+                    ) : (
+                      <span className="text-gray-500 text-xs px-3 py-1 bg-gray-200 rounded-md">None</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -446,6 +579,107 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
           </motion.div>
         </motion.div>
       )}
+
+      {/* Code Modal */}
+      {showCodeModal && selectedItem && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-[var(--background)] rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[80vh] flex flex-col"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-full">
+                  <FaEye className="text-blue-600" size={20} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-[var(--foreground)]">
+                    Product Codes
+                  </h2>
+                  <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                    {selectedItem.product.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowCodeModal(false);
+                  setPendingReplaceCode(null);
+                }}
+                className="p-2 rounded-full hover:bg-[color-mix(in_srgb,var(--background),#333_15%)] transition-colors"
+              >
+                <FaTimes size={16} className="text-[var(--foreground)]" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-hidden">
+              <div className="space-y-3 overflow-y-auto max-h-[40vh] pr-2">
+                {selectedItem.codes && selectedItem.codes.map((code: string, index: number) => (
+                  <div key={index} className="bg-[color-mix(in_srgb,var(--background),#333_15%)] rounded-lg p-4 border border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="bg-[color-mix(in_srgb,var(--background),#333_25%)] rounded-md border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)] px-3 py-2 flex-1">
+                        <p className="text-sm font-mono text-[var(--foreground)] break-all select-all">
+                          {code}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(code);
+                            toast.success("Code copied to clipboard!");
+                          }}
+                          className="px-3 py-2 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 transition-colors flex items-center gap-2"
+                        >
+                          <FaCopy size={12} />
+                          Copy
+                        </button>
+                        <button 
+                          onClick={() => handleReplaceCode(selectedItem.id, index, code)}
+                          disabled={isReplacingCode}
+                          className={`px-3 py-2 text-white text-xs rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 
+                            ${pendingReplaceCode && 
+                             pendingReplaceCode.itemId === selectedItem.id && 
+                             pendingReplaceCode.codeIndex === index &&
+                             pendingReplaceCode.oldCode === code 
+                              ? 'bg-red-600 hover:bg-red-700' 
+                              : 'bg-blue-600 hover:bg-blue-700'}`}
+                        >
+                          <FaSync className={`${isReplacingCode ? 'animate-spin' : ''}`} size={12} />
+                          {isReplacingCode 
+                            ? 'Replacing...' 
+                            : (pendingReplaceCode && 
+                               pendingReplaceCode.itemId === selectedItem.id && 
+                               pendingReplaceCode.codeIndex === index &&
+                               pendingReplaceCode.oldCode === code)
+                              ? 'Confirm replace' 
+                              : 'Replace'
+                          }
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-6 pt-4 border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
+              <p className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                Status: {invoice.status === OrderStatus.DELIVERED ? "Delivered" : "Not Delivered"}
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
-} 
+}
