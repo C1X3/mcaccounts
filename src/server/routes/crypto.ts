@@ -6,6 +6,7 @@ import { getTotalBitcoinBalance } from '../crypto/getBalance/bitcoin';
 import { getTotalLitecoinBalance } from '../crypto/getBalance/litecoin';
 import { getTotalEthereumBalance } from '../crypto/getBalance/ethereum';
 import { sendSolanaBalance } from '../crypto/sendBalance/solana';
+import { sendBitcoin } from '../crypto/sendBalance/bitcoin';
 
 export const cryptoRouter = createTRPCRouter({
     getCryptoBalance: adminProcedure
@@ -28,9 +29,11 @@ export const cryptoRouter = createTRPCRouter({
                 return sendSolanaBalance(input.destination);
             }
 
-            // else if (input.type === CryptoType.BITCOIN) {
-            //     return sendBitcoinBalance(input.destination);
-            // } else if (input.type === CryptoType.LITECOIN) {
+            else if (input.type === CryptoType.BITCOIN) {
+                return sendBitcoin(input.destination);
+            }
+
+            // else if (input.type === CryptoType.LITECOIN) {
             //     return sendLitecoinBalance(input.destination);
             // } else if (input.type === CryptoType.ETHEREUM) {
             //     return sendEthereumBalance(input.destination);
