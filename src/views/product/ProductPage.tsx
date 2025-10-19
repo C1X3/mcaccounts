@@ -302,16 +302,16 @@ const ProductPage = ({ product, stockCount }: { product?: Product, stockCount?: 
                 <div className="bg-[color-mix(in_srgb,var(--background),#333_5%)] rounded-3xl p-8 mb-12 shadow-sm border border-[color-mix(in_srgb,var(--foreground),var(--background)_90%)]">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="text-center p-4 bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#fff_5%)] to-[color-mix(in_srgb,var(--background),#333_5%)] rounded-2xl">
-                            <div className="text-4xl font-bold text-[var(--foreground)]">516</div>
+                            <div className="text-4xl font-bold text-[var(--foreground)]">4,189</div>
                             <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Products Sold</div>
                         </div>
                         <div className="text-center p-4 bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#fff_5%)] to-[color-mix(in_srgb,var(--background),#333_5%)] rounded-2xl">
-                            <div className="text-4xl font-bold text-[var(--foreground)]">516</div>
+                            <div className="text-4xl font-bold text-[var(--foreground)]">4,189</div>
                             <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Happy Customers</div>
                         </div>
                         <div className="text-center p-4 bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#fff_5%)] to-[color-mix(in_srgb,var(--background),#333_5%)] rounded-2xl">
                             <div className="flex items-center justify-center">
-                                <span className="text-4xl font-bold text-[var(--foreground)] mr-2">4.96</span>
+                                <span className="text-4xl font-bold text-[var(--foreground)] mr-2">4.99</span>
                                 <FaStar className="text-yellow-400" size={24} />
                             </div>
                             <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">Average Rating</div>
