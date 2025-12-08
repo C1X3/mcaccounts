@@ -108,30 +108,25 @@ const ShopPage = () => {
                 >
                     <div className="flex flex-col md:flex-row items-center gap-10">
                         <motion.div
-                            className="w-full md:w-1/2 relative"
+                            className="w-full md:w-auto relative flex items-center justify-start"
                             whileHover={{ scale: 1.02 }}
                             transition={{ type: "spring", stiffness: 300, damping: 15 }}
                         >
-                            <div className="w-full aspect-video relative rounded-2xl overflow-hidden 
-                                        bg-gradient-to-br 
-                                        from-[color-mix(in_srgb,var(--primary),#fff_80%)] 
-                                        to-[color-mix(in_srgb,var(--secondary),#fff_80%)] 
-                                        bg-opacity-20">
-                                <div className="relative h-full w-full mx-auto">
-                                    <Image
-                                        src={topProduct.image || ""}
-                                        alt="Featured Product"
-                                        fill
-                                        style={{ objectFit: "contain" }}
-                                        className="drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]"
-                                    />
-                                </div>
-                                <div className="absolute top-4 right-4 bg-[var(--accent)] text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            <div className="relative rounded-2xl overflow-hidden inline-block">
+                                <Image
+                                    src={topProduct.image || ""}
+                                    alt="Featured Product"
+                                    width={500}
+                                    height={500}
+                                    style={{ objectFit: "contain", width: "auto", height: "auto", maxWidth: "100%", maxHeight: "400px" }}
+                                    className="drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)] rounded-2xl"
+                                />
+                                <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                                     FEATURED
                                 </div>
                             </div>
                         </motion.div>
-                        <div className="w-full md:w-1/2 space-y-6">
+                        <div className="w-full md:flex-1 space-y-6">
                             <h3 className="text-3xl font-bold">{topProduct.name}</h3>
                             <div className="flex items-center">
                                 <div className="flex text-yellow-400 mr-2">

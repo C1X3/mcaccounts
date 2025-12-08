@@ -1,9 +1,10 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { FaStar, FaShoppingCart } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { ProductGetAllOutput } from "@/server/routes/_app";
+import { useState, useEffect } from "react";
 
 type CardStyle = "normal" | "article";
 
@@ -16,6 +17,24 @@ const ProductCard = ({
 }) => {
     const router = useRouter();
     const { addItem } = useCart();
+    const [isHovering, setIsHovering] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    const allImages = [product.image, ...(product.additionalImages || [])];
+    const hasMultipleImages = allImages.length > 1;
+
+    useEffect(() => {
+        if (!hasMultipleImages || !isHovering) {
+            setCurrentImageIndex(0);
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
+        }, 2000);
+
+        return () => clearInterval(interval);
+    }, [isHovering, hasMultipleImages, allImages.length]);
 
     const handleNavigateToProduct = () => {
         router.push(`/shop/${product.slug}`);
@@ -86,19 +105,34 @@ const ProductCard = ({
                 </div>
 
                 {/* Left: Image */}
-                <div className="relative w-1/3 h-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-50">
-                    <motion.div
-                        className="absolute inset-0"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                    >
-                        <Image
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            style={{ objectFit: "cover" }}
-                        />
-                    </motion.div>
+                <div 
+                    className="relative w-1/3 h-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-50"
+                    onMouseEnter={() => setIsHovering(true)}
+                    onMouseLeave={() => setIsHovering(false)}
+                >
+                <motion.div
+                    className="absolute inset-0"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                >
+                    <AnimatePresence initial={false}>
+                        <motion.div
+                            key={currentImageIndex}
+                            initial={{ x: "100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="absolute inset-0"
+                        >
+                            <Image
+                                src={allImages[currentImageIndex]}
+                                alt={product.name}
+                                fill
+                                style={{ objectFit: "cover" }}
+                            />
+                        </motion.div>
+                    </AnimatePresence>
+                </motion.div>
                 </div>
 
                 {/* Right: Content */}
@@ -152,23 +186,52 @@ const ProductCard = ({
             onClick={handleNavigateToProduct}
         >
             {/* Image with hover and full-fill effect */}
-            <div className="relative h-60 overflow-hidden bg-gradient-to-br from-[color-mix(in_srgb,var(--primary),#fff_80%)] to-[color-mix(in_srgb,var(--secondary),#fff_80%)] bg-opacity-10">
+            <div 
+                className="relative h-60 overflow-hidden bg-gradient-to-br from-[color-mix(in_srgb,var(--primary),#fff_80%)] to-[color-mix(in_srgb,var(--secondary),#fff_80%)] bg-opacity-10"
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+            >
                 <motion.div
                     className="absolute inset-0"
                     whileHover={{ scale: 1.08 }}
                     transition={{ type: "spring", stiffness: 200, damping: 15 }}
                 >
-                    <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        style={{ objectFit: "cover" }}
-                        className="drop-shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]"
-                    />
+                    <AnimatePresence initial={false}>
+                        <motion.div
+                            key={currentImageIndex}
+                            initial={{ x: "100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="absolute inset-0"
+                        >
+                            <Image
+                                src={allImages[currentImageIndex]}
+                                alt={product.name}
+                                fill
+                                style={{ objectFit: "cover" }}
+                                className="drop-shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]"
+                            />
+                        </motion.div>
+                    </AnimatePresence>
                 </motion.div>
-                {product.badge && <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full">
+                {product.badge && <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
                     {product.badge}
                 </div>}
+                {hasMultipleImages && (
+                    <div className="absolute bottom-3 right-3 flex gap-1 z-10">
+                        {allImages.map((_, index) => (
+                            <div
+                                key={index}
+                                className={`w-2 h-2 rounded-full transition-all ${
+                                    index === currentImageIndex
+                                        ? "bg-white w-4"
+                                        : "bg-white/50"
+                                }`}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Content */}
