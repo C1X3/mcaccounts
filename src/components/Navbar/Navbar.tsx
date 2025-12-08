@@ -8,10 +8,20 @@ import NavMenu from "./NavMenu";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import SaleBanner from "../SaleBanner";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [bannerVisible, setBannerVisible] = useState(true);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const savedBannerState = sessionStorage.getItem("saleBannerVisible");
+    if (savedBannerState !== null) {
+      setBannerVisible(savedBannerState === "true");
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,9 +32,20 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleCloseBanner = () => {
+    setBannerVisible(false);
+    sessionStorage.setItem("saleBannerVisible", "false");
+  };
+
+  const shouldShowBanner = bannerVisible && 
+    !pathname?.startsWith('/admin') && 
+    !pathname?.startsWith('/order') && 
+    !pathname?.startsWith('/cart');
+
   return (
     <>
-      <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      <SaleBanner isVisible={shouldShowBanner} onClose={handleCloseBanner} />
+      <div className={`fixed ${shouldShowBanner ? 'top-[40px]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled ? "py-2 bg-[var(--background)]/90 backdrop-blur-lg" : "py-4"
       }`}>
         <div className="relative w-full max-w-7xl mx-auto px-4">
@@ -72,8 +93,12 @@ const Navbar = () => {
         )}
       </AnimatePresence>
       
-      {/* Spacer for fixed navbar */}
-      <div className={`h-${isScrolled ? '16' : '24'} transition-all duration-300`}></div>
+      {/* Spacer for fixed navbar + banner */}
+      <div className={`${
+        shouldShowBanner 
+          ? isScrolled ? 'h-[104px]' : 'h-[116px]'
+          : isScrolled ? 'h-16' : 'h-24'
+      } transition-all duration-300`}></div>
     </>
   );
 };
