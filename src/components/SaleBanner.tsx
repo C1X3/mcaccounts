@@ -29,8 +29,14 @@ const SaleBanner = ({ isVisible, onClose }: SaleBannerProps) => {
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: -100, opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-red-600 via-green-600 to-red-600 text-white overflow-hidden"
+      className="fixed top-0 left-0 right-0 z-[60] text-white overflow-hidden"
     >
+      <div
+        className="absolute inset-0 opacity-70"
+        style={{
+          background: "repeating-linear-gradient(-45deg, #dc2626, #dc2626 80px, #16a34a 80px, #16a34a 160px)",
+        }}
+      />
       <div className="relative py-2">
         <div className="absolute inset-0 overflow-hidden opacity-20 pointer-events-none">
           {Array.from({ length: 15 }).map((_, i) => (
