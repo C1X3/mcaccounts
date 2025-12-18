@@ -14,6 +14,8 @@ import {
   FaUser,
   FaBitcoin,
   FaEthereum,
+  FaMousePointer,
+  FaPercent,
 } from "react-icons/fa";
 import { SiLitecoin, SiSolana } from "react-icons/si";
 import {
@@ -100,6 +102,17 @@ export default function DashboardTab() {
     enabled: authQuery.data === true,
   });
 
+  const clickStatsData = useQuery({
+    ...trpc.analytics.getClickStats.queryOptions({
+      timeRange,
+      customRange:
+        timeRange === "custom"
+          ? { startDate: customStartDate, endDate: customEndDate }
+          : undefined,
+    }),
+    enabled: authQuery.data === true,
+  });
+
   const chartDataQuery = useQuery({
     ...trpc.analytics.getChartData.queryOptions({
       timeRange,
@@ -155,6 +168,7 @@ export default function DashboardTab() {
   // Use API data or fallback to empty array if loading
   const revenue = revenueData.data || { amount: 0, percentChange: 0 };
   const orders = ordersData.data || { count: 0, percentChange: 0 };
+  const clickStats = clickStatsData.data || { clicks: 0, clicksPercentChange: 0, conversionRate: 0, conversionPercentChange: 0 };
   const chartData = chartDataQuery.data || [];
   const latestCompletedOrders = latestCompletedOrdersData.data || [];
   const topProducts = topProductsData.data || [];
@@ -164,6 +178,7 @@ export default function DashboardTab() {
   const hasErrors =
     revenueData.error ||
     ordersData.error ||
+    clickStatsData.error ||
     chartDataQuery.error ||
     recentOrdersData.error ||
     latestCompletedOrdersData.error ||
@@ -304,7 +319,7 @@ export default function DashboardTab() {
         </h1>
       </div>{" "}
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Revenue Card */}
         <div className="bg-white p-6 rounded-xl shadow-sm">
           <div className="flex justify-between items-start">
@@ -373,6 +388,78 @@ export default function DashboardTab() {
           <div className="mt-4 flex items-center text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
             <FaChartLine className="mr-1" />
             <span>Compared to previous period</span>
+          </div>
+        </div>
+
+        {/* Total Clicks Card */}
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm font-medium">
+                Total Clicks
+              </h3>
+              {clickStatsData.isLoading ? (
+                <div className="h-9 w-16 bg-gray-100 rounded animate-pulse mt-1"></div>
+              ) : (
+                <p className="text-3xl font-bold text-[var(--foreground)] mt-1">
+                  {clickStats.clicks}
+                </p>
+              )}
+            </div>
+            {clickStatsData.isLoading ? (
+              <div className="h-6 w-16 bg-gray-100 rounded animate-pulse"></div>
+            ) : (
+              <div
+                className={`flex items-center px-2.5 py-1 rounded-full text-sm font-medium ${clickStats.clicksPercentChange >= 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+              >
+                {clickStats.clicksPercentChange >= 0 ? (
+                  <FaArrowUp className="mr-1" />
+                ) : (
+                  <FaArrowDown className="mr-1" />
+                )}
+                {Math.abs(clickStats.clicksPercentChange)}%
+              </div>
+            )}
+          </div>
+          <div className="mt-4 flex items-center text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+            <FaMousePointer className="mr-1" />
+            <span>Unique site visitors</span>
+          </div>
+        </div>
+
+        {/* Conversion Rate Card */}
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm font-medium">
+                Conversion Rate
+              </h3>
+              {clickStatsData.isLoading ? (
+                <div className="h-9 w-16 bg-gray-100 rounded animate-pulse mt-1"></div>
+              ) : (
+                <p className="text-3xl font-bold text-[var(--foreground)] mt-1">
+                  {clickStats.conversionRate}%
+                </p>
+              )}
+            </div>
+            {clickStatsData.isLoading ? (
+              <div className="h-6 w-16 bg-gray-100 rounded animate-pulse"></div>
+            ) : (
+              <div
+                className={`flex items-center px-2.5 py-1 rounded-full text-sm font-medium ${clickStats.conversionPercentChange >= 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+              >
+                {clickStats.conversionPercentChange >= 0 ? (
+                  <FaArrowUp className="mr-1" />
+                ) : (
+                  <FaArrowDown className="mr-1" />
+                )}
+                {Math.abs(clickStats.conversionPercentChange)}%
+              </div>
+            )}
+          </div>
+          <div className="mt-4 flex items-center text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+            <FaPercent className="mr-1" />
+            <span>Clicks to orders</span>
           </div>
         </div>
       </div>

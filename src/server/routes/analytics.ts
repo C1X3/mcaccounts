@@ -551,6 +551,96 @@ export const analyticsRouter = createTRPCRouter({
         .slice(0, limit);
     }),
 
+  // Get click stats (total clicks and conversion rate)
+  getClickStats: adminProcedure
+    .input(
+      z.object({
+        timeRange: timeRangeSchema,
+        customRange: customDateRangeSchema.optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      const { timeRange, customRange } = input;
+      const dateRange = getDateRange(timeRange, customRange);
+
+      // Get current period site clicks (all visitors)
+      const currentPeriodClicks = await prisma.siteClick.count({
+        where: {
+          createdAt: {
+            gte: dateRange.start,
+            lte: dateRange.end,
+          },
+        },
+      });
+
+      // Get current period orders
+      const currentPeriodOrders = await prisma.order.count({
+        where: {
+          createdAt: {
+            gte: dateRange.start,
+            lte: dateRange.end,
+          },
+          status: { in: [OrderStatus.PAID, OrderStatus.DELIVERED] },
+        },
+      });
+
+      // Calculate conversion rate
+      const conversionRate = currentPeriodClicks > 0 
+        ? (currentPeriodOrders / currentPeriodClicks) * 100 
+        : 0;
+
+      // Calculate previous period date range
+      const periodLength = dateRange.end.getTime() - dateRange.start.getTime();
+      const prevEnd = new Date(dateRange.start);
+      const prevStart = new Date(prevEnd.getTime() - periodLength);
+
+      // Get previous period site clicks
+      const previousPeriodClicks = await prisma.siteClick.count({
+        where: {
+          createdAt: {
+            gte: prevStart,
+            lte: prevEnd,
+          },
+        },
+      });
+
+      // Get previous period orders
+      const previousPeriodOrders = await prisma.order.count({
+        where: {
+          createdAt: {
+            gte: prevStart,
+            lte: prevEnd,
+          },
+          status: { in: [OrderStatus.PAID, OrderStatus.DELIVERED] },
+        },
+      });
+
+      // Calculate previous conversion rate
+      const previousConversionRate = previousPeriodClicks > 0
+        ? (previousPeriodOrders / previousPeriodClicks) * 100
+        : 0;
+
+      // Calculate percent changes
+      let clicksPercentChange = 0;
+      if (previousPeriodClicks > 0) {
+        clicksPercentChange =
+          ((currentPeriodClicks - previousPeriodClicks) / previousPeriodClicks) * 100;
+      }
+
+      let conversionPercentChange = 0;
+      if (previousConversionRate > 0) {
+        conversionPercentChange =
+          ((conversionRate - previousConversionRate) / previousConversionRate) * 100;
+      }
+
+      return {
+        clicks: currentPeriodClicks,
+        clicksPercentChange: parseFloat(clicksPercentChange.toFixed(1)),
+        conversionRate: parseFloat(conversionRate.toFixed(2)),
+        conversionPercentChange: parseFloat(conversionPercentChange.toFixed(1)),
+      };
+    }),
+
   // Get recent completed orders with detailed information for the table
   getLatestCompletedOrders: adminProcedure
     .input(

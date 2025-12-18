@@ -6,14 +6,17 @@ model Affiliate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  clicks AffiliateClick[]
+  clicks SiteClick[]
   orders CustomerInformation[]
 }
 
-model AffiliateClick {
-  id          String   @id @default(cuid())
-  affiliateId String
-  affiliate   Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+model SiteClick {
+  id          String     @id @default(cuid())
+  affiliateId String?
+  affiliate   Affiliate? @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
   ipAddress   String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime   @default(now())
+
+  @@index([createdAt])
+  @@index([affiliateId])
 }

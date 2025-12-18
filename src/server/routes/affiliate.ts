@@ -46,7 +46,7 @@ export const affiliateRouter = createTRPCRouter({
           },
         });
 
-        const clicks = await prisma.affiliateClick.findMany({
+        const clicks = await prisma.siteClick.findMany({
           where: {
             affiliateId: affiliate.id,
             createdAt: {
@@ -167,7 +167,7 @@ export const affiliateRouter = createTRPCRouter({
         },
       });
 
-      const allClicks = await prisma.affiliateClick.findMany({
+      const allClicks = await prisma.siteClick.findMany({
         where: {
           affiliateId: affiliate.id,
         },
