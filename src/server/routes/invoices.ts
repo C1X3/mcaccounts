@@ -4,44 +4,104 @@ import { adminProcedure, createTRPCRouter } from "../init";
 import { TRPCError } from "@trpc/server";
 import { OrderStatus, PaymentType, CryptoType } from "@generated";
 
+const invoiceFilterSchema = z.object({
+  search: z.string().optional(),
+  status: z.string().optional(),
+  paymentType: z.string().optional(),
+  email: z.string().optional(),
+  discord: z.string().optional(),
+  affiliate: z.string().optional(),
+  product: z.string().optional(),
+  code: z.string().optional(),
+  paypalNote: z.string().optional(),
+  invoiceId: z.string().optional(),
+  dateProcessed: z.string().optional(),
+});
+
+function buildInvoiceWhereClause(input: z.infer<typeof invoiceFilterSchema> | undefined): Record<string, unknown> {
+  const where: Record<string, unknown> = {};
+  const andConditions: Record<string, unknown>[] = [];
+
+  if (input?.status && input.status !== "ALL") {
+    if (input.status === OrderStatus.DELIVERED) {
+      where.status = { in: [OrderStatus.PAID, OrderStatus.DELIVERED] };
+    } else {
+      where.status = input.status;
+    }
+  }
+
+  if (input?.paymentType && input.paymentType !== "ALL") {
+    if (Object.values(CryptoType).includes(input.paymentType as CryptoType)) {
+      where.paymentType = PaymentType.CRYPTO;
+      where.Wallet = { some: { chain: input.paymentType as CryptoType } };
+    } else if (Object.values(PaymentType).includes(input.paymentType as PaymentType)) {
+      where.paymentType = input.paymentType;
+    }
+  }
+
+  if (input?.email) {
+    andConditions.push({ customer: { email: { contains: input.email, mode: "insensitive" } } });
+  }
+
+  if (input?.discord) {
+    andConditions.push({ customer: { discord: { contains: input.discord, mode: "insensitive" } } });
+  }
+
+  if (input?.affiliate) {
+    andConditions.push({ customer: { affiliate: { code: { contains: input.affiliate, mode: "insensitive" } } } });
+  }
+
+  if (input?.product) {
+    if (input.product === "OTHER") {
+      andConditions.push({ OrderItem: { some: { product: { discontinued: true } } } });
+    } else {
+      andConditions.push({ OrderItem: { some: { product: { name: { equals: input.product, mode: "insensitive" } } } } });
+    }
+  }
+
+  if (input?.code) {
+    andConditions.push({ OrderItem: { some: { codes: { has: input.code } } } });
+  }
+
+  if (input?.paypalNote) {
+    andConditions.push({ paypalNote: { contains: input.paypalNote, mode: "insensitive" } });
+  }
+
+  if (input?.invoiceId) {
+    andConditions.push({ id: { contains: input.invoiceId, mode: "insensitive" } });
+  }
+
+  if (input?.dateProcessed) {
+    const date = new Date(input.dateProcessed);
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+    andConditions.push({ createdAt: { gte: startOfDay, lt: endOfDay } });
+  }
+
+  if (input?.search) {
+    where.OR = [
+      { id: { contains: input.search, mode: "insensitive" } },
+      { customer: { email: { contains: input.search, mode: "insensitive" } } },
+      { customer: { name: { contains: input.search, mode: "insensitive" } } },
+      { customer: { discord: { contains: input.search, mode: "insensitive" } } },
+      { couponUsed: { contains: input.search, mode: "insensitive" } },
+      { paypalNote: { contains: input.search, mode: "insensitive" } },
+      { OrderItem: { some: { product: { name: { contains: input.search, mode: "insensitive" } } } } },
+    ];
+  }
+
+  if (andConditions.length > 0) {
+    where.AND = andConditions;
+  }
+
+  return where;
+}
+
 export const invoicesRouter = createTRPCRouter({
   getStats: adminProcedure
-    .input(z.object({
-      search: z.string().optional(),
-      status: z.string().optional(),
-      paymentType: z.string().optional(),
-    }).optional())
+    .input(invoiceFilterSchema.optional())
     .query(async ({ input }) => {
-      const where: Record<string, unknown> = {};
-
-      if (input?.status && input.status !== "ALL") {
-        if (input.status === OrderStatus.DELIVERED) {
-          where.status = { in: [OrderStatus.PAID, OrderStatus.DELIVERED] };
-        } else {
-          where.status = input.status;
-        }
-      }
-
-      if (input?.paymentType && input.paymentType !== "ALL") {
-        if (Object.values(CryptoType).includes(input.paymentType as CryptoType)) {
-          where.paymentType = PaymentType.CRYPTO;
-          where.Wallet = { some: { chain: input.paymentType as CryptoType } };
-        } else if (Object.values(PaymentType).includes(input.paymentType as PaymentType)) {
-          where.paymentType = input.paymentType;
-        }
-      }
-
-      if (input?.search) {
-        where.OR = [
-          { id: { contains: input.search, mode: "insensitive" } },
-          { customer: { email: { contains: input.search, mode: "insensitive" } } },
-          { customer: { name: { contains: input.search, mode: "insensitive" } } },
-          { customer: { discord: { contains: input.search, mode: "insensitive" } } },
-          { couponUsed: { contains: input.search, mode: "insensitive" } },
-          { paypalNote: { contains: input.search, mode: "insensitive" } },
-          { OrderItem: { some: { product: { name: { contains: input.search, mode: "insensitive" } } } } },
-        ];
-      }
+      const where = buildInvoiceWhereClause(input);
 
       const completedWhere = { ...where, status: { in: [OrderStatus.PAID, OrderStatus.DELIVERED] } };
       const pendingWhere = { ...where, status: OrderStatus.PENDING };
@@ -68,46 +128,12 @@ export const invoicesRouter = createTRPCRouter({
     .input(z.object({
       page: z.number().min(1).default(1),
       limit: z.number().min(1).max(100).default(15),
-      search: z.string().optional(),
-      status: z.string().optional(),
-      paymentType: z.string().optional(),
-      cryptoType: z.string().optional(),
-    }))
+    }).merge(invoiceFilterSchema))
     .query(async ({ input }) => {
-      const { page, limit, search, status, paymentType } = input;
+      const { page, limit } = input;
       const skip = (page - 1) * limit;
 
-      const where: Record<string, unknown> = {};
-
-      if (status && status !== "ALL") {
-        if (status === OrderStatus.DELIVERED) {
-          where.status = { in: [OrderStatus.PAID, OrderStatus.DELIVERED] };
-        } else {
-          where.status = status;
-        }
-      }
-
-      if (paymentType && paymentType !== "ALL") {
-        if (Object.values(CryptoType).includes(paymentType as CryptoType)) {
-          where.paymentType = PaymentType.CRYPTO;
-          where.Wallet = { some: { chain: paymentType as CryptoType } };
-        } else if (Object.values(PaymentType).includes(paymentType as PaymentType)) {
-          where.paymentType = paymentType;
-        }
-      }
-
-      if (search) {
-        where.OR = [
-          { id: { contains: search, mode: "insensitive" } },
-          { customer: { email: { contains: search, mode: "insensitive" } } },
-          { customer: { name: { contains: search, mode: "insensitive" } } },
-          { customer: { discord: { contains: search, mode: "insensitive" } } },
-          { couponUsed: { contains: search, mode: "insensitive" } },
-          { paypalNote: { contains: search, mode: "insensitive" } },
-          { OrderItem: { some: { product: { name: { contains: search, mode: "insensitive" } } } } },
-          { OrderItem: { some: { codes: { has: search } } } },
-        ];
-      }
+      const where = buildInvoiceWhereClause(input);
 
       const [invoices, totalCount] = await Promise.all([
         prisma.order.findMany({
@@ -160,43 +186,9 @@ export const invoicesRouter = createTRPCRouter({
   }),
 
   getFiltered: adminProcedure
-    .input(z.object({
-      search: z.string().optional(),
-      status: z.string().optional(),
-      paymentType: z.string().optional(),
-    }))
+    .input(invoiceFilterSchema)
     .query(async ({ input }) => {
-      const { search, status, paymentType } = input;
-      const where: Record<string, unknown> = {};
-
-      if (status && status !== "ALL") {
-        if (status === OrderStatus.DELIVERED) {
-          where.status = { in: [OrderStatus.PAID, OrderStatus.DELIVERED] };
-        } else {
-          where.status = status;
-        }
-      }
-
-      if (paymentType && paymentType !== "ALL") {
-        if (Object.values(CryptoType).includes(paymentType as CryptoType)) {
-          where.paymentType = PaymentType.CRYPTO;
-          where.Wallet = { some: { chain: paymentType as CryptoType } };
-        } else if (Object.values(PaymentType).includes(paymentType as PaymentType)) {
-          where.paymentType = paymentType;
-        }
-      }
-
-      if (search) {
-        where.OR = [
-          { id: { contains: search, mode: "insensitive" } },
-          { customer: { email: { contains: search, mode: "insensitive" } } },
-          { customer: { name: { contains: search, mode: "insensitive" } } },
-          { customer: { discord: { contains: search, mode: "insensitive" } } },
-          { couponUsed: { contains: search, mode: "insensitive" } },
-          { paypalNote: { contains: search, mode: "insensitive" } },
-          { OrderItem: { some: { product: { name: { contains: search, mode: "insensitive" } } } } },
-        ];
-      }
+      const where = buildInvoiceWhereClause(input);
 
       return await prisma.order.findMany({
         where,

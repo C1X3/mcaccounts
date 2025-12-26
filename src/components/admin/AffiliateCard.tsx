@@ -83,16 +83,18 @@ export default function AffiliateCard({ affiliate, onClick }: AffiliateCardProps
             Clicks (Last 7 days)
           </span>
         </div>
-        <div className="flex items-end gap-1 h-16">
+        <div className="flex items-end gap-1">
           {affiliate.clicksLast7Days.map((day) => (
             <div
               key={day.date}
               className="flex-1 flex flex-col items-center gap-1"
             >
-              <div
-                className="w-full bg-[var(--primary)] rounded-t-sm min-h-[4px] transition-all"
-                style={{ height: `${Math.max((day.clicks / maxClicks) * 100, 8)}%` }}
-              />
+              <div className="h-12 w-full flex items-end">
+                <div
+                  className="w-full bg-[var(--primary)] rounded-t-sm min-h-[4px] transition-all"
+                  style={{ height: `${Math.max((day.clicks / maxClicks) * 100, 8)}%` }}
+                />
+              </div>
               <span className="text-[10px] text-[color-mix(in_srgb,var(--foreground),#888_60%)]">
                 {new Date(day.date).toLocaleDateString("en-US", { weekday: "short" }).charAt(0)}
               </span>

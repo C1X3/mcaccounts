@@ -53,16 +53,26 @@ export default function InvoicesTab() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  const filterQueryParams = {
+    search: debouncedSearch || undefined,
+    status: filters.statusFilter !== "ALL" ? filters.statusFilter : undefined,
+    paymentType: filters.paymentFilter !== "ALL" ? filters.paymentFilter : undefined,
+    email: filters.emailFilter || undefined,
+    discord: filters.discordFilter || undefined,
+    affiliate: filters.affiliateFilter || undefined,
+    product: filters.productFilter || undefined,
+    code: filters.codeFilter || undefined,
+    paypalNote: filters.paypalNoteFilter || undefined,
+    invoiceId: filters.invoiceIdFilter || undefined,
+    dateProcessed: filters.dateProcessedFilter || undefined,
+  };
+
   // Export filtered invoices function
   const handleExportAll = async () => {
     setIsExporting(true);
     try {
       const filteredInvoices = await queryClient.fetchQuery(
-        trpc.invoices.getFiltered.queryOptions({
-          search: debouncedSearch || undefined,
-          status: filters.statusFilter !== "ALL" ? filters.statusFilter : undefined,
-          paymentType: filters.paymentFilter !== "ALL" ? filters.paymentFilter : undefined,
-        })
+        trpc.invoices.getFiltered.queryOptions(filterQueryParams)
       );
       exportInvoicesToCSV(filteredInvoices);
     } catch (error) {
@@ -74,11 +84,7 @@ export default function InvoicesTab() {
 
   // Get stats (lightweight aggregate query with filters)
   const { data: stats } = useQuery(
-    trpc.invoices.getStats.queryOptions({
-      search: debouncedSearch || undefined,
-      status: filters.statusFilter !== "ALL" ? filters.statusFilter : undefined,
-      paymentType: filters.paymentFilter !== "ALL" ? filters.paymentFilter : undefined,
-    })
+    trpc.invoices.getStats.queryOptions(filterQueryParams)
   );
 
   // Get paginated invoices (only fetches current page)
@@ -86,9 +92,7 @@ export default function InvoicesTab() {
     trpc.invoices.getPaginated.queryOptions({
       page: currentPage,
       limit: itemsPerPage,
-      search: debouncedSearch || undefined,
-      status: filters.statusFilter !== "ALL" ? filters.statusFilter : undefined,
-      paymentType: filters.paymentFilter !== "ALL" ? filters.paymentFilter : undefined,
+      ...filterQueryParams,
     })
   );
 
