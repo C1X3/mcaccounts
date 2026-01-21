@@ -79,6 +79,9 @@ export async function POST(request: NextRequest) {
 
     // Calculate the expected amount with discount applied
     const expectedTotal = order.totalPrice + order.paymentFee - (order.discountAmount ?? 0);
+    
+    // Allow for 1 cent tolerance since invoice displays prices rounded to 2 decimal places
+    const amountDifference = Math.abs(ipn.mcGross - expectedTotal);
 
     if (
         ipn.receiverEmail === process.env.NEXT_PUBLIC_PAYPAL_EMAIL &&
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
         ipn.txnType === 'send_money' &&
         ipn.paymentType === 'instant' &&
         ipn.mcCurrency === 'USD' &&
-        ipn.mcGross >= expectedTotal
+        amountDifference <= 0.01
     ) {
         await prisma.order.update({
             where: { id: order.id },
