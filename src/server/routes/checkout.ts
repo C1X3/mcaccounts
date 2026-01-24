@@ -76,6 +76,14 @@ export const checkoutRouter = createTRPCRouter({
                         });
                     }
 
+                    // Check if enough stock is available BEFORE creating the order
+                    if (product.stock.length < item.quantity) {
+                        throw new TRPCError({
+                            code: 'BAD_REQUEST',
+                            message: `Not enough stock available for ${product.name}. Available: ${product.stock.length}, Requested: ${item.quantity}`,
+                        });
+                    }
+
                     totalPrice += product.price * item.quantity;
                 }
 
