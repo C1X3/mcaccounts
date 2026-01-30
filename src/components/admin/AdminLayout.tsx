@@ -23,6 +23,7 @@ interface AdminLayoutProps {
   onTabChange?: (tab: string) => void;
   isAuthenticated: boolean;
   authComponent: ReactNode;
+  userRole?: "admin" | "support" | null;
 }
 
 export default function AdminLayout({
@@ -31,10 +32,11 @@ export default function AdminLayout({
   onTabChange,
   isAuthenticated,
   authComponent,
+  userRole,
 }: AdminLayoutProps) {
   const router = useRouter();
 
-  const tabs: TabItem[] = [
+  const allTabs: TabItem[] = [
     { id: "dashboard", label: "Dashboard", icon: <FaTachometerAlt /> },
     { id: "products", label: "Products", icon: <FaBox /> },
     { id: "articles", label: "Articles", icon: <FaNewspaper /> },
@@ -42,6 +44,17 @@ export default function AdminLayout({
     { id: "coupons", label: "Coupons", icon: <FaTicketAlt /> },
     { id: "affiliates", label: "Affiliates", icon: <FaUsers /> },
   ];
+
+  // Filter tabs based on user role
+  const tabs =
+    userRole === "support"
+      ? allTabs.filter(
+          (tab) =>
+            tab.id === "products" ||
+            tab.id === "invoices" ||
+            tab.id === "affiliates",
+        )
+      : allTabs;
 
   const handleTabClick = (tabId: string) => {
     if (onTabChange) {

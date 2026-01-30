@@ -9,31 +9,45 @@ export const authenticationRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const { password } = input;
 
-      // Check if the password is correct
-      if (password !== process.env.ADMIN_PASSWORD)
+      // Determine role based on password
+      let role: "admin" | "support" | null = null;
+      if (password === process.env.ADMIN_PASSWORD) {
+        role = "admin";
+      } else if (password === process.env.SUPPORT_PASSWORD) {
+        role = "support";
+      }
+
+      // Check if the password is valid
+      if (!role) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Invalid password",
         });
+      }
 
-      // If the password is correct, set the session cookie
+      // Set the session cookie with password and role
       (await cookies()).set({
         name: "authenticated",
-        value: process.env.ADMIN_PASSWORD!,
+        value: `${password}&role=${role}`,
       });
 
-      // Return a success message
-      return true;
+      // Return the role
+      return { role };
     }),
 
   isAuthenticated: baseProcedure.query(async ({}) => {
     // Check if the authenticated cookie is set
     const sessionCookie = (await cookies()).get("authenticated");
     if (!sessionCookie) {
-      return false;
+      return { authenticated: false, role: null };
     }
 
-    // Return a success message
-    return true;
+    // Parse role from cookie
+    const cookieValue = sessionCookie.value;
+    const rolePart = cookieValue.split("&role=")[1];
+    const role = rolePart as "admin" | "support" | undefined;
+
+    // Return authentication status and role
+    return { authenticated: true, role: role || null };
   }),
 });

@@ -28,9 +28,11 @@ import {
   getPaymentDisplayName,
 } from "@/utils/invoiceUtils";
 import { PaymentMethodLogo } from "@/components/PaymentMethodLogo";
+import { useAdminRole } from "@/contexts/AdminContext";
 
 export default function InvoiceDetailPage({ id }: { id: string }) {
   const trpc = useTRPC();
+  const { userRole } = useAdminRole();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
@@ -284,12 +286,14 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
           >
             <FaEye /> View Invoice
           </Link>
-          <button
-            className="px-4 py-2 flex items-center gap-2 bg-transparent border border-red-600 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors"
-            onClick={handleDeleteInvoice}
-          >
-            <FaTrash /> {isDeleting ? "Deleting..." : "Delete Invoice"}
-          </button>
+          {userRole === "admin" && (
+            <button
+              className="px-4 py-2 flex items-center gap-2 bg-transparent border border-red-600 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors"
+              onClick={handleDeleteInvoice}
+            >
+              <FaTrash /> {isDeleting ? "Deleting..." : "Delete Invoice"}
+            </button>
+          )}
         </div>
       </div>
 

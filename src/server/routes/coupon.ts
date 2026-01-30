@@ -6,7 +6,14 @@ import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
 import { couponCodeSchema } from "../schemas/coupon";
 
 export const couponRouter = createTRPCRouter({
-  getAll: adminProcedure.query(async () => {
+  getAll: adminProcedure.query(async ({ ctx }) => {
+    if (ctx.role !== "admin") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Admin access required",
+      });
+    }
+
     return await prisma.coupon.findMany({
       orderBy: { createdAt: "desc" },
     });
@@ -44,7 +51,14 @@ export const couponRouter = createTRPCRouter({
       return coupon;
     }),
 
-  create: adminProcedure.input(couponCodeSchema).mutation(async ({ input }) => {
+  create: adminProcedure.input(couponCodeSchema).mutation(async ({ input, ctx }) => {
+    if (ctx.role !== "admin") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Admin access required",
+      });
+    }
+
     // Check if coupon code already exists
     const existingCoupon = await prisma.coupon.findUnique({
       where: { code: input.code },
@@ -77,7 +91,14 @@ export const couponRouter = createTRPCRouter({
         active: z.boolean().optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { id, ...data } = input;
 
       // If code is being updated, check if the new code already exists
@@ -108,7 +129,14 @@ export const couponRouter = createTRPCRouter({
 
   delete: adminProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       return await prisma.coupon.delete({
         where: { id: input.id },
       });

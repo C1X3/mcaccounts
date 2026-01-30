@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { adminProcedure, createTRPCRouter } from "../init";
 import { CryptoType } from "@generated/client";
+import { TRPCError } from "@trpc/server";
 import { getTotalSolanaBalance } from "../crypto/getBalance/solana";
 import { getTotalBitcoinBalance } from "../crypto/getBalance/bitcoin";
 import { getTotalLitecoinBalance } from "../crypto/getBalance/litecoin";
@@ -31,7 +32,14 @@ async function getCryptoPrices() {
 }
 
 export const cryptoRouter = createTRPCRouter({
-  getCryptoBalance: adminProcedure.query(async () => {
+  getCryptoBalance: adminProcedure.query(async ({ ctx }) => {
+    if (ctx.role !== "admin") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Admin access required",
+      });
+    }
+
     try {
       // Fetch balances and prices with individual error handling
       const [solana, bitcoin, litecoin, ethereum, prices] = await Promise.all([
@@ -91,7 +99,14 @@ export const cryptoRouter = createTRPCRouter({
         destination: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       if (input.type === CryptoType.SOLANA) {
         return sendSolanaBalance(input.destination);
       } else if (input.type === CryptoType.BITCOIN) {

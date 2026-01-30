@@ -7,6 +7,7 @@ import { ReactNode, useState } from "react";
 import toast from "react-hot-toast";
 import { FaLock } from "react-icons/fa";
 import AdminLayout from "./admin/AdminLayout";
+import { AdminProvider } from "@/contexts/AdminContext";
 
 export default function AdminWrapper({
   children,
@@ -21,13 +22,15 @@ export default function AdminWrapper({
 
   const [password, setPassword] = useState("");
   const [isPasswordIncorrect, setIsPasswordIncorrect] = useState(false);
+  const [userRole, setUserRole] = useState<"admin" | "support" | null>(null);
 
   const isAuthenticated = useQuery(trpc.auth.isAuthenticated.queryOptions());
 
   const login = useMutation(
     trpc.auth.authenticate.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (data) => {
         setIsPasswordIncorrect(false);
+        setUserRole(data.role);
         toast.success("Authenticated successfully");
       },
       onError: (error) => {
@@ -48,9 +51,23 @@ export default function AdminWrapper({
     });
   };
 
+  // Update role when authentication status changes
+  if (
+    isAuthenticated.data &&
+    typeof isAuthenticated.data === "object" &&
+    "role" in isAuthenticated.data &&
+    !userRole
+  ) {
+    setUserRole(isAuthenticated.data.role as "admin" | "support" | null);
+  }
+
   const authComponent = (
     <AnimatePresence>
-      {!isAuthenticated.isLoading && isAuthenticated.data === false && (
+      {!isAuthenticated.isLoading &&
+        (!isAuthenticated.data ||
+          (typeof isAuthenticated.data === "object" &&
+            "authenticated" in isAuthenticated.data &&
+            !isAuthenticated.data.authenticated)) && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -119,14 +136,23 @@ export default function AdminWrapper({
     </AnimatePresence>
   );
 
+  const isAuth =
+    isAuthenticated.data === true ||
+    (typeof isAuthenticated.data === "object" &&
+      "authenticated" in isAuthenticated.data &&
+      isAuthenticated.data.authenticated === true);
+
   return (
-    <AdminLayout
-      currentTab={currentTab}
-      onTabChange={setCurrentTab}
-      isAuthenticated={isAuthenticated.data === true}
-      authComponent={authComponent}
-    >
-      {children}
-    </AdminLayout>
+    <AdminProvider userRole={userRole}>
+      <AdminLayout
+        currentTab={currentTab}
+        onTabChange={setCurrentTab}
+        isAuthenticated={isAuth}
+        authComponent={authComponent}
+        userRole={userRole}
+      >
+        {children}
+      </AdminLayout>
+    </AdminProvider>
   );
 }

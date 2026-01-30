@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { prisma } from "@/utils/prisma";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
+import { TRPCError } from "@trpc/server";
 
 export const productRouter = createTRPCRouter({
   getAll: baseProcedure
@@ -137,11 +138,54 @@ export const productRouter = createTRPCRouter({
         stripeProductName: z.string().optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      // Support users can only update stock
+      if (ctx.role === "support") {
+        const { id, stock } = input;
+        // Check if they're trying to update anything other than stock
+        const otherFields = Object.keys(input).filter(
+          (key) => key !== "id" && key !== "stock",
+        );
+        if (otherFields.length > 0) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Support users can only update product stock",
+          });
+        }
+        // Allow stock-only update
+        if (stock !== undefined) {
+          return await prisma.product.update({
+            where: { id },
+            data: { stock },
+          });
+        }
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No stock data provided",
+        });
+      }
+
+      // Admin can update everything
       const { id, ...data } = input;
       return await prisma.product.update({
         where: { id },
         data,
+      });
+    }),
+
+  // Stock-only update for support users
+  updateStock: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        stock: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { id, stock } = input;
+      return await prisma.product.update({
+        where: { id },
+        data: { stock },
       });
     }),
 
@@ -174,7 +218,14 @@ export const productRouter = createTRPCRouter({
 
   delete: adminProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       return await prisma.product.delete({
         where: { id: input.id },
       });

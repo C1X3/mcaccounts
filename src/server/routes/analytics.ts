@@ -109,7 +109,14 @@ export const analyticsRouter = createTRPCRouter({
         customRange: customDateRangeSchema.optional(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { timeRange, customRange } = input;
       const dateRange = getDateRange(timeRange, customRange);
 
@@ -180,7 +187,14 @@ export const analyticsRouter = createTRPCRouter({
         customRange: customDateRangeSchema.optional(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { timeRange, customRange } = input;
       const dateRange = getDateRange(timeRange, customRange);
 
@@ -234,7 +248,14 @@ export const analyticsRouter = createTRPCRouter({
         customRange: customDateRangeSchema.optional(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { timeRange, customRange } = input;
       const dateRange = getDateRange(timeRange, customRange);
       const { start, end } = dateRange;
@@ -399,7 +420,14 @@ export const analyticsRouter = createTRPCRouter({
         limit: z.number().min(1).max(50).default(5),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { limit } = input;
 
       // Get recent completed orders from database
@@ -445,7 +473,14 @@ export const analyticsRouter = createTRPCRouter({
         limit: z.number().min(1).max(20).default(5),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { limit } = input;
 
       // Get all order items with product info from completed orders
@@ -527,7 +562,14 @@ export const analyticsRouter = createTRPCRouter({
         limit: z.number().min(1).max(20).default(5),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { limit } = input;
 
       // Get all completed orders with customer info
@@ -582,7 +624,14 @@ export const analyticsRouter = createTRPCRouter({
         customRange: customDateRangeSchema.optional(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { timeRange, customRange } = input;
       const dateRange = getDateRange(timeRange, customRange);
 
@@ -676,7 +725,14 @@ export const analyticsRouter = createTRPCRouter({
         limit: z.number().min(1).max(50).default(10),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { limit } = input;
 
       // Get recent completed orders from database with all needed info

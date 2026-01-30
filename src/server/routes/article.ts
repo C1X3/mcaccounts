@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { prisma } from "@/utils/prisma";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
+import { TRPCError } from "@trpc/server";
 
 export const articleRouter = createTRPCRouter({
   getAll: baseProcedure
@@ -9,7 +10,15 @@ export const articleRouter = createTRPCRouter({
         includeInactive: z.boolean().default(false),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      // Block support users from accessing articles
+      if (ctx.isAuthenticated && ctx.role === "support") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       return await prisma.article.findMany({
         where: {
           ...(input.includeInactive ? {} : { isActive: true }),
@@ -40,7 +49,14 @@ export const articleRouter = createTRPCRouter({
         order: z.number().default(0),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       return await prisma.article.create({
         data: input,
       });
@@ -61,7 +77,14 @@ export const articleRouter = createTRPCRouter({
         order: z.number().optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { id, ...data } = input;
       return await prisma.article.update({
         where: { id },
@@ -80,7 +103,14 @@ export const articleRouter = createTRPCRouter({
         ),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const { articleOrders } = input;
 
       // Update articles in transaction
@@ -98,7 +128,14 @@ export const articleRouter = createTRPCRouter({
 
   delete: adminProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       return await prisma.article.delete({
         where: { id: input.id },
       });

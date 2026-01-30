@@ -16,12 +16,19 @@ import ProductFormModal, {
 import { Product } from "@generated/browser";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/server/client";
+import { useAdminRole } from "@/contexts/AdminContext";
+import StockEditModal from "./StockEditModal";
 
 export default function ProductsTab() {
+  const { userRole } = useAdminRole();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isStockModalOpen, setIsStockModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<
     ProductFormModalSchema | undefined
+  >(undefined);
+  const [selectedStockProduct, setSelectedStockProduct] = useState<
+    Product | undefined
   >(undefined);
   const [orderedProducts, setOrderedProducts] = useState<Product[]>([]);
   const [isDragDisabled, setIsDragDisabled] = useState(false);
@@ -72,6 +79,13 @@ export default function ProductsTab() {
   };
 
   const handleEditProduct = (product: Product) => {
+    // Support users can only edit stock
+    if (userRole === "support") {
+      setSelectedStockProduct(product);
+      setIsStockModalOpen(true);
+      return;
+    }
+
     const formProduct: ProductFormModalSchema = {
       id: product.id,
       slug: product.slug || "",
@@ -132,6 +146,18 @@ export default function ProductsTab() {
             onSuccess={() => products.refetch()}
           />
         )}
+
+        {isStockModalOpen && selectedStockProduct && (
+          <StockEditModal
+            isOpen={isStockModalOpen}
+            onClose={() => {
+              setIsStockModalOpen(false);
+              setSelectedStockProduct(undefined);
+            }}
+            product={selectedStockProduct}
+            onSuccess={() => products.refetch()}
+          />
+        )}
       </AnimatePresence>
 
       <div className="bg-[color-mix(in_srgb,var(--background),#333_15%)] p-6 rounded-xl border border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]">
@@ -140,18 +166,22 @@ export default function ProductsTab() {
             <FaBox />
             Products
           </h2>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center gap-2"
-          >
-            <FaPlus size={14} />
-            <span>Add Product</span>
-          </button>
+          {userRole === "admin" && (
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center gap-2"
+            >
+              <FaPlus size={14} />
+              <span>Add Product</span>
+            </button>
+          )}
         </div>
 
-        <div className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)] mb-4">
-          Drag and drop to reorder products
-        </div>
+        {userRole === "admin" && (
+          <div className="text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)] mb-4">
+            Drag and drop to reorder products
+          </div>
+        )}
 
         {products.isLoading ? (
           <div className="flex justify-center py-8">
@@ -166,9 +196,11 @@ export default function ProductsTab() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]">
-                  <th className="text-left py-4 px-2 text-[var(--foreground)] w-10">
-                    Order
-                  </th>
+                  {userRole === "admin" && (
+                    <th className="text-left py-4 px-2 text-[var(--foreground)] w-10">
+                      Order
+                    </th>
+                  )}
                   <th className="text-left py-4 px-2 text-[var(--foreground)]">
                     ID
                   </th>
@@ -189,85 +221,141 @@ export default function ProductsTab() {
                   </th>
                 </tr>
               </thead>
-              <Reorder.Group
-                as="tbody"
-                axis="y"
-                values={orderedProducts}
-                onReorder={handleReorder}
-                className="relative"
-              >
-                {!products.error &&
-                  orderedProducts.map((product) => (
-                    <Reorder.Item
-                      key={product.id}
-                      value={product}
-                      as="tr"
-                      dragListener={!isDragDisabled}
-                      dragControls={undefined}
-                      className="border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] hover:bg-[color-mix(in_srgb,var(--background),#333_10%)] relative"
-                    >
-                      <td className="py-4 px-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)] cursor-move">
-                        <FaGripVertical className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]" />
-                      </td>
-                      <td className="py-4 px-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                        {product.id.substring(0, 8)}...
-                      </td>
-                      <td className="py-4 px-2 text-[var(--foreground)]">
-                        {product.name}
-                      </td>
-                      <td className="py-4 px-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                        {product.category}
-                      </td>
-                      <td className="py-4 px-2 text-[var(--foreground)]">
-                        ${product.price.toFixed(2)}
-                      </td>
-                      <td className="py-4 px-2 text-[var(--foreground)]">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            product.stock.length > 10
-                              ? "bg-green-100 text-green-800"
-                              : product.stock.length > 0
-                                ? "bg-orange-100 text-orange-800"
-                                : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {product.stock.length}
-                        </span>
-                      </td>
-                      <td className="py-4 px-2 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => router.push(`/shop/${product.slug}`)}
-                            className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
-                            title="View Product"
-                            onMouseEnter={() => setIsDragDisabled(true)}
-                            onMouseLeave={() => setIsDragDisabled(false)}
+              {userRole === "admin" ? (
+                <Reorder.Group
+                  as="tbody"
+                  axis="y"
+                  values={orderedProducts}
+                  onReorder={handleReorder}
+                  className="relative"
+                >
+                  {!products.error &&
+                    orderedProducts.map((product) => (
+                      <Reorder.Item
+                        key={product.id}
+                        value={product}
+                        as="tr"
+                        dragListener={!isDragDisabled}
+                        dragControls={undefined}
+                        className="border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] hover:bg-[color-mix(in_srgb,var(--background),#333_10%)] relative"
+                      >
+                        <td className="py-4 px-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)] cursor-move">
+                          <FaGripVertical className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]" />
+                        </td>
+                        <td className="py-4 px-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                          {product.id.substring(0, 8)}...
+                        </td>
+                        <td className="py-4 px-2 text-[var(--foreground)]">
+                          {product.name}
+                        </td>
+                        <td className="py-4 px-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                          {product.category}
+                        </td>
+                        <td className="py-4 px-2 text-[var(--foreground)]">
+                          ${product.price.toFixed(2)}
+                        </td>
+                        <td className="py-4 px-2 text-[var(--foreground)]">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              product.stock.length > 10
+                                ? "bg-green-100 text-green-800"
+                                : product.stock.length > 0
+                                  ? "bg-orange-100 text-orange-800"
+                                  : "bg-red-100 text-red-800"
+                            }`}
                           >
-                            <FaEye size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleEditProduct(product)}
-                            className="p-2 bg-amber-100 text-amber-600 rounded hover:bg-amber-200 transition-colors"
-                            title="Edit Product"
-                            onMouseEnter={() => setIsDragDisabled(true)}
-                            onMouseLeave={() => setIsDragDisabled(false)}
+                            {product.stock.length}
+                          </span>
+                        </td>
+                        <td className="py-4 px-2 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => router.push(`/shop/${product.slug}`)}
+                              className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
+                              title="View Product"
+                              onMouseEnter={() => setIsDragDisabled(true)}
+                              onMouseLeave={() => setIsDragDisabled(false)}
+                            >
+                              <FaEye size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleEditProduct(product)}
+                              className="p-2 bg-amber-100 text-amber-600 rounded hover:bg-amber-200 transition-colors"
+                              title="Edit Product"
+                              onMouseEnter={() => setIsDragDisabled(true)}
+                              onMouseLeave={() => setIsDragDisabled(false)}
+                            >
+                              <FaEdit size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="p-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                              title="Delete Product"
+                              onMouseEnter={() => setIsDragDisabled(true)}
+                              onMouseLeave={() => setIsDragDisabled(false)}
+                            >
+                              <FaTrash size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </Reorder.Item>
+                    ))}
+                </Reorder.Group>
+              ) : (
+                <tbody>
+                  {!products.error &&
+                    orderedProducts.map((product) => (
+                      <tr
+                        key={product.id}
+                        className="border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_95%)] hover:bg-[color-mix(in_srgb,var(--background),#333_10%)]"
+                      >
+                        <td className="py-4 px-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                          {product.id.substring(0, 8)}...
+                        </td>
+                        <td className="py-4 px-2 text-[var(--foreground)]">
+                          {product.name}
+                        </td>
+                        <td className="py-4 px-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
+                          {product.category}
+                        </td>
+                        <td className="py-4 px-2 text-[var(--foreground)]">
+                          ${product.price.toFixed(2)}
+                        </td>
+                        <td className="py-4 px-2 text-[var(--foreground)]">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              product.stock.length > 10
+                                ? "bg-green-100 text-green-800"
+                                : product.stock.length > 0
+                                  ? "bg-orange-100 text-orange-800"
+                                  : "bg-red-100 text-red-800"
+                            }`}
                           >
-                            <FaEdit size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteProduct(product.id)}
-                            className="p-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                            title="Delete Product"
-                            onMouseEnter={() => setIsDragDisabled(true)}
-                            onMouseLeave={() => setIsDragDisabled(false)}
-                          >
-                            <FaTrash size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </Reorder.Item>
-                  ))}
-              </Reorder.Group>
+                            {product.stock.length}
+                          </span>
+                        </td>
+                        <td className="py-4 px-2 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => router.push(`/shop/${product.slug}`)}
+                              className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
+                              title="View Product"
+                            >
+                              <FaEye size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleEditProduct(product)}
+                              className="p-2 bg-amber-100 text-amber-600 rounded hover:bg-amber-200 transition-colors"
+                              title="Edit Stock"
+                            >
+                              <FaEdit size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              )}
             </table>
           </div>
         )}

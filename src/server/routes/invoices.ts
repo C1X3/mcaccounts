@@ -367,7 +367,14 @@ export const invoicesRouter = createTRPCRouter({
 
   delete: adminProcedure
     .input(z.object({ orderId: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Admin access required",
+        });
+      }
+
       const order = await prisma.order.findUnique({
         where: { id: input.orderId },
         include: {

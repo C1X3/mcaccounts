@@ -7,11 +7,29 @@ import { cookies } from "next/headers";
 export const createTRPCContext = cache(async () => {
   const cooks = await cookies();
   const authenticatedCookie = cooks.get("authenticated");
-  const isAuthenticated =
-    authenticatedCookie?.value === process.env.ADMIN_PASSWORD;
+
+  // Parse password and role from cookie
+  let isAuthenticated = false;
+  let role: "admin" | "support" | null = null;
+
+  if (authenticatedCookie?.value) {
+    const parts = authenticatedCookie.value.split("&role=");
+    const password = parts[0];
+    const cookieRole = parts[1] as "admin" | "support" | undefined;
+
+    // Validate password matches expected value
+    if (
+      password === process.env.ADMIN_PASSWORD ||
+      password === process.env.SUPPORT_PASSWORD
+    ) {
+      isAuthenticated = true;
+      role = cookieRole || null;
+    }
+  }
 
   return {
     isAuthenticated,
+    role,
   };
 });
 
@@ -20,6 +38,7 @@ const t = initTRPC
     isAuthenticated: Awaited<
       ReturnType<typeof createTRPCContext>
     >["isAuthenticated"];
+    role: Awaited<ReturnType<typeof createTRPCContext>>["role"];
   }>()
   .create({
     /**
@@ -32,12 +51,35 @@ const t = initTRPC
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure;
+
+// Allows both admin and support users
 export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
   // Check for admin password in the context
   if (!ctx.isAuthenticated) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not authorized to access this resource.",
+    });
+  }
+
+  return next();
+});
+
+// Only allows admin users
+export const adminOnlyProcedure = baseProcedure.use(async ({ ctx, next }) => {
+  // Check for admin password in the context
+  if (!ctx.isAuthenticated) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not authorized to access this resource.",
+    });
+  }
+
+  // Check for admin role
+  if (ctx.role !== "admin") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Admin access required",
     });
   }
 
