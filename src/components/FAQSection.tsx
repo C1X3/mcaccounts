@@ -22,7 +22,7 @@ const faqData: FAQItem[] = [
     question: "What do I do if my PayPal order hasn't processed/cancelled?",
     answer: (
       <div>
-        <p className="mb-3">If your PayPal order hasn't been processed or was cancelled, please reach out to us:</p>
+        <p className="mb-3">If your PayPal order hasn&apos;t been processed or was cancelled, please reach out to us:</p>
         <ul className="space-y-2 ml-4">
           <li className="flex items-start">
             <span className="text-[var(--primary-dark)] mr-2">•</span>
@@ -58,7 +58,7 @@ const faqData: FAQItem[] = [
         </li>
         <li className="flex items-start">
           <span className="font-semibold text-[var(--primary-dark)] mr-2">5.</span>
-          <span>Go to your profile's skin settings.</span>
+          <span>Go to your profile&apos;s skin settings.</span>
         </li>
         <li className="flex items-start">
           <span className="font-semibold text-[var(--primary-dark)] mr-2">6.</span>
@@ -165,7 +165,7 @@ const FAQSection = ({ showTitle = false, showContactButtons = false }: FAQSectio
             Still have questions?
           </h2>
           <p className="text-gray-600 mb-6">
-            Can't find the answer you're looking for? Feel free to reach out to our support team.
+            Can&apos;t find the answer you&apos;re looking for? Feel free to reach out to our support team.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a

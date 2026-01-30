@@ -2,7 +2,7 @@ import { z } from "zod";
 import { prisma } from "@/utils/prisma";
 import { adminProcedure, createTRPCRouter } from "../init";
 import { TRPCError } from "@trpc/server";
-import { OrderStatus, PaymentType, CryptoType } from "@generated";
+import { OrderStatus, PaymentType, CryptoType } from "@generated/client";
 
 const invoiceFilterSchema = z.object({
   search: z.string().optional(),
@@ -18,7 +18,9 @@ const invoiceFilterSchema = z.object({
   dateProcessed: z.string().optional(),
 });
 
-function buildInvoiceWhereClause(input: z.infer<typeof invoiceFilterSchema> | undefined): Record<string, unknown> {
+function buildInvoiceWhereClause(
+  input: z.infer<typeof invoiceFilterSchema> | undefined,
+): Record<string, unknown> {
   const where: Record<string, unknown> = {};
   const andConditions: Record<string, unknown>[] = [];
 
@@ -34,28 +36,46 @@ function buildInvoiceWhereClause(input: z.infer<typeof invoiceFilterSchema> | un
     if (Object.values(CryptoType).includes(input.paymentType as CryptoType)) {
       where.paymentType = PaymentType.CRYPTO;
       where.Wallet = { some: { chain: input.paymentType as CryptoType } };
-    } else if (Object.values(PaymentType).includes(input.paymentType as PaymentType)) {
+    } else if (
+      Object.values(PaymentType).includes(input.paymentType as PaymentType)
+    ) {
       where.paymentType = input.paymentType;
     }
   }
 
   if (input?.email) {
-    andConditions.push({ customer: { email: { contains: input.email, mode: "insensitive" } } });
+    andConditions.push({
+      customer: { email: { contains: input.email, mode: "insensitive" } },
+    });
   }
 
   if (input?.discord) {
-    andConditions.push({ customer: { discord: { contains: input.discord, mode: "insensitive" } } });
+    andConditions.push({
+      customer: { discord: { contains: input.discord, mode: "insensitive" } },
+    });
   }
 
   if (input?.affiliate) {
-    andConditions.push({ customer: { affiliate: { code: { contains: input.affiliate, mode: "insensitive" } } } });
+    andConditions.push({
+      customer: {
+        affiliate: { code: { contains: input.affiliate, mode: "insensitive" } },
+      },
+    });
   }
 
   if (input?.product) {
     if (input.product === "OTHER") {
-      andConditions.push({ OrderItem: { some: { product: { discontinued: true } } } });
+      andConditions.push({
+        OrderItem: { some: { product: { discontinued: true } } },
+      });
     } else {
-      andConditions.push({ OrderItem: { some: { product: { name: { equals: input.product, mode: "insensitive" } } } } });
+      andConditions.push({
+        OrderItem: {
+          some: {
+            product: { name: { equals: input.product, mode: "insensitive" } },
+          },
+        },
+      });
     }
   }
 
@@ -64,17 +84,29 @@ function buildInvoiceWhereClause(input: z.infer<typeof invoiceFilterSchema> | un
   }
 
   if (input?.paypalNote) {
-    andConditions.push({ paypalNote: { contains: input.paypalNote, mode: "insensitive" } });
+    andConditions.push({
+      paypalNote: { contains: input.paypalNote, mode: "insensitive" },
+    });
   }
 
   if (input?.invoiceId) {
-    andConditions.push({ id: { contains: input.invoiceId, mode: "insensitive" } });
+    andConditions.push({
+      id: { contains: input.invoiceId, mode: "insensitive" },
+    });
   }
 
   if (input?.dateProcessed) {
     const date = new Date(input.dateProcessed);
-    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+    const startOfDay = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+    );
+    const endOfDay = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate() + 1,
+    );
     andConditions.push({ createdAt: { gte: startOfDay, lt: endOfDay } });
   }
 
@@ -83,10 +115,18 @@ function buildInvoiceWhereClause(input: z.infer<typeof invoiceFilterSchema> | un
       { id: { contains: input.search, mode: "insensitive" } },
       { customer: { email: { contains: input.search, mode: "insensitive" } } },
       { customer: { name: { contains: input.search, mode: "insensitive" } } },
-      { customer: { discord: { contains: input.search, mode: "insensitive" } } },
+      {
+        customer: { discord: { contains: input.search, mode: "insensitive" } },
+      },
       { couponUsed: { contains: input.search, mode: "insensitive" } },
       { paypalNote: { contains: input.search, mode: "insensitive" } },
-      { OrderItem: { some: { product: { name: { contains: input.search, mode: "insensitive" } } } } },
+      {
+        OrderItem: {
+          some: {
+            product: { name: { contains: input.search, mode: "insensitive" } },
+          },
+        },
+      },
     ];
   }
 
@@ -103,18 +143,22 @@ export const invoicesRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const where = buildInvoiceWhereClause(input);
 
-      const completedWhere = { ...where, status: { in: [OrderStatus.PAID, OrderStatus.DELIVERED] } };
+      const completedWhere = {
+        ...where,
+        status: { in: [OrderStatus.PAID, OrderStatus.DELIVERED] },
+      };
       const pendingWhere = { ...where, status: OrderStatus.PENDING };
 
-      const [totalSales, totalCount, pendingCount, completedCount] = await Promise.all([
-        prisma.order.aggregate({
-          where: completedWhere,
-          _sum: { totalPrice: true },
-        }),
-        prisma.order.count({ where }),
-        prisma.order.count({ where: pendingWhere }),
-        prisma.order.count({ where: completedWhere }),
-      ]);
+      const [totalSales, totalCount, pendingCount, completedCount] =
+        await Promise.all([
+          prisma.order.aggregate({
+            where: completedWhere,
+            _sum: { totalPrice: true },
+          }),
+          prisma.order.count({ where }),
+          prisma.order.count({ where: pendingWhere }),
+          prisma.order.count({ where: completedWhere }),
+        ]);
 
       return {
         totalSales: totalSales._sum.totalPrice || 0,
@@ -125,10 +169,14 @@ export const invoicesRouter = createTRPCRouter({
     }),
 
   getPaginated: adminProcedure
-    .input(z.object({
-      page: z.number().min(1).default(1),
-      limit: z.number().min(1).max(100).default(15),
-    }).merge(invoiceFilterSchema))
+    .input(
+      z
+        .object({
+          page: z.number().min(1).default(1),
+          limit: z.number().min(1).max(100).default(15),
+        })
+        .merge(invoiceFilterSchema),
+    )
     .query(async ({ input }) => {
       const { page, limit } = input;
       const skip = (page - 1) * limit;
@@ -251,7 +299,7 @@ export const invoicesRouter = createTRPCRouter({
     }),
 
   getByStatus: adminProcedure
-    .input(z.object({ status: z.nativeEnum(OrderStatus) }))
+    .input(z.object({ status: z.enum(OrderStatus) }))
     .query(async ({ input }) => {
       return await prisma.order.findMany({
         where: { status: input.status },

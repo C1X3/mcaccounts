@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FaTimes } from "react-icons/fa";
-import { OrderStatus, PaymentType, CryptoType } from "@generated";
+import { OrderStatus, PaymentType, CryptoType } from "@generated/browser";
 import { getPaymentMethodName } from "@/utils/invoiceUtils";
 import { PaymentFilterType } from "@/types/invoiceFilters";
 

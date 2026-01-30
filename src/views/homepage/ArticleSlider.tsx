@@ -2,7 +2,7 @@ import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Article } from "@generated";
+import { Article } from "@generated/browser";
 import ProductCard from "@/components/ProductCard";
 import { ProductGetAllOutput } from "@/server/routes/_app";
 

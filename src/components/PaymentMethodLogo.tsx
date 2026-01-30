@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { PaymentType, CryptoType } from "@generated";
+import { PaymentType, CryptoType } from "@generated/browser";
 import { SiBitcoin, SiEthereum, SiLitecoin, SiSolana } from "react-icons/si";
 
 interface PaymentMethodLogoProps {

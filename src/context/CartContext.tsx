@@ -12,7 +12,7 @@ import {
 import toast from 'react-hot-toast';
 import { useTRPC } from '@/server/client';
 import { useMutation } from '@tanstack/react-query';
-import { CouponType } from '@generated';
+import { CouponType } from '@generated/browser';
 
 type CartContextType = {
     items: CartItem[];

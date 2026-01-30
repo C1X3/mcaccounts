@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaPlus, FaEye, FaGripVertical, FaBox } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import ProductFormModal, { ProductFormModalSchema } from "@/components/admin/ProductFormModal";
-import { Product } from "@generated";
+import { Product } from "@generated/browser";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/server/client";
 

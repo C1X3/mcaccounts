@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/server/client";
 import ArticleFormModal, { ArticleFormModalSchema } from "@/components/admin/ArticleFormModal";
-import { Article } from "@generated";
+import { Article } from "@generated/browser";
 
 export default function ArticlesTab() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);

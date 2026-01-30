@@ -28,7 +28,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CryptoType, PaymentType } from "@generated";
+import { CryptoType, PaymentType } from "@generated/browser";
 import { PaymentMethodLogo } from "@/components/PaymentMethodLogo";
 
 // Define time range type

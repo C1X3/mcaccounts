@@ -1,7 +1,7 @@
 import { HydrateClient, prefetch, trpc } from "@/server/server";
 import { prisma } from "@/utils/prisma";
 import OrderPage from "@/views/order/OrderPage";
-import { OrderStatus } from "@generated";
+import { OrderStatus } from "@generated/client";
 import { redirect } from "next/navigation";
 
 const Page = async ({ params, searchParams }: {

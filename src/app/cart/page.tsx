@@ -13,7 +13,7 @@ import Footer from "@/components/Footer";
 import { toast } from "react-hot-toast";
 import { useTRPC } from "@/server/client";
 import { useMutation } from "@tanstack/react-query";
-import { CryptoType, PaymentType } from "@generated";
+import { CryptoType, PaymentType } from "@generated/browser";
 import { useRouter } from "next/navigation";
 import { formatFeePercentage, calculatePaymentFee, calculateTotalWithFee } from "@/utils/fees";
 

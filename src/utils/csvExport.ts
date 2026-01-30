@@ -1,5 +1,9 @@
-import { getPaymentMethodName, getShortenedProductName, formatDateTimeForCSV } from "@/utils/invoiceUtils";
-import { PaymentType } from "@generated";
+import {
+  getPaymentMethodName,
+  getShortenedProductName,
+  formatDateTimeForCSV,
+} from "@/utils/invoiceUtils";
+import { PaymentType } from "@generated/browser";
 
 export interface Invoice {
   id: string;
@@ -40,7 +44,7 @@ export const exportInvoicesToCSV = (invoices: Invoice[]) => {
     "",
     "Buyer Email",
     "Buyer Discord",
-    ""
+    "",
   ].join(",");
 
   // Map invoices to CSV rows
@@ -68,7 +72,7 @@ export const exportInvoicesToCSV = (invoices: Invoice[]) => {
                 invoice.customer?.email || "N/A",
                 invoice.customer?.discord || "N/A",
                 "",
-              ].join(",")
+              ].join(","),
             );
           } else {
             // If no codes (e.g., cancelled), create one row for the item
@@ -89,7 +93,7 @@ export const exportInvoicesToCSV = (invoices: Invoice[]) => {
                 invoice.customer?.email || "N/A",
                 invoice.customer?.discord || "N/A",
                 "",
-              ].join(",")
+              ].join(","),
             ];
           }
         }).join("\n");
@@ -119,12 +123,15 @@ export const exportInvoicesToCSV = (invoices: Invoice[]) => {
   const csvContent = [headers, rows].join("\n");
 
   // Create download link
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', `invoices_${new Date().toISOString().split("T")[0]}.csv`);
-  link.style.visibility = 'hidden';
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `invoices_${new Date().toISOString().split("T")[0]}.csv`,
+  );
+  link.style.visibility = "hidden";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

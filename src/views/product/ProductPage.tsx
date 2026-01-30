@@ -3,7 +3,7 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar/Navbar";
 import FAQSection from "@/components/FAQSection";
-import { Product } from "@generated";
+import { Product } from "@generated/browser";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";

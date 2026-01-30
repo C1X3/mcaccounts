@@ -23,7 +23,7 @@ import { SiLitecoin, SiSolana } from "react-icons/si";
 import { useTRPC } from "@/server/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import QRCode from "react-qr-code";
-import { CryptoType, OrderStatus, PaymentType } from "@generated";
+import { CryptoType, OrderStatus, PaymentType } from "@generated/browser";
 
 // Confirmation thresholds for different crypto types
 const CONFIRMATION_THRESHOLDS: Record<CryptoType, number> = {

@@ -2,7 +2,7 @@
 
 import { useTRPC } from "@/server/client";
 import { couponCodeSchema } from "@/server/schemas/coupon";
-import { CouponType } from "@generated";
+import { CouponType } from "@generated/browser";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";

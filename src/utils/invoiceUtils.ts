@@ -1,4 +1,4 @@
-import { OrderStatus, PaymentType } from "@generated";
+import { OrderStatus, PaymentType } from "@generated/browser";
 
 // Type for invoice in utility functions
 type InvoiceWithWallet = {
@@ -10,9 +10,14 @@ type InvoiceWithWallet = {
 
 // Utility function to get payment method display name including specific crypto types
 export const getPaymentDisplayName = (invoice: InvoiceWithWallet): string => {
-  if (invoice.paymentType === PaymentType.CRYPTO && invoice.Wallet?.[0]?.chain) {
+  if (
+    invoice.paymentType === PaymentType.CRYPTO &&
+    invoice.Wallet?.[0]?.chain
+  ) {
     const cryptoType = invoice.Wallet[0].chain;
-    return cryptoType.charAt(0).toUpperCase() + cryptoType.slice(1).toLowerCase();
+    return (
+      cryptoType.charAt(0).toUpperCase() + cryptoType.slice(1).toLowerCase()
+    );
   }
   return getPaymentMethodName(invoice.paymentType);
 };
@@ -38,9 +43,9 @@ export const formatDateTimeForCSV = (date: Date): string => {
   const day = d.getDate();
   const year = d.getFullYear();
   const hours = d.getHours();
-  const minutes = d.getMinutes().toString().padStart(2, '0');
-  const seconds = d.getSeconds().toString().padStart(2, '0');
-  
+  const minutes = d.getMinutes().toString().padStart(2, "0");
+  const seconds = d.getSeconds().toString().padStart(2, "0");
+
   return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
 };
 
@@ -79,8 +84,11 @@ export const getStatusBadgeClass = (status: OrderStatus): string => {
 };
 
 // Utility function to format date
-export const formatDate = (date: Date, format: 'short' | 'long' = 'short'): string => {
-  if (format === 'long') {
+export const formatDate = (
+  date: Date,
+  format: "short" | "long" = "short",
+): string => {
+  if (format === "long") {
     return new Date(date).toLocaleString("en-US", {
       year: "numeric",
       month: "long",
@@ -89,7 +97,7 @@ export const formatDate = (date: Date, format: 'short' | 'long' = 'short'): stri
       minute: "2-digit",
     });
   }
-  
+
   return new Date(date).toLocaleString("en-US", {
     year: "numeric",
     month: "short",

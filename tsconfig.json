@@ -27,8 +27,8 @@
       "@/*": [
         "./src/*"
       ],
-      "@generated": [
-        "./generated"
+      "@generated/*": [
+        "./generated/*"
       ],
       "@components": [
         "./src/components/*"

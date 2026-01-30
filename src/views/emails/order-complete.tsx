@@ -8,7 +8,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import { PaymentType } from "@generated";
+import { PaymentType } from "@generated/client";
 
 interface OrderCompleteTemplateProps {
   customerName: string;

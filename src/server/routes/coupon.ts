@@ -1,5 +1,5 @@
 import { prisma } from "@/utils/prisma";
-import { CouponType } from "@generated";
+import { CouponType } from "@generated/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
@@ -44,28 +44,26 @@ export const couponRouter = createTRPCRouter({
       return coupon;
     }),
 
-  create: adminProcedure
-    .input(couponCodeSchema)
-    .mutation(async ({ input }) => {
-      // Check if coupon code already exists
-      const existingCoupon = await prisma.coupon.findUnique({
-        where: { code: input.code },
-      });
+  create: adminProcedure.input(couponCodeSchema).mutation(async ({ input }) => {
+    // Check if coupon code already exists
+    const existingCoupon = await prisma.coupon.findUnique({
+      where: { code: input.code },
+    });
 
-      if (existingCoupon) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Coupon code already exists",
-        });
-      }
-
-      return await prisma.coupon.create({
-        data: {
-          ...input,
-          validUntil: new Date(input.validUntil),
-        },
+    if (existingCoupon) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "Coupon code already exists",
       });
-    }),
+    }
+
+    return await prisma.coupon.create({
+      data: {
+        ...input,
+        validUntil: new Date(input.validUntil),
+      },
+    });
+  }),
 
   update: adminProcedure
     .input(
@@ -73,11 +71,11 @@ export const couponRouter = createTRPCRouter({
         id: z.string(),
         code: z.string().optional(),
         discount: z.number().positive().optional(),
-        type: z.nativeEnum(CouponType).optional(),
+        type: z.enum(CouponType).optional(),
         validUntil: z.string().optional(),
         usageLimit: z.number().int().positive().optional(),
         active: z.boolean().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const { id, ...data } = input;

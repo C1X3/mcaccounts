@@ -3,7 +3,7 @@ import { useState } from "react";
 import { FaEdit, FaPlus, FaTicketAlt, FaTrash } from "react-icons/fa";
 
 // Import the actual CouponFormModal component
-import { Coupon } from "@generated";
+import { Coupon } from "@generated/browser";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import CouponFormModal from "./CouponFormModal";

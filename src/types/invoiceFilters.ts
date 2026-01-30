@@ -1,4 +1,4 @@
-import { OrderStatus, PaymentType, CryptoType } from "@generated";
+import { OrderStatus, PaymentType, CryptoType } from "@generated/browser";
 
 // Extended payment filter type that includes individual crypto types
 export type PaymentFilterType = PaymentType | CryptoType | "ALL";

@@ -2,7 +2,7 @@ import { prisma } from "@/utils/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { adminProcedure, createTRPCRouter } from "../init";
-import { OrderStatus } from "@generated";
+import { OrderStatus } from "@generated/client";
 
 const getLast7Days = () => {
   const days = [];
@@ -64,7 +64,7 @@ export const affiliateRouter = createTRPCRouter({
           return {
             date: day.toISOString().split("T")[0],
             clicks: clicks.filter(
-              (c) => c.createdAt >= day && c.createdAt < nextDay
+              (c) => c.createdAt >= day && c.createdAt < nextDay,
             ).length,
           };
         });
@@ -78,14 +78,14 @@ export const affiliateRouter = createTRPCRouter({
               (o) =>
                 o.order &&
                 new Date(o.order.createdAt) >= day &&
-                new Date(o.order.createdAt) < nextDay
+                new Date(o.order.createdAt) < nextDay,
             ).length,
             revenue: orders
               .filter(
                 (o) =>
                   o.order &&
                   new Date(o.order.createdAt) >= day &&
-                  new Date(o.order.createdAt) < nextDay
+                  new Date(o.order.createdAt) < nextDay,
               )
               .reduce((sum, o) => sum + (o.order?.totalPrice || 0), 0),
           };
@@ -94,9 +94,10 @@ export const affiliateRouter = createTRPCRouter({
         const totalOrders = orders.length;
         const totalRevenue = orders.reduce(
           (sum, customer) => sum + (customer.order?.totalPrice || 0),
-          0
+          0,
         );
-        const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+        const averageOrderValue =
+          totalOrders > 0 ? totalRevenue / totalOrders : 0;
         const conversionRate =
           affiliate._count.clicks > 0
             ? (totalOrders / affiliate._count.clicks) * 100
@@ -112,7 +113,7 @@ export const affiliateRouter = createTRPCRouter({
           clicksLast7Days,
           ordersLast7Days,
         };
-      })
+      }),
     );
 
     return affiliatesWithStats;
@@ -182,7 +183,7 @@ export const affiliateRouter = createTRPCRouter({
         return {
           date: day.toISOString().split("T")[0],
           clicks: allClicks.filter(
-            (c) => c.createdAt >= day && c.createdAt < nextDay
+            (c) => c.createdAt >= day && c.createdAt < nextDay,
           ).length,
         };
       });
@@ -196,14 +197,14 @@ export const affiliateRouter = createTRPCRouter({
             (o) =>
               o.order &&
               new Date(o.order.createdAt) >= day &&
-              new Date(o.order.createdAt) < nextDay
+              new Date(o.order.createdAt) < nextDay,
           ).length,
           revenue: orders
             .filter(
               (o) =>
                 o.order &&
                 new Date(o.order.createdAt) >= day &&
-                new Date(o.order.createdAt) < nextDay
+                new Date(o.order.createdAt) < nextDay,
             )
             .reduce((sum, o) => sum + (o.order?.totalPrice || 0), 0),
         };
@@ -214,23 +215,26 @@ export const affiliateRouter = createTRPCRouter({
         .sort(
           (a, b) =>
             new Date(b.order!.createdAt).getTime() -
-            new Date(a.order!.createdAt).getTime()
+            new Date(a.order!.createdAt).getTime(),
         )
         .slice(0, 3)
         .map((o) => ({
           id: o.order!.id,
           totalPrice: o.order!.totalPrice,
           createdAt: o.order!.createdAt,
-          products: o.order!.OrderItem.map((item) => item.product.name).join(", "),
+          products: o
+            .order!.OrderItem.map((item) => item.product.name)
+            .join(", "),
           customerEmail: o.email,
         }));
 
       const totalOrders = orders.length;
       const totalRevenue = orders.reduce(
         (sum, customer) => sum + (customer.order?.totalPrice || 0),
-        0
+        0,
       );
-      const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+      const averageOrderValue =
+        totalOrders > 0 ? totalRevenue / totalOrders : 0;
       const conversionRate =
         affiliate._count.clicks > 0
           ? (totalOrders / affiliate._count.clicks) * 100
@@ -278,14 +282,17 @@ export const affiliateRouter = createTRPCRouter({
         code: z
           .string()
           .min(1)
-          .regex(/^[a-zA-Z0-9_-]+$/, "Code can only contain letters, numbers, underscores, and hyphens"),
+          .regex(
+            /^[a-zA-Z0-9_-]+$/,
+            "Code can only contain letters, numbers, underscores, and hyphens",
+          ),
         name: z.string().min(1),
         active: z.boolean().optional().default(true),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const existingAffiliate = await prisma.affiliate.findFirst({
-        where: { code: { equals: input.code, mode: 'insensitive' } },
+        where: { code: { equals: input.code, mode: "insensitive" } },
       });
 
       if (existingAffiliate) {
@@ -311,11 +318,14 @@ export const affiliateRouter = createTRPCRouter({
         code: z
           .string()
           .min(1)
-          .regex(/^[a-zA-Z0-9_-]+$/, "Code can only contain letters, numbers, underscores, and hyphens")
+          .regex(
+            /^[a-zA-Z0-9_-]+$/,
+            "Code can only contain letters, numbers, underscores, and hyphens",
+          )
           .optional(),
         name: z.string().min(1).optional(),
         active: z.boolean().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
@@ -323,7 +333,7 @@ export const affiliateRouter = createTRPCRouter({
       if (data.code) {
         const existingAffiliate = await prisma.affiliate.findFirst({
           where: {
-            code: { equals: data.code, mode: 'insensitive' },
+            code: { equals: data.code, mode: "insensitive" },
             id: { not: id },
           },
         });

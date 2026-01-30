@@ -17,7 +17,7 @@ import {
 } from "date-fns";
 import { z } from "zod";
 import { adminProcedure, createTRPCRouter } from "../init";
-import { OrderStatus } from "@generated";
+import { OrderStatus } from "@generated/client";
 
 // Define time range schema
 const timeRangeSchema = z.enum([
@@ -40,7 +40,7 @@ const customDateRangeSchema = z.object({
 // Helper function to get date range based on time range
 const getDateRange = (
   timeRange: z.infer<typeof timeRangeSchema>,
-  customRange?: { startDate: string; endDate: string }
+  customRange?: { startDate: string; endDate: string },
 ) => {
   const now = new Date();
 
@@ -107,7 +107,7 @@ export const analyticsRouter = createTRPCRouter({
       z.object({
         timeRange: timeRangeSchema,
         customRange: customDateRangeSchema.optional(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { timeRange, customRange } = input;
@@ -120,10 +120,7 @@ export const analyticsRouter = createTRPCRouter({
             gte: dateRange.start,
             lte: dateRange.end,
           },
-          OR: [
-            { status: OrderStatus.PAID },
-            { status: OrderStatus.DELIVERED },
-          ],
+          OR: [{ status: OrderStatus.PAID }, { status: OrderStatus.DELIVERED }],
         },
         select: {
           totalPrice: true,
@@ -133,7 +130,7 @@ export const analyticsRouter = createTRPCRouter({
 
       const currentTotalAmount = currentPeriodOrders.reduce(
         (sum, order) => sum + order.totalPrice,
-        0
+        0,
       );
 
       // Calculate previous period date range
@@ -158,7 +155,7 @@ export const analyticsRouter = createTRPCRouter({
 
       const previousTotalAmount = previousPeriodOrders.reduce(
         (sum, order) => sum + order.totalPrice,
-        0
+        0,
       );
 
       // Calculate percent change
@@ -181,7 +178,7 @@ export const analyticsRouter = createTRPCRouter({
       z.object({
         timeRange: timeRangeSchema,
         customRange: customDateRangeSchema.optional(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { timeRange, customRange } = input;
@@ -235,44 +232,51 @@ export const analyticsRouter = createTRPCRouter({
       z.object({
         timeRange: timeRangeSchema,
         customRange: customDateRangeSchema.optional(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { timeRange, customRange } = input;
       const dateRange = getDateRange(timeRange, customRange);
       const { start, end } = dateRange;
 
-      let bucketType: 'hour' | 'day' | 'week' | 'month';
+      let bucketType: "hour" | "day" | "week" | "month";
       let bucketSize: number;
 
       const totalHours = differenceInHours(end, start);
       const totalDays = differenceInDays(end, start);
 
-      if (totalHours <= 24) {         // Up to 1 day (e.g., "Last 24 hours")
-        bucketType = 'hour';
-        bucketSize = 3;               // 8 points
-      } else if (totalHours <= 48) {  // Up to 2 days (e.g., "Last 48 hours")
-        bucketType = 'hour';
-        bucketSize = 2;               // 24 points (48/2)
-      } else if (totalDays <= 7) {    // For ranges from >2 days up to 7 days (e.g., "Last 7 days")
+      if (totalHours <= 24) {
+        // Up to 1 day (e.g., "Last 24 hours")
+        bucketType = "hour";
+        bucketSize = 3; // 8 points
+      } else if (totalHours <= 48) {
+        // Up to 2 days (e.g., "Last 48 hours")
+        bucketType = "hour";
+        bucketSize = 2; // 24 points (48/2)
+      } else if (totalDays <= 7) {
+        // For ranges from >2 days up to 7 days (e.g., "Last 7 days")
         // This includes the case where totalDays is exactly 7.
-        bucketType = 'day';
-        bucketSize = 1;               // Will result in up to 7 daily points.
+        bucketType = "day";
+        bucketSize = 1; // Will result in up to 7 daily points.
         // If totalDays is 3, you get 3 points. If 7, you get 7 points.
-      } else if (totalDays <= 30) {   // For ranges >7 days up to 30 days (e.g., "Last 30 days")
-        bucketType = 'day';
-        bucketSize = 1;               // Up to 30 daily points
-      } else if (totalDays <= 90) {   // For ranges >30 days up to 90 days (e.g., "Last 90 days")
-        bucketType = 'week';
-        bucketSize = 1;               // Up to ~13 weekly points
-      } else {                        // For ranges >90 days
-        bucketType = 'month';
-        bucketSize = 1;               // Monthly points
+      } else if (totalDays <= 30) {
+        // For ranges >7 days up to 30 days (e.g., "Last 30 days")
+        bucketType = "day";
+        bucketSize = 1; // Up to 30 daily points
+      } else if (totalDays <= 90) {
+        // For ranges >30 days up to 90 days (e.g., "Last 90 days")
+        bucketType = "week";
+        bucketSize = 1; // Up to ~13 weekly points
+      } else {
+        // For ranges >90 days
+        bucketType = "month";
+        bucketSize = 1; // Monthly points
       }
 
       function floorToBucket(d: Date): Date {
-        if (bucketType === 'hour') {
-          const flooredHour = Math.floor(d.getHours() / bucketSize) * bucketSize;
+        if (bucketType === "hour") {
+          const flooredHour =
+            Math.floor(d.getHours() / bucketSize) * bucketSize;
           return new Date(
             d.getFullYear(),
             d.getMonth(),
@@ -280,26 +284,28 @@ export const analyticsRouter = createTRPCRouter({
             flooredHour,
             0,
             0,
-            0
+            0,
           );
-        } else if (bucketType === 'day') {
+        } else if (bucketType === "day") {
           return startOfDay(d);
-        } else if (bucketType === 'week') {
+        } else if (bucketType === "week") {
           // startOfWeek defaults to Sunday. Use { weekStartsOn: 1 } for Monday.
           return startOfWeek(d, { weekStartsOn: 0 });
-        } else { // 'month'
+        } else {
+          // 'month'
           return startOfMonth(d);
         }
       }
 
       function addOneBucket(d: Date): Date {
-        if (bucketType === 'hour') {
+        if (bucketType === "hour") {
           return addHours(d, bucketSize);
-        } else if (bucketType === 'day') {
+        } else if (bucketType === "day") {
           return addDays(d, bucketSize);
-        } else if (bucketType === 'week') {
+        } else if (bucketType === "week") {
           return addWeeks(d, bucketSize);
-        } else { // 'month'
+        } else {
+          // 'month'
           return addMonths(d, bucketSize);
         }
       }
@@ -317,7 +323,10 @@ export const analyticsRouter = createTRPCRouter({
         const nextCursor = addOneBucket(cursor);
         // Safety break if bucket size is 0 or negative (should not happen with current logic)
         if (nextCursor <= cursor) {
-          console.error("Bucket generation stalled. Check bucketSize and addOneBucket logic.", { bucketType, bucketSize, cursor, nextCursor });
+          console.error(
+            "Bucket generation stalled. Check bucketSize and addOneBucket logic.",
+            { bucketType, bucketSize, cursor, nextCursor },
+          );
           break;
         }
         cursor = nextCursor;
@@ -339,7 +348,7 @@ export const analyticsRouter = createTRPCRouter({
           createdAt: true,
         },
         orderBy: {
-          createdAt: 'asc',
+          createdAt: "asc",
         },
       });
 
@@ -363,14 +372,15 @@ export const analyticsRouter = createTRPCRouter({
         const data = bucketMap[b.toISOString()] || { revenue: 0, orders: 0 };
         let label: string;
 
-        if (bucketType === 'hour') {
-          label = format(b, 'MMM dd HH:00');
-        } else if (bucketType === 'day') {
-          label = format(b, 'MMM dd'); // e.g., "Jun 02"
-        } else if (bucketType === 'week') {
-          label = format(b, 'MMM dd'); // Start of week, e.g., "Jun 01"
-        } else { // 'month'
-          label = format(b, 'MMM yyyy');
+        if (bucketType === "hour") {
+          label = format(b, "MMM dd HH:00");
+        } else if (bucketType === "day") {
+          label = format(b, "MMM dd"); // e.g., "Jun 02"
+        } else if (bucketType === "week") {
+          label = format(b, "MMM dd"); // Start of week, e.g., "Jun 01"
+        } else {
+          // 'month'
+          label = format(b, "MMM yyyy");
         }
 
         return {
@@ -387,7 +397,7 @@ export const analyticsRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().min(1).max(50).default(5),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { limit } = input;
@@ -395,10 +405,7 @@ export const analyticsRouter = createTRPCRouter({
       // Get recent completed orders from database
       const recentOrders = await prisma.order.findMany({
         where: {
-          OR: [
-            { status: OrderStatus.PAID },
-            { status: OrderStatus.DELIVERED },
-          ],
+          OR: [{ status: OrderStatus.PAID }, { status: OrderStatus.DELIVERED }],
         },
         select: {
           id: true,
@@ -436,7 +443,7 @@ export const analyticsRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().min(1).max(20).default(5),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { limit } = input;
@@ -467,32 +474,45 @@ export const analyticsRouter = createTRPCRouter({
       });
 
       // Group by product and calculate totals
-      const productStats = orderItems.reduce((acc, item) => {
-        const productKey = item.productId;
-        const productName = item.product.name;
-        const stripeProductName = item.product.stripeProductName || item.product.name;
-        
-        if (!acc[productKey]) {
-          acc[productKey] = {
-            id: productKey,
-            name: productName,
-            stripeProductName: stripeProductName,
-            totalSales: 0,
-            totalRevenue: 0,
-          };
-        }
-        
-        acc[productKey].totalSales += item.quantity;
-        acc[productKey].totalRevenue += item.price * item.quantity;
-        
-        return acc;
-      }, {} as Record<string, { id: string; name: string; stripeProductName: string; totalSales: number; totalRevenue: number }>);
+      const productStats = orderItems.reduce(
+        (acc, item) => {
+          const productKey = item.productId;
+          const productName = item.product.name;
+          const stripeProductName =
+            item.product.stripeProductName || item.product.name;
+
+          if (!acc[productKey]) {
+            acc[productKey] = {
+              id: productKey,
+              name: productName,
+              stripeProductName: stripeProductName,
+              totalSales: 0,
+              totalRevenue: 0,
+            };
+          }
+
+          acc[productKey].totalSales += item.quantity;
+          acc[productKey].totalRevenue += item.price * item.quantity;
+
+          return acc;
+        },
+        {} as Record<
+          string,
+          {
+            id: string;
+            name: string;
+            stripeProductName: string;
+            totalSales: number;
+            totalRevenue: number;
+          }
+        >,
+      );
 
       // Convert to array and sort by total revenue
       return Object.values(productStats)
         .sort((a, b) => b.totalRevenue - a.totalRevenue)
         .slice(0, limit)
-        .map(product => ({
+        .map((product) => ({
           name: product.name,
           stripeProductName: product.stripeProductName,
           totalSales: product.totalSales,
@@ -505,7 +525,7 @@ export const analyticsRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().min(1).max(20).default(5),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { limit } = input;
@@ -513,10 +533,7 @@ export const analyticsRouter = createTRPCRouter({
       // Get all completed orders with customer info
       const orders = await prisma.order.findMany({
         where: {
-          OR: [
-            { status: OrderStatus.PAID },
-            { status: OrderStatus.DELIVERED },
-          ],
+          OR: [{ status: OrderStatus.PAID }, { status: OrderStatus.DELIVERED }],
         },
         include: {
           customer: {
@@ -528,22 +545,28 @@ export const analyticsRouter = createTRPCRouter({
       });
 
       // Group by customer email and calculate totals
-      const customerStats = orders.reduce((acc, order) => {
-        const customerEmail = order.customer.email;
-        
-        if (!acc[customerEmail]) {
-          acc[customerEmail] = {
-            email: customerEmail,
-            totalOrders: 0,
-            totalSpent: 0,
-          };
-        }
-        
-        acc[customerEmail].totalOrders += 1;
-        acc[customerEmail].totalSpent += order.totalPrice;
-        
-        return acc;
-      }, {} as Record<string, { email: string; totalOrders: number; totalSpent: number }>);
+      const customerStats = orders.reduce(
+        (acc, order) => {
+          const customerEmail = order.customer.email;
+
+          if (!acc[customerEmail]) {
+            acc[customerEmail] = {
+              email: customerEmail,
+              totalOrders: 0,
+              totalSpent: 0,
+            };
+          }
+
+          acc[customerEmail].totalOrders += 1;
+          acc[customerEmail].totalSpent += order.totalPrice;
+
+          return acc;
+        },
+        {} as Record<
+          string,
+          { email: string; totalOrders: number; totalSpent: number }
+        >,
+      );
 
       // Convert to array and sort by total spent
       return Object.values(customerStats)
@@ -557,7 +580,7 @@ export const analyticsRouter = createTRPCRouter({
       z.object({
         timeRange: timeRangeSchema,
         customRange: customDateRangeSchema.optional(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { timeRange, customRange } = input;
@@ -585,9 +608,10 @@ export const analyticsRouter = createTRPCRouter({
       });
 
       // Calculate conversion rate
-      const conversionRate = currentPeriodClicks > 0 
-        ? (currentPeriodOrders / currentPeriodClicks) * 100 
-        : 0;
+      const conversionRate =
+        currentPeriodClicks > 0
+          ? (currentPeriodOrders / currentPeriodClicks) * 100
+          : 0;
 
       // Calculate previous period date range
       const periodLength = dateRange.end.getTime() - dateRange.start.getTime();
@@ -616,21 +640,25 @@ export const analyticsRouter = createTRPCRouter({
       });
 
       // Calculate previous conversion rate
-      const previousConversionRate = previousPeriodClicks > 0
-        ? (previousPeriodOrders / previousPeriodClicks) * 100
-        : 0;
+      const previousConversionRate =
+        previousPeriodClicks > 0
+          ? (previousPeriodOrders / previousPeriodClicks) * 100
+          : 0;
 
       // Calculate percent changes
       let clicksPercentChange = 0;
       if (previousPeriodClicks > 0) {
         clicksPercentChange =
-          ((currentPeriodClicks - previousPeriodClicks) / previousPeriodClicks) * 100;
+          ((currentPeriodClicks - previousPeriodClicks) /
+            previousPeriodClicks) *
+          100;
       }
 
       let conversionPercentChange = 0;
       if (previousConversionRate > 0) {
         conversionPercentChange =
-          ((conversionRate - previousConversionRate) / previousConversionRate) * 100;
+          ((conversionRate - previousConversionRate) / previousConversionRate) *
+          100;
       }
 
       return {
@@ -646,7 +674,7 @@ export const analyticsRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().min(1).max(50).default(10),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { limit } = input;
@@ -654,10 +682,7 @@ export const analyticsRouter = createTRPCRouter({
       // Get recent completed orders from database with all needed info
       const recentOrders = await prisma.order.findMany({
         where: {
-          OR: [
-            { status: OrderStatus.PAID },
-            { status: OrderStatus.DELIVERED },
-          ],
+          OR: [{ status: OrderStatus.PAID }, { status: OrderStatus.DELIVERED }],
         },
         include: {
           customer: {
@@ -691,16 +716,18 @@ export const analyticsRouter = createTRPCRouter({
       // Map to the format expected by the UI
       return recentOrders.map((order) => {
         // Sort order items by price (most expensive first)
-        const sortedItems = [...order.OrderItem].sort((a, b) => b.price - a.price);
+        const sortedItems = [...order.OrderItem].sort(
+          (a, b) => b.price - a.price,
+        );
         const mostExpensive = sortedItems[0];
         const additionalCount = sortedItems.length - 1;
-        
+
         return {
           id: order.id,
-          products: mostExpensive 
-            ? (additionalCount > 0 
-                ? `${mostExpensive.product.name} +${additionalCount} more`
-                : mostExpensive.product.name)
+          products: mostExpensive
+            ? additionalCount > 0
+              ? `${mostExpensive.product.name} +${additionalCount} more`
+              : mostExpensive.product.name
             : "N/A",
           price: order.totalPrice,
           paymentType: order.paymentType,

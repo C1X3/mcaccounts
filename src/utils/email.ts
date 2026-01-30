@@ -2,7 +2,7 @@ import { render } from "@react-email/render";
 import nodemailer from "nodemailer";
 import { OrderCompleteTemplate } from "@/views/emails/order-complete";
 import { CodeReplacedTemplate } from "@/views/emails/code-replaced";
-import { PaymentType } from "@generated";
+import { PaymentType } from "@generated/client";
 
 // Configure the email transport
 const transporter = nodemailer.createTransport({
@@ -81,7 +81,7 @@ export async function sendOrderCompleteEmail({
       totalWithFee,
       paymentType,
       orderDate,
-    })
+    }),
   );
 
   return sendEmail({
@@ -114,7 +114,7 @@ export async function sendCodeReplacedEmail({
       productName,
       oldCode,
       newCode,
-    })
+    }),
   );
 
   return sendEmail({

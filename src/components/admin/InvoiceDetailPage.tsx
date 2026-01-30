@@ -4,7 +4,7 @@ import { useTRPC } from "@/server/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useState, useEffect } from "react";
 import { FaBox, FaUser, FaShoppingBag, FaFileInvoice, FaTrash, FaTimes, FaTimesCircle, FaExclamationTriangle, FaEye, FaCopy, FaSync, FaExternalLinkAlt } from "react-icons/fa";
-import { OrderStatus, PaymentType } from "@generated";
+import { OrderStatus, PaymentType } from "@generated/browser";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import Image from "next/image";
