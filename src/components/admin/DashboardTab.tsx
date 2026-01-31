@@ -75,7 +75,7 @@ export default function DashboardTab() {
   // Load crypto balances SEPARATELY (slow, don't block other data)
   const cryptoBalances = useQuery({
     ...trpc.crypto.getCryptoBalance.queryOptions(),
-    enabled: authQuery.data === true,
+    enabled: authQuery.data?.authenticated === true,
     staleTime: 30000, // Cache for 30 seconds
     retry: 1, // Only retry once if it fails
   });
@@ -88,7 +88,7 @@ export default function DashboardTab() {
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
     }),
-    enabled: authQuery.data === true,
+    enabled: authQuery.data?.authenticated === true,
   });
 
   const ordersData = useQuery({
@@ -99,7 +99,7 @@ export default function DashboardTab() {
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
     }),
-    enabled: authQuery.data === true,
+    enabled: authQuery.data?.authenticated === true,
   });
 
   const clickStatsData = useQuery({
@@ -110,7 +110,7 @@ export default function DashboardTab() {
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
     }),
-    enabled: authQuery.data === true,
+    enabled: authQuery.data?.authenticated === true,
   });
 
   const chartDataQuery = useQuery({
@@ -121,14 +121,14 @@ export default function DashboardTab() {
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
     }),
-    enabled: authQuery.data === true,
+    enabled: authQuery.data?.authenticated === true,
   });
 
   const recentOrdersData = useQuery({
     ...trpc.analytics.getRecentOrders.queryOptions({
       limit: 5,
     }),
-    enabled: authQuery.data === true,
+    enabled: authQuery.data?.authenticated === true,
   });
 
   // Add the new analytics queries
@@ -136,21 +136,21 @@ export default function DashboardTab() {
     ...trpc.analytics.getLatestCompletedOrders.queryOptions({
       limit: 5,
     }),
-    enabled: authQuery.data === true,
+    enabled: authQuery.data?.authenticated === true,
   });
 
   const topProductsData = useQuery({
     ...trpc.analytics.getTopProducts.queryOptions({
       limit: 5,
     }),
-    enabled: authQuery.data === true,
+    enabled: authQuery.data?.authenticated === true,
   });
 
   const topCustomersData = useQuery({
     ...trpc.analytics.getTopCustomers.queryOptions({
       limit: 5,
     }),
-    enabled: authQuery.data === true,
+    enabled: authQuery.data?.authenticated === true,
   });
 
   // Add the mutation for sending crypto balance

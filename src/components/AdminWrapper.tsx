@@ -137,10 +137,7 @@ export default function AdminWrapper({
   );
 
   const isAuth =
-    isAuthenticated.data === true ||
-    (typeof isAuthenticated.data === "object" &&
-      "authenticated" in isAuthenticated.data &&
-      isAuthenticated.data.authenticated === true);
+    isAuthenticated.data?.authenticated === true;
 
   return (
     <AdminProvider userRole={userRole}>
