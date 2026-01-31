@@ -12,7 +12,8 @@
     "deploy": "prisma migrate deploy",
     "postinstall": "prisma generate",
     "server": "tsx --tsconfig tsconfig.server.json src/server.ts",
-    "balances": "tsx --tsconfig tsconfig.server.json src/balances.ts"
+    "balances": "tsx --tsconfig tsconfig.server.json src/balances.ts",
+    "noop": "node -e \"process.exit(0)\""
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.978.0",
