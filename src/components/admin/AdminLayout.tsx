@@ -7,6 +7,7 @@ import {
   FaTachometerAlt,
   FaNewspaper,
   FaUsers,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import Navbar from "@/components/Navbar/Navbar";
 import { useRouter } from "next/navigation";
@@ -65,6 +66,11 @@ export default function AdminLayout({
     }
   };
 
+  const handleLogout = () => {
+    document.cookie = "authenticated=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    window.location.reload();
+  };
+
   if (!isAuthenticated) {
     return <>{authComponent}</>;
   }
@@ -81,8 +87,8 @@ export default function AdminLayout({
       <div className="flex flex-1 pt-[120px] pb-20 md:pb-0">
         {/* Desktop Sidebar Only - z-20 below navbar */}
         <aside className="hidden md:block fixed left-0 top-0 h-full w-64 bg-[var(--background)] border-r border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] z-20 pt-[120px]">
-          <div className="h-full overflow-y-auto">
-            <div className="p-4">
+          <div className="h-full overflow-y-auto flex flex-col">
+            <div className="p-4 flex-1">
               <h2 className="text-xl font-bold text-[var(--foreground)] mb-6">
                 Admin Panel
               </h2>
@@ -102,6 +108,15 @@ export default function AdminLayout({
                   </button>
                 ))}
               </nav>
+            </div>
+            <div className="p-4 border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-red-500 hover:bg-red-500/10 transition-colors"
+              >
+                <span className="text-lg"><FaSignOutAlt /></span>
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </aside>
@@ -136,6 +151,12 @@ export default function AdminLayout({
               <span className="text-2xl">{tab.icon}</span>
             </button>
           ))}
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center px-3 py-2 rounded-lg transition-colors min-w-0 flex-1 text-red-500 hover:text-red-400"
+          >
+            <span className="text-2xl"><FaSignOutAlt /></span>
+          </button>
         </nav>
       </div>
     </div>
