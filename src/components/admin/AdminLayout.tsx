@@ -70,15 +70,15 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Fixed Navbar */}
-      <div className="fixed top-0 left-0 right-0 z-20 bg-[var(--background)]">
+      {/* Fixed Navbar - z-30 to stay above sidebar */}
+      <div className="fixed top-0 left-0 right-0 z-30 bg-[var(--background)]">
         <header className="py-2 flex items-center justify-center relative flex-col">
           <Navbar />
         </header>
       </div>
 
       <div className="flex flex-1 pt-[120px] pb-20 md:pb-0">
-        {/* Desktop Sidebar Only */}
+        {/* Desktop Sidebar Only - z-20 below navbar */}
         <aside className="hidden md:block fixed left-0 top-0 h-full w-64 bg-[var(--background)] border-r border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] z-20 pt-[120px]">
           <div className="h-full overflow-y-auto">
             <div className="p-4">
@@ -120,7 +120,7 @@ export default function AdminLayout({
       </div>
 
       {/* Mobile Bottom Tab Bar - Primary mobile navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[var(--background)] border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] md:hidden z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-[var(--background)] border-t border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] md:hidden z-40">
         <nav className="flex justify-around items-center py-2">
           {tabs.map((tab) => (
             <button

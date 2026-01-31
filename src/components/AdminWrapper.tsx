@@ -3,7 +3,7 @@
 import { useTRPC } from "@/server/client";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { FaLock } from "react-icons/fa";
 import AdminLayout from "./admin/AdminLayout";
@@ -52,14 +52,12 @@ export default function AdminWrapper({
   };
 
   // Update role when authentication status changes
-  if (
-    isAuthenticated.data &&
-    typeof isAuthenticated.data === "object" &&
-    "role" in isAuthenticated.data &&
-    !userRole
-  ) {
-    setUserRole(isAuthenticated.data.role as "admin" | "support" | null);
-  }
+  const authRole = isAuthenticated.data?.role as "admin" | "support" | null | undefined;
+  useEffect(() => {
+    if (authRole !== undefined) {
+      setUserRole(authRole);
+    }
+  }, [authRole]);
 
   const authComponent = (
     <AnimatePresence>
