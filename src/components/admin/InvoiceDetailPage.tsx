@@ -497,53 +497,6 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
         </div>
       </div>
 
-      {/* Notes Section */}
-      <div className="mt-6 bg-admin-card rounded-lg shadow text-foreground p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <FaStickyNote className="text-text-muted" />
-          <h2 className="font-semibold">Notes</h2>
-        </div>
-
-        {/* Add Note Form */}
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
-            placeholder="Add a note..."
-            className="flex-1 px-3 py-2 border border-admin-card-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info focus:border-transparent"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !isAddingNote) {
-                handleAddNote();
-              }
-            }}
-          />
-          <button
-            onClick={handleAddNote}
-            disabled={isAddingNote || !newNote.trim()}
-            className="px-4 py-2 bg-info text-white rounded-lg hover:bg-info-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isAddingNote ? "Adding..." : "Add Note"}
-          </button>
-        </div>
-
-        {/* Existing Notes */}
-        {invoice.notes && invoice.notes.length > 0 ? (
-          <div className="space-y-2">
-            {invoice.notes.map((note: string, index: number) => (
-              <div
-                key={index}
-                className="bg-surface-muted rounded-lg p-3 border border-admin-card-border"
-              >
-                <p className="text-sm font-mono text-gray-700">{note}</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-text-muted text-sm">No notes yet.</p>
-        )}
-      </div>
-
       {/* Items Section */}
       <div className="mt-6 bg-admin-card rounded-lg shadow text-foreground p-4">
         <div className="flex items-center gap-2 mb-4">
@@ -619,6 +572,54 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
             </tbody>
           </table>
         </div>
+      </div>
+
+
+      {/* Notes Section */}
+      <div className="mt-6 bg-admin-card rounded-lg shadow text-foreground p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <FaStickyNote className="text-text-muted" />
+          <h2 className="font-semibold">Notes</h2>
+        </div>
+
+        {/* Add Note Form */}
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder="Add a note..."
+            className="flex-1 px-3 py-2 border border-admin-card-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info focus:border-transparent"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !isAddingNote) {
+                handleAddNote();
+              }
+            }}
+          />
+          <button
+            onClick={handleAddNote}
+            disabled={isAddingNote || !newNote.trim()}
+            className="px-4 py-2 bg-info text-white rounded-lg hover:bg-info-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isAddingNote ? "Adding..." : "Add Note"}
+          </button>
+        </div>
+
+        {/* Existing Notes */}
+        {invoice.notes && invoice.notes.length > 0 ? (
+          <div className="space-y-2">
+            {invoice.notes.map((note: string, index: number) => (
+              <div
+                key={index}
+                className="bg-surface-muted rounded-lg p-3 border border-admin-card-border"
+              >
+                <p className="text-sm font-mono text-gray-700">{note}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-text-muted text-sm">No notes yet.</p>
+        )}
       </div>
 
       {/* Confirmation Modal */}
