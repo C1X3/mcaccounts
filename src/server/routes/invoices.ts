@@ -382,6 +382,38 @@ export const invoicesRouter = createTRPCRouter({
       });
     }),
 
+  addNote: adminProcedure
+    .input(z.object({ orderId: z.string(), note: z.string().min(1) }))
+    .mutation(async ({ input, ctx }) => {
+      const order = await prisma.order.findUnique({
+        where: { id: input.orderId },
+      });
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invoice not found",
+        });
+      }
+
+      // Format the note with timestamp and role
+      const now = new Date();
+      const formattedDate = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+      const roleLabel = ctx.role === "admin" ? "ADMIN" : "SUPPORT";
+      const formattedNote = `${input.note} - ${formattedDate} (${roleLabel})`;
+
+      await prisma.order.update({
+        where: { id: input.orderId },
+        data: {
+          notes: {
+            push: formattedNote,
+          },
+        },
+      });
+
+      return { success: true, note: formattedNote };
+    }),
+
   delete: adminProcedure
     .input(z.object({ orderId: z.string() }))
     .mutation(async ({ input, ctx }) => {

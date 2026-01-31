@@ -56,6 +56,7 @@ model Order {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   paypalNote  String?
+  notes       String[]  @default([])
 
   OrderItem   OrderItem[]
 

@@ -16,6 +16,7 @@ import {
   FaCopy,
   FaSync,
   FaExternalLinkAlt,
+  FaStickyNote,
 } from "react-icons/fa";
 import { OrderStatus, PaymentType } from "@generated/browser";
 import Link from "next/link";
@@ -52,6 +53,7 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
     code: string;
     name: string;
   } | null>(null);
+  const [newNote, setNewNote] = useState("");
 
   const {
     data: invoice,
@@ -150,6 +152,30 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
       },
     }),
   );
+
+  const { mutate: addNote, isPending: isAddingNote } = useMutation(
+    trpc.invoices.addNote.mutationOptions({
+      onSuccess: () => {
+        toast.success("Note added successfully");
+        setNewNote("");
+        window.location.reload();
+      },
+      onError: () => {
+        toast.error("Failed to add note");
+      },
+    }),
+  );
+
+  const handleAddNote = () => {
+    if (!newNote.trim()) {
+      toast.error("Please enter a note");
+      return;
+    }
+    addNote({
+      orderId: id,
+      note: newNote.trim(),
+    });
+  };
 
   const handleReplaceCode = async (
     itemId: string,
@@ -469,6 +495,53 @@ export default function InvoiceDetailPage({ id }: { id: string }) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Notes Section */}
+      <div className="mt-6 bg-white rounded-lg shadow text-black p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <FaStickyNote className="text-gray-500" />
+          <h2 className="font-semibold">Notes</h2>
+        </div>
+
+        {/* Add Note Form */}
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder="Add a note..."
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !isAddingNote) {
+                handleAddNote();
+              }
+            }}
+          />
+          <button
+            onClick={handleAddNote}
+            disabled={isAddingNote || !newNote.trim()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isAddingNote ? "Adding..." : "Add Note"}
+          </button>
+        </div>
+
+        {/* Existing Notes */}
+        {invoice.notes && invoice.notes.length > 0 ? (
+          <div className="space-y-2">
+            {invoice.notes.map((note: string, index: number) => (
+              <div
+                key={index}
+                className="bg-gray-50 rounded-lg p-3 border border-gray-200"
+              >
+                <p className="text-sm font-mono text-gray-700">{note}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-sm">No notes yet.</p>
+        )}
       </div>
 
       {/* Items Section */}

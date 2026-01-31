@@ -496,7 +496,7 @@ export const checkoutRouter = createTRPCRouter({
 
   manuallyProcessInvoice: adminProcedure
     .input(z.object({ orderId: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const order = await prisma.order.findUnique({
         where: { id: input.orderId },
         include: {
@@ -555,9 +555,20 @@ export const checkoutRouter = createTRPCRouter({
         });
       }
 
+      // Format the manual processing note with timestamp
+      const now = new Date();
+      const formattedDate = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+      const roleLabel = ctx.role === "admin" ? "ADMIN" : "SUPPORT";
+      const processingNote = `MANUALLY PROCESSED - ${formattedDate} (${roleLabel})`;
+
       await prisma.order.update({
         where: { id: input.orderId },
-        data: { status: OrderStatus.PAID },
+        data: {
+          status: OrderStatus.PAID,
+          notes: {
+            push: processingNote,
+          },
+        },
       });
 
       // Fetch the updated order with codes for email
@@ -634,7 +645,7 @@ export const checkoutRouter = createTRPCRouter({
         codeIndex: z.number(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const orderItem = await prisma.orderItem.findUnique({
         where: { id: input.itemId },
         include: {
@@ -676,6 +687,12 @@ export const checkoutRouter = createTRPCRouter({
       const updatedCodes = [...orderItem.codes];
       updatedCodes[input.codeIndex] = newCode;
 
+      // Format the replacement note with timestamp
+      const now = new Date();
+      const formattedDate = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+      const roleLabel = ctx.role === "admin" ? "ADMIN" : "SUPPORT";
+      const replacementNote = `REPLACED: ${oldCode} -> ${newCode}: ${formattedDate} (${roleLabel})`;
+
       // Update the order item with the new codes array and remove code from product stock
       await prisma.$transaction([
         // Update the order item with new codes
@@ -689,6 +706,15 @@ export const checkoutRouter = createTRPCRouter({
           data: {
             stock: {
               set: orderItem.product.stock.slice(1), // Remove the first code
+            },
+          },
+        }),
+        // Add the replacement note to the order
+        prisma.order.update({
+          where: { id: orderItem.order.id },
+          data: {
+            notes: {
+              push: replacementNote,
             },
           },
         }),

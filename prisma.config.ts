@@ -7,7 +7,7 @@ loadEnvConfig(projectDir);
 export default defineConfig({
   schema: "database",
   migrations: {
-    path: "prisma/migrations",
+    path: "database/migrations",
   },
   datasource: {
     url: env("DATABASE_URL"),
