@@ -88,9 +88,12 @@ const getDateRange = (
           message: "Custom date range is required for custom time range",
         });
       }
+      // Use startOfDay/endOfDay so single-day ranges are midnight-to-midnight (not same instant = $0)
+      const customStart = new Date(customRange.startDate + "T00:00:00");
+      const customEnd = new Date(customRange.endDate + "T00:00:00");
       return {
-        start: new Date(customRange.startDate),
-        end: new Date(customRange.endDate),
+        start: startOfDay(customStart),
+        end: endOfDay(customEnd),
       };
     default:
       return {

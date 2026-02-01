@@ -1,8 +1,11 @@
 import { useTRPC } from "@/server/client";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { DateRange } from "react-date-range";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 import {
   FaArrowDown,
   FaArrowUp,
@@ -59,6 +62,38 @@ export default function DashboardTab() {
   const [showTimeRangeDropdown, setShowTimeRangeDropdown] = useState(false);
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
+  const timeRangeDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!showTimeRangeDropdown) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        timeRangeDropdownRef.current &&
+        !timeRangeDropdownRef.current.contains(e.target as Node)
+      ) {
+        setShowTimeRangeDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showTimeRangeDropdown]);
+
+  // DateRange expects Date objects; derive from custom strings for the calendar
+  const customDateRange = useMemo(
+    () => [
+      {
+        startDate: customStartDate
+          ? new Date(customStartDate + "T00:00:00")
+          : new Date(),
+        endDate: customEndDate
+          ? new Date(customEndDate + "T00:00:00")
+          : new Date(),
+        key: "selection" as const,
+      },
+    ],
+    [customStartDate, customEndDate],
+  );
 
   // New state for crypto withdrawal dialog
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
@@ -80,6 +115,12 @@ export default function DashboardTab() {
     retry: 1, // Only retry once if it fails
   });
 
+  // Don't fetch analytics when Custom is selected but no dates chosen yet (avoids 500 from empty range)
+  const canFetchAnalytics = Boolean(
+    authQuery.data?.authenticated === true &&
+      (timeRange !== "custom" || (customStartDate && customEndDate)),
+  );
+
   const revenueData = useQuery({
     ...trpc.analytics.getRevenue.queryOptions({
       timeRange,
@@ -88,7 +129,7 @@ export default function DashboardTab() {
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
     }),
-    enabled: authQuery.data?.authenticated === true,
+    enabled: canFetchAnalytics,
   });
 
   const ordersData = useQuery({
@@ -99,7 +140,7 @@ export default function DashboardTab() {
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
     }),
-    enabled: authQuery.data?.authenticated === true,
+    enabled: canFetchAnalytics,
   });
 
   const clickStatsData = useQuery({
@@ -110,7 +151,7 @@ export default function DashboardTab() {
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
     }),
-    enabled: authQuery.data?.authenticated === true,
+    enabled: canFetchAnalytics,
   });
 
   const chartDataQuery = useQuery({
@@ -121,7 +162,7 @@ export default function DashboardTab() {
           ? { startDate: customStartDate, endDate: customEndDate }
           : undefined,
     }),
-    enabled: authQuery.data?.authenticated === true,
+    enabled: canFetchAnalytics,
   });
 
   const recentOrdersData = useQuery({
@@ -199,11 +240,17 @@ export default function DashboardTab() {
 
   const handleTimeRangeChange = (range: TimeRangeType) => {
     setTimeRange(range);
-    setShowTimeRangeDropdown(false);
-  };
-
-  const handleApplyCustomRange = () => {
-    if (customStartDate && customEndDate) {
+    // When switching to Custom with no range yet, default to today so we show data instead of nothing
+    if (range === "custom") {
+      setCustomStartDate((prev) =>
+        prev ? prev : format(new Date(), "yyyy-MM-dd"),
+      );
+      setCustomEndDate((prev) =>
+        prev ? prev : format(new Date(), "yyyy-MM-dd"),
+      );
+    }
+    // Only close dropdown when selecting a preset; keep open for Custom so user can pick range
+    if (range !== "custom") {
       setShowTimeRangeDropdown(false);
     }
   };
@@ -217,6 +264,15 @@ export default function DashboardTab() {
   };
 
   const getTimeRangeLabel = () => {
+    if (timeRange === "custom" && customStartDate && customEndDate) {
+      const start = new Date(customStartDate + "T00:00:00");
+      const end = new Date(customEndDate + "T00:00:00");
+      // Single day: show "Jan 1, 2026" instead of "Jan 1, 2026 - Jan 1, 2026"
+      if (customStartDate === customEndDate) {
+        return format(start, "MMM d, yyyy");
+      }
+      return `${format(start, "MMM d, yyyy")} - ${format(end, "MMM d, yyyy")}`;
+    }
     return (
       timeRangeOptions.find((option) => option.value === timeRange)?.label ||
       "Custom Range"
@@ -263,7 +319,7 @@ export default function DashboardTab() {
       )}
       {/* Page Header with Time Range Selector */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="relative">
+        <div className="relative" ref={timeRangeDropdownRef}>
           <button
             onClick={() => setShowTimeRangeDropdown(!showTimeRangeDropdown)}
             className="flex items-center gap-2 px-4 py-2 bg-admin-card rounded-lg border border-admin-card-border text-foreground"
@@ -273,48 +329,57 @@ export default function DashboardTab() {
           </button>
 
           {showTimeRangeDropdown && (
-            <div className="absolute top-full left-0 mt-1 w-64 bg-admin-card border border-admin-card-border rounded-lg shadow-lg z-10">
-              <div className="p-2">
-                {timeRangeOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleTimeRangeChange(option.value)}
-                    className={`w-full text-left px-3 py-2 rounded-md ${timeRange === option.value ? "bg-[var(--primary)] text-white" : "hover:bg-admin-hover text-foreground"}`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-
-                {timeRange === "custom" && (
-                  <div className="p-2 space-y-2 border-t border-[color-mix(in_srgb,var(--foreground),var,--background_85%)] mt-2">
-                    <div>
-                      <label className="block text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                        Start Date
-                      </label>
-                      <input
-                        type="date"
-                        value={customStartDate}
-                        onChange={(e) => setCustomStartDate(e.target.value)}
-                        className="w-full p-2 bg-admin-card border border-admin-card-border rounded text-foreground"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                        End Date
-                      </label>
-                      <input
-                        type="date"
-                        value={customEndDate}
-                        onChange={(e) => setCustomEndDate(e.target.value)}
-                        className="w-full p-2 bg-admin-card border border-admin-card-border rounded text-foreground"
-                      />
-                    </div>
+            <div
+              className={`absolute top-full left-0 mt-1 bg-admin-card border border-admin-card-border rounded-lg shadow-lg z-10 ${timeRange === "custom" ? "w-fit" : "w-48"}`}
+            >
+              <div
+                className={
+                  timeRange === "custom"
+                    ? "flex w-full gap-0 items-stretch"
+                    : ""
+                }
+              >
+                <div
+                  className={
+                    timeRange === "custom"
+                      ? "w-48 flex-shrink-0 border-r border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] p-2"
+                      : "p-2"
+                  }
+                >
+                  {timeRangeOptions.map((option) => (
                     <button
-                      onClick={handleApplyCustomRange}
-                      className="w-full px-3 py-2 bg-[var(--primary)] text-white rounded-md"
+                      key={option.value}
+                      onClick={() => handleTimeRangeChange(option.value)}
+                      className={`w-full text-left px-3 py-2 rounded-md whitespace-nowrap ${timeRange === option.value ? "bg-[var(--primary)] text-white" : "hover:bg-admin-hover text-foreground"}`}
                     >
-                      Apply
+                      {option.label}
                     </button>
+                  ))}
+                </div>
+                {timeRange === "custom" && (
+                  <div
+                    className="flex-shrink-0 p-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <DateRange
+                      ranges={customDateRange}
+                      onChange={(item) => {
+                        const { startDate, endDate } = item.selection;
+                        if (startDate) {
+                          setCustomStartDate(format(startDate, "yyyy-MM-dd"));
+                        }
+                        setCustomEndDate(
+                          endDate ? format(endDate, "yyyy-MM-dd") : "",
+                        );
+                      }}
+                      moveRangeOnFirstSelection={false}
+                      months={1}
+                      direction="horizontal"
+                      rangeColors={["var(--primary)"]}
+                      showDateDisplay={false}
+                      maxDate={new Date()}
+                      className="admin-date-range"
+                    />
                   </div>
                 )}
               </div>
