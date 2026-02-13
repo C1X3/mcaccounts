@@ -30,7 +30,7 @@ const TopProductsSection = ({
           transition={{ duration: 0.6 }}
         >
           <div className="inline-block mb-4">
-            <span className="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white">
+            <span className="bg-[var(--primary)] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white">
               Customers&apos; Favorites
             </span>
           </div>
@@ -73,7 +73,7 @@ const TopProductsSection = ({
               boxShadow: "0 0 20px rgba(var(--primary-rgb),0.5)",
             }}
             whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] hover:from-[color-mix(in_srgb,var(--primary),#000_10%)] hover:to-[color-mix(in_srgb,var(--secondary),#000_10%)] text-white font-bold rounded-xl shadow-lg shadow-[var(--primary-rgb)]/30 transition-all"
+            className="inline-flex items-center px-8 py-4 bg-[var(--primary)] hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] text-white font-bold rounded-xl shadow-lg shadow-[var(--primary-rgb)]/30 transition-all"
           >
             Explore All Products
             <FaChevronRight className="ml-2" />

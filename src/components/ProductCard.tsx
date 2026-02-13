@@ -216,7 +216,7 @@ const ProductCard = ({
           </AnimatePresence>
         </motion.div>
         {product.badge && (
-          <div className="absolute top-3 left-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+          <div className="absolute top-3 left-3 bg-[var(--primary)] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
             {product.badge}
           </div>
         )}
