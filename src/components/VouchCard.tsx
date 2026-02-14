@@ -38,7 +38,7 @@ const VouchCard = ({ vouch }: VouchCardProps) => {
         </div>
 
         <p className="text-[color-mix(in_srgb,var(--foreground),#888_30%)] text-sm">
-          &quot;{vouch.message}&quot;
+          {vouch.message}
         </p>
       </div>
     </div>
