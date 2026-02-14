@@ -96,7 +96,7 @@ const Footer = () => {
 
         <div className="border-t border-[var(--surface-light)] mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-500 text-sm">
-            &copy; 2025 MCCapes. All rights reserved.
+            &copy; 2026 MCCapes. All rights reserved.
           </p>
           <p className="text-gray-500 text-sm mt-4 md:mt-0">mccapes.net</p>
         </div>
