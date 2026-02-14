@@ -2,7 +2,6 @@ import { YouTubeApiResponse, YouTubeChannel } from "@/types/youtube";
 
 export const YOUTUBE_CHANNEL_IDS = [
   "UCZf6WKzzljB8LHyPHTPxHLA", // Dewier
-  "UC2KjRb9JQ9yAEIw8HMFUENg", // Blissolic
   "UCzS1DfNk-TnKXe2oRWxRRXw", // MC Capes
   "UChNwsP0_jTrqYgq74DyfCIg", // ItzBlake
   "UCXHiZWRYzDnzZE_Xm_1OEVA", // Vaes
@@ -11,9 +10,9 @@ export const YOUTUBE_CHANNEL_IDS = [
   "UCgBfyINBxXscTfTfXI0AT5Q", // C1X3
   "UCgQyImwRQU2iRlJc_Rz3rMg", // Kryptoke
   "UCH8CkkLskdhprMPO4EYsHVw", // Flowtives
-  "UCNv8iB--rsS_CwfJ2T8B3qw", // IcyNutella
   "UC2gufCjSyNihNbOEZE50bwQ", // JudeLow
-  "UCi8bmLd969MYvmrgAGndHaQ", // ItzOwo
+  "UC2MjV-x5Lc4ELCtypv6BVgw", // qBedwars
+  "UC1FteQvZl19GKHCcBoOR5Jw", // Kornelic
 ];
 
 export const YOUTUBE_API_CONFIG = {
