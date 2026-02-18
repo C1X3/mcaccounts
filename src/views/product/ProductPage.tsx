@@ -339,20 +339,20 @@ const ProductPage = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="glass-effect rounded-xl p-8 text-center">
             <div className="text-5xl font-bold text-[var(--foreground)] mb-2">
-              4,189
+              5,792
             </div>
             <div className="text-gray-600 font-medium">Products Sold</div>
           </div>
           <div className="glass-effect rounded-xl p-8 text-center">
             <div className="text-5xl font-bold text-[var(--foreground)] mb-2">
-              4,189
+              4,187
             </div>
-            <div className="text-gray-600 font-medium">Happy Customers</div>
+            <div className="text-gray-600 font-medium">Unique Customers</div>
           </div>
           <div className="glass-effect rounded-xl p-8 text-center">
             <div className="flex items-center justify-center mb-2">
               <span className="text-5xl font-bold text-[var(--foreground)] mr-2">
-                4.99
+                4.97
               </span>
               <FaStar className="text-warning" size={28} />
             </div>
