@@ -297,7 +297,7 @@ const ProductPage = ({
                 disabled={stockCount! <= 0}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex-1 px-6 py-3 bg-[var(--accent)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--accent),#000_10%)] transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Buy Now
               </motion.button>
