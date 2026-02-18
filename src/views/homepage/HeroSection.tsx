@@ -200,6 +200,34 @@ const HeroSection = () => {
               ))}
             </div>
 
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute rounded-full bg-primary-700"
+                  style={{
+                    width: 20 + Math.random() * 100,
+                    height: 20 + Math.random() * 100,
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                  }}
+                  animate={{
+                    x: [0, Math.random() * 60 - 30],
+                    y: [0, Math.random() * 60 - 30],
+                    scale: [1, 1 + Math.random() * 0.3],
+                    opacity: [0.6, 0.9, 0.6],
+                  }}
+                  transition={{
+                    duration: 8 + Math.random() * 7,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "easeInOut",
+                  }}
+                />
+              ))}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
               {/* LEFT SIDE: ABOUT TEXT */}
               <motion.div

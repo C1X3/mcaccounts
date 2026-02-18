@@ -233,7 +233,7 @@ const CartPage = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white rounded-xl hover:shadow-lg transition-all"
+                  className="px-8 py-3 bg-[var(--primary)] hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] text-white rounded-xl hover:shadow-lg transition-all"
                 >
                   Browse Products
                 </motion.button>
@@ -509,7 +509,7 @@ const CartPage = () => {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => setShowPaymentOptions(true)}
-                          className="w-full py-4 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"
+                          className="w-full py-4 bg-success text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"
                         >
                           Proceed to Checkout
                         </motion.button>

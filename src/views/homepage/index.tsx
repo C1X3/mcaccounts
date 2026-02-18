@@ -28,13 +28,13 @@ const HomePage = () => {
         <HeroSection />
       </header>
 
-      {/* 3. Product Article Slider */}
+      {/* 3. Top Selling Products Section */}
+      <TopProductsSection products={products || []} />
+
+      {/* 4. Product Article Slider */}
       {articles && articles.length > 0 && (
         <ArticleSlider articles={articles} products={products || []} />
       )}
-
-      {/* 4. Top Selling Products Section */}
-      <TopProductsSection products={products || []} />
 
       {/* 2. YouTuber/Partner Section */}
       <section className="py-16 bg-white relative overflow-hidden">

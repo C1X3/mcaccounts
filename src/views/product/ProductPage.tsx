@@ -14,6 +14,10 @@ import {
   FaMinus,
   FaPlus,
   FaShoppingCart,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaTimesCircle,
+  FaBox,
 } from "react-icons/fa";
 import { useCart } from "@/context/CartContext";
 
@@ -91,68 +95,68 @@ const ProductPage = ({
         {/* Back button */}
         <button
           onClick={() => router.push("/shop")}
-          className="mb-8 flex items-center gap-2 text-[color-mix(in_srgb,var(--foreground),#888_40%)] hover:text-[var(--accent)] transition-colors"
+          className="mb-8 inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gray-200 text-[color-mix(in_srgb,var(--foreground),#888_40%)] hover:text-[var(--accent)] hover:bg-gray-300 shadow-md border border-gray-300 transition-colors"
         >
           <FaArrowLeft size={14} />
           <span>Back to Shop</span>
         </button>
 
-        {/* Product details */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product images */}
-          <div>
-            <div className="mb-4 rounded-2xl overflow-hidden bg-gradient-to-br from-[color-mix(in_srgb,var(--primary),#fff_90%)] to-[color-mix(in_srgb,var(--secondary),#fff_90%)] p-8 h-[400px] flex items-center justify-center">
+        {/* Product details: on lg, row 1 = image + info (centered with image), row 2 = thumbnails */}
+        <div className="grid grid-cols-1 gap-x-12 gap-y-4 lg:grid-cols-2 lg:grid-rows-[auto_auto]">
+          {/* Image box - lg row 1 col 1 */}
+          <div className="lg:col-start-1 lg:row-start-1">
+            <div className="mb-4 w-full max-w-[1000px] aspect-[1000/700] rounded-2xl overflow-hidden ring-2 ring-black ring-inset">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="relative w-full h-full"
+                className="relative w-full h-full rounded-2xl overflow-hidden"
               >
                 <Image
                   src={selectedImage}
                   alt={product.name}
                   fill
                   style={{ objectFit: "cover" }}
-                  className="drop-shadow-[0_10px_20px_rgba(0,0,0,0.25)]"
+                  className="rounded-2xl drop-shadow-[0_10px_20px_rgba(0,0,0,0.25)]"
                 />
               </motion.div>
             </div>
+          </div>
 
-            {/* Thumbnail images */}
-            <div className="flex gap-4 mt-4">
+          {/* Thumbnails - lg row 2 col 1 */}
+          <div className="flex gap-4 mt-4 lg:col-start-1 lg:row-start-2">
+            <button
+              className={`border-2 rounded-lg overflow-hidden w-24 h-24 flex items-center justify-center ${selectedImage === product.image ? "border-[var(--accent)]" : "border-transparent"}`}
+              onClick={() => setSelectedImage(product.image)}
+            >
+              <Image
+                src={product.image}
+                alt={`${product.name} thumbnail`}
+                width={80}
+                height={80}
+                style={{ objectFit: "contain" }}
+              />
+            </button>
+
+            {product.additionalImages?.map((img, index) => (
               <button
-                className={`border-2 rounded-lg overflow-hidden w-24 h-24 flex items-center justify-center ${selectedImage === product.image ? "border-[var(--accent)]" : "border-transparent"}`}
-                onClick={() => setSelectedImage(product.image)}
+                key={index}
+                className={`rounded-xl overflow-hidden w-24 h-24 flex items-center justify-center ring-2 ring-offset-1 ${selectedImage === img ? "ring-[var(--accent)]" : "ring-gray-300/60"}`}
+                onClick={() => setSelectedImage(img)}
               >
                 <Image
-                  src={product.image}
-                  alt={`${product.name} thumbnail`}
+                  src={img}
+                  alt={`${product.name} alternative view ${index + 1}`}
                   width={80}
                   height={80}
                   style={{ objectFit: "contain" }}
                 />
               </button>
-
-              {product.additionalImages?.map((img, index) => (
-                <button
-                  key={index}
-                  className={`border-2 rounded-lg overflow-hidden w-24 h-24 flex items-center justify-center ${selectedImage === img ? "border-[var(--accent)]" : "border-transparent"}`}
-                  onClick={() => setSelectedImage(img)}
-                >
-                  <Image
-                    src={img}
-                    alt={`${product.name} alternative view ${index + 1}`}
-                    width={80}
-                    height={80}
-                    style={{ objectFit: "contain" }}
-                  />
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
 
-          {/* Product information */}
-          <div>
+          {/* Product information - lg row 1 col 2, same height as image box, content vertically centered */}
+          <div className="lg:col-start-2 lg:row-start-1 w-full max-w-[1000px] lg:aspect-[1000/700] flex flex-col justify-center">
             <div className="mb-4">
               <span className="inline-block px-3 py-1 bg-[color-mix(in_srgb,var(--background),#333_15%)] text-[var(--foreground)] text-xs font-medium rounded-full">
                 {product.category}
@@ -177,9 +181,6 @@ const ProductPage = ({
                   />
                 ))}
               </div>
-              <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                {product.rating} rating
-              </span>
             </div>
 
             <div className="text-3xl font-bold text-[var(--foreground)] mb-6">
@@ -195,104 +196,84 @@ const ProductPage = ({
               <p className="text-[var(--foreground)] mb-4">
                 {product.description}
               </p>
+            </div>
 
-              <ul className="space-y-2">
-                {product.features?.map((feature, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-2 text-[color-mix(in_srgb,var(--foreground),#888_20%)]"
+            <div className="mb-8 flex flex-wrap items-center gap-6">
+              {/* Stock status: icon + label + count */}
+              <div className="flex items-center gap-3">
+                {stockCount! > 10 ? (
+                  <FaCheckCircle className="text-green-500 shrink-0" size={24} />
+                ) : stockCount! > 0 ? (
+                  <FaExclamationTriangle className="text-amber-500 shrink-0" size={24} />
+                ) : (
+                  <FaTimesCircle className="text-red-500 shrink-0" size={24} />
+                )}
+                <div>
+                  <span
+                    className={`font-semibold ${stockCount! > 10 ? "text-green-600" : stockCount! > 0 ? "text-amber-600" : "text-red-600"}`}
                   >
-                    <span className="text-[var(--accent)] mt-1">•</span>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mb-6">
-              <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] mb-2">
-                Availability:
-                <span
-                  className={`ml-2 font-medium ${stockCount! > 10 ? "text-green-500" : stockCount! > 0 ? "text-orange-500" : "text-red-500"}`}
-                >
-                  {stockCount! > 10
-                    ? "In Stock"
-                    : stockCount! > 0
-                      ? "Low Stock"
-                      : "Out of Stock"}
-                </span>
-              </div>
-              <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
-                {stockCount! > 0
-                  ? `${stockCount} units remaining`
-                  : "Currently unavailable"}
-              </div>
-            </div>
-
-            {stockCount! > 0 && (
-              <div className="mb-8">
-                <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] mb-2">
-                  Quantity:
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center">
-                    <button
-                      onClick={handleDecrementQuantity}
-                      disabled={quantity <= 1}
-                      className="
-                                                    h-10 w-10 
-                                                    flex items-center justify-center 
-                                                    bg-[color-mix(in_srgb,var(--background),#333_15%)] 
-                                                    rounded-l-lg 
-                                                    border border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] 
-                                                    text-[var(--foreground)] 
-                                                    disabled:opacity-50
-                                                "
-                    >
-                      <FaMinus size={12} />
-                    </button>
-                    <input
-                      type="number"
-                      min="1"
-                      max={stockCount}
-                      value={quantity}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        if (!isNaN(val) && val >= 1 && val <= stockCount!) {
-                          setQuantity(val);
-                        }
-                      }}
-                      className="
-                                                    h-10 w-16 
-                                                    text-center 
-                                                    bg-[color-mix(in_srgb,var(--background),#333_15%)] 
-                                                    border-t border-b border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] 
-                                                    text-[var(--foreground)]
-                                                    outline-none
-                                                "
-                    />
-                    <button
-                      onClick={handleIncrementQuantity}
-                      disabled={quantity >= stockCount!}
-                      className="
-                                                    h-10 w-10 
-                                                    flex items-center justify-center 
-                                                    bg-[color-mix(in_srgb,var(--background),#333_15%)] 
-                                                    rounded-r-lg 
-                                                    border border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] 
-                                                    text-[var(--foreground)] 
-                                                    disabled:opacity-50
-                                                "
-                    >
-                      <FaPlus size={12} />
-                    </button>
-                  </div>
-                  <div className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-sm">
-                    {stockCount! < 10 && `Only ${stockCount} available`}
-                  </div>
+                    {stockCount! > 10
+                      ? "In Stock"
+                      : stockCount! > 0
+                        ? "Low Stock"
+                        : "Out of Stock"}
+                  </span>
+                  {stockCount! > 0 ? (
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      <span className="font-medium tabular-nums text-[var(--foreground)]">{stockCount}</span> units left in stock
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500 mt-0.5">Currently unavailable</p>
+                  )}
                 </div>
               </div>
-            )}
+
+              {stockCount! > 0 && (
+                <>
+                  <div className="h-6 w-px bg-gray-300" aria-hidden />
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-600">Quantity</span>
+                    <div className="flex items-center rounded-lg border border-gray-300 overflow-hidden bg-white">
+                      <button
+                        onClick={handleDecrementQuantity}
+                        disabled={quantity <= 1}
+                        className="h-10 w-10 flex items-center justify-center text-[var(--foreground)] hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+                        aria-label="Decrease quantity"
+                      >
+                        <FaMinus size={12} />
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        max={stockCount}
+                        value={quantity}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          if (!isNaN(val) && val >= 1 && val <= stockCount!) {
+                            setQuantity(val);
+                          }
+                        }}
+                        className="h-10 w-12 text-center border-x border-gray-300 bg-transparent text-[var(--foreground)] font-medium tabular-nums outline-none"
+                        aria-label="Quantity"
+                      />
+                      <button
+                        onClick={handleIncrementQuantity}
+                        disabled={quantity >= stockCount!}
+                        className="h-10 w-10 flex items-center justify-center text-[var(--foreground)] hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+                        aria-label="Increase quantity"
+                      >
+                        <FaPlus size={12} />
+                      </button>
+                    </div>
+                    {stockCount! < 10 && (
+                      <span className="text-sm text-amber-600" role="status">
+                        max {stockCount}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <motion.button
@@ -300,7 +281,7 @@ const ProductPage = ({
                 disabled={stockCount! <= 0 || isAdding}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex-1 px-6 py-3 bg-[var(--primary)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 bg-gray-300 text-gray-800 rounded-xl hover:bg-gray-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isAdding ? (
                   <span>Adding...</span>
@@ -324,6 +305,19 @@ const ProductPage = ({
           </div>
         </div>
       </main>
+
+      {/* FAQ Section */}
+      <div className="container mx-auto px-4 pb-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-2">
+            <span className="gradient-text">Frequently Asked Questions</span>
+          </h2>
+          <p className="text-gray-600">
+            Find answers to common questions about our services
+          </p>
+        </div>
+        <FAQSection showTitle={false} showContactButtons={false} />
+      </div>
 
       {/* Customer Stats Section */}
       <div className="container mx-auto px-4 pb-16">
@@ -359,19 +353,6 @@ const ProductPage = ({
             <div className="text-gray-600 font-medium">Average Rating</div>
           </div>
         </div>
-      </div>
-
-      {/* FAQ Section */}
-      <div className="container mx-auto px-4 pb-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-2">
-            <span className="gradient-text">Frequently Asked Questions</span>
-          </h2>
-          <p className="text-gray-600">
-            Find answers to common questions about our services
-          </p>
-        </div>
-        <FAQSection showTitle={false} showContactButtons={false} />
       </div>
 
       <Footer />

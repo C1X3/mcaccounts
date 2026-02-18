@@ -178,7 +178,7 @@ const ShopPage = () => {
                     onClick={handleAddToCart}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
-                    className="flex items-center gap-2 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] hover:from-[color-mix(in_srgb,var(--primary),#000_10%)] hover:to-[color-mix(in_srgb,var(--secondary),#000_10%)] text-white font-medium py-3 px-6 rounded-xl shadow-lg shadow-[var(--primary-rgb)]/20"
+                    className="flex items-center gap-2 bg-[var(--primary)] hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] text-white font-medium py-3 px-6 rounded-xl shadow-lg"
                   >
                     <FaShoppingCart size={18} />
                     Add to Cart

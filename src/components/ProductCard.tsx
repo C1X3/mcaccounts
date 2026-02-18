@@ -61,9 +61,6 @@ const ProductCard = ({
           />
         ))}
       </div>
-      <span className="text-[color-mix(in_srgb,var(--foreground),#888_40%)] text-xs">
-        {product.rating}
-      </span>
     </div>
   );
 

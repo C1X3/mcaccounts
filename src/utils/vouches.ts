@@ -2062,7 +2062,7 @@ export const mockVouches: Vouch[] = [
   },
   {
     id: "258",
-    author: "᲼",
+    author: ".",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
     message: "+Vouch\nThanks to Suvox and Aidan for helping me very patient and very friendly",
