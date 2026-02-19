@@ -38,7 +38,6 @@ const DiscordFloatingWidget = () => {
       initial={{ x: CARD_WIDTH }}
       animate={{ x: hovered ? 0 : CARD_WIDTH }}
       transition={{ type: "spring", stiffness: 280, damping: 28 }}
-      onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Tab — small button, top-left of the widget */}
@@ -46,6 +45,7 @@ const DiscordFloatingWidget = () => {
         className="flex-shrink-0 flex items-center justify-center text-white rounded-l-2xl cursor-pointer shadow-xl"
         style={{ background: "#5865F2", width: 52, height: 56, marginTop: 28 }}
         aria-label="Join our Discord server"
+        onMouseEnter={() => setHovered(true)}
       >
         <DiscordIcon />
       </div>
