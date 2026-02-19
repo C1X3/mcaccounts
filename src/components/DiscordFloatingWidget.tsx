@@ -20,9 +20,16 @@ const DiscordIcon = () => (
 
 const DiscordFloatingWidget = () => {
   const [hovered, setHovered] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const pathname = usePathname();
 
   if (pathname.startsWith("/admin")) return null;
+  if (dismissed) return null;
+
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDismissed(true);
+  };
 
   return (
     <motion.div
@@ -45,9 +52,18 @@ const DiscordFloatingWidget = () => {
 
       {/* Card — right side, top-left corner square to meet the tab */}
       <div
-        className="flex-1 overflow-hidden rounded-2xl shadow-2xl"
+        className="relative flex-1 overflow-hidden rounded-2xl shadow-2xl"
         style={{ background: "#2b2d31" }}
       >
+        <button
+          onClick={handleDismiss}
+          aria-label="Dismiss Discord widget"
+          className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center rounded-full bg-[#4e5058] hover:bg-[#6d6f78] text-[#b5bac1] hover:text-white transition-colors z-10"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-2.5 h-2.5">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
         {/* Banner */}
         <div
           className="h-14 w-full"
