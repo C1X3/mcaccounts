@@ -22,20 +22,18 @@ const links = [
 
 const Footer = () => {
   return (
-    <footer className="bg-[var(--surface-dark)] text-[var(--foreground)] py-12 relative overflow-hidden">
-      <motion.div className="absolute inset-0 bg-gradient-to-b from-[var(--surface)] to-transparent opacity-10 z-0" />
-
-      <div className="container mx-auto px-6 relative z-10">
+    <footer className="bg-[var(--color-background-darker)] text-gray-100 py-12">
+      <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h5 className="text-xl font-bold mb-4 gradient-text">MCAccounts</h5>
-            <p className="text-text-muted mb-4">
+            <h5 className="text-xl font-bold mb-4 text-gray-100">MCAccounts</h5>
+            <p className="text-gray-400 mb-4">
               Premium Minecraft cosmetics for dedicated players.
             </p>
           </div>
 
           <div>
-            <h5 className="text-lg font-semibold mb-4 text-[var(--accent-light)]">
+            <h5 className="text-lg font-semibold mb-4 text-gray-300">
               Shop
             </h5>
             <ul className="space-y-2">
@@ -43,7 +41,7 @@ const Footer = () => {
                 <li key={item.label}>
                   <a
                     href={item.href}
-                    className="text-text-muted hover:text-black transition-colors flex items-center"
+                    className="text-gray-400 hover:text-gray-200 transition-colors flex items-center"
                   >
                     <FaChevronRight className="mr-2 text-xs" />
                     {item.label}
@@ -54,7 +52,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h5 className="text-lg font-semibold mb-4 text-[var(--accent-light)]">
+            <h5 className="text-lg font-semibold mb-4 text-gray-300">
               Company
             </h5>{" "}
             <ul className="space-y-2">
@@ -67,7 +65,7 @@ const Footer = () => {
                 <li key={item.label}>
                   <a
                     href={item.href}
-                    className="text-text-muted hover:text-black transition-colors flex items-center"
+                    className="text-gray-400 hover:text-gray-200 transition-colors flex items-center"
                   >
                     <FaChevronRight className="mr-2 text-xs" />
                     {item.label}
@@ -78,13 +76,13 @@ const Footer = () => {
           </div>
 
           <div>
-            <h5 className="text-lg font-semibold mb-4 text-[var(--tertiary-light)]">
+            <h5 className="text-lg font-semibold mb-4 text-gray-300">
               Contact Us
             </h5>
             <address className="not-italic space-y-2">
               <a
                 href="mailto:mcaccountsbusiness@gmail.com"
-                className="text-text-muted hover:text-black transition-colors flex items-center"
+                className="text-gray-400 hover:text-gray-200 transition-colors flex items-center"
               >
                 <FaChevronRight className="mr-2 text-xs" />
                 mcaccountsbusiness@gmail.com
@@ -93,7 +91,7 @@ const Footer = () => {
                 href="https://discord.maccounts.net"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-text-muted hover:text-black transition-colors flex items-center"
+                className="text-gray-400 hover:text-gray-200 transition-colors flex items-center"
               >
                 <FaChevronRight className="mr-2 text-xs" />
                 Discord
@@ -102,7 +100,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-[var(--surface-light)] mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-[var(--color-surface)]/60 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-500 text-sm">
             &copy; 2026 MCAccounts. All rights reserved.
           </p>

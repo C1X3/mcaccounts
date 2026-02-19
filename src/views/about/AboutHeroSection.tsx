@@ -71,7 +71,7 @@ const AboutHeroSection = () => {
               whileHover={{ scale: 1.03, y: -5 }}
             >
               <motion.div
-                className="shrink-0 p-4 bg-white/80 rounded-xl border border-[color-mix(in_srgb,var(--primary),transparent_80%)] shadow-md group-hover:shadow-lg transition-all duration-300"
+                className="shrink-0 p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--accent)]/40 shadow-md group-hover:shadow-lg group-hover:border-[var(--accent-light)] transition-all duration-300"
                 whileHover={{ rotate: [0, -10, 10, -10, 0] }}
                 transition={{ duration: 0.5 }}
               >

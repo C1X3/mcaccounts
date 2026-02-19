@@ -107,26 +107,13 @@ const ArticleSlider = ({ articles, products, hideProduct = false }: ArticleSlide
 
   return (
     <>
-      <section className="py-16 bg-[var(--surface-light)] relative px-4 sm:px-6 lg:px-8">
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-tr from-[var(--primary-light)] to-transparent z-0"
-          animate={{
-            opacity: [0.03, 0.06, 0.03],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            repeatType: "reverse",
-            ease: "easeInOut",
-          }}
-        />
-
+      <section className="py-20 relative px-4 sm:px-6 lg:px-8 overflow-hidden" style={{ background: "#0a1e35" }}>
         <div className="container mx-auto relative">
           {/* Navigation buttons - desktop only */}
           <div className="hidden md:block absolute left-4 top-1/2 transform -translate-y-1/2 z-20">
             <button
               onClick={goToPrevious}
-              className="w-12 h-12 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+              className="w-12 h-12 bg-[var(--color-surface)] border border-[var(--accent)]/40 hover:border-[var(--accent-light)] shadow-lg rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
               disabled={articles.length <= 1}
             >
               <svg
@@ -147,7 +134,7 @@ const ArticleSlider = ({ articles, products, hideProduct = false }: ArticleSlide
           <div className="hidden md:block absolute right-4 top-1/2 transform -translate-y-1/2 z-20">
             <button
               onClick={goToNext}
-              className="w-12 h-12 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+              className="w-12 h-12 bg-[var(--color-surface)] border border-[var(--accent)]/40 hover:border-[var(--accent-light)] shadow-lg rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
               disabled={articles.length <= 1}
             >
               <svg
@@ -294,7 +281,7 @@ const ArticleSlider = ({ articles, products, hideProduct = false }: ArticleSlide
                   className="minecraft-btn"
                   whileHover={{
                     scale: 1.03,
-                    boxShadow: "0 10px 20px rgba(74, 222, 128, 0.2)",
+                    boxShadow: "0 10px 20px rgba(234, 179, 8, 0.2)",
                     transition: { duration: 0.2 },
                   }}
                   whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
@@ -307,7 +294,7 @@ const ArticleSlider = ({ articles, products, hideProduct = false }: ArticleSlide
                   className="minecraft-btn"
                   whileHover={{
                     scale: 1.03,
-                    boxShadow: "0 10px 20px rgba(74, 222, 128, 0.2)",
+                    boxShadow: "0 10px 20px rgba(234, 179, 8, 0.2)",
                     transition: { duration: 0.2 },
                   }}
                   whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
@@ -346,9 +333,9 @@ const ArticleSlider = ({ articles, products, hideProduct = false }: ArticleSlide
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-black/60 z-50 flex items-center justify-center p-4">
           <motion.div
-            className="bg-white rounded-lg w-[95vw] h-[95vh] overflow-hidden shadow-xl flex flex-col"
+            className="bg-[var(--color-background-darker)] border border-[var(--accent)]/40 rounded-lg w-[95vw] h-[95vh] overflow-hidden shadow-xl flex flex-col"
             initial={{ opacity: 0, y: 10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}

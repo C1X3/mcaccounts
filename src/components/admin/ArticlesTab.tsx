@@ -10,7 +10,7 @@ import {
   FaToggleOff,
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/server/client";
 import ArticleFormModal, {
   ArticleFormModalSchema,
@@ -27,6 +27,16 @@ export default function ArticlesTab() {
   const [isDragDisabled, setIsDragDisabled] = useState(false);
 
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const invalidateArticleQueries = () => {
+    queryClient.invalidateQueries({
+      queryKey: trpc.article.getAll.queryKey({ includeInactive: false }),
+    });
+    queryClient.invalidateQueries({
+      queryKey: trpc.article.getAll.queryKey({ includeInactive: true }),
+    });
+  };
 
   // tRPC article hooks
   const articles = useQuery(
@@ -36,7 +46,7 @@ export default function ArticlesTab() {
     trpc.article.delete.mutationOptions({
       onSuccess: () => {
         toast.success("Article deleted successfully");
-        articles.refetch();
+        invalidateArticleQueries();
       },
       onError: (error) => {
         toast.error(`Error deleting article: ${error.message}`);
@@ -49,6 +59,7 @@ export default function ArticlesTab() {
     trpc.article.updateOrders.mutationOptions({
       onSuccess: () => {
         toast.success("Article order updated successfully");
+        invalidateArticleQueries();
       },
       onError: (error) => {
         toast.error(`Error updating article order: ${error.message}`);
@@ -65,7 +76,7 @@ export default function ArticlesTab() {
     trpc.article.update.mutationOptions({
       onSuccess: () => {
         toast.success("Article status updated successfully");
-        articles.refetch();
+        invalidateArticleQueries();
       },
       onError: (error) => {
         toast.error(`Error updating article status: ${error.message}`);
@@ -126,7 +137,7 @@ export default function ArticlesTab() {
   };
 
   const handleModalSuccess = () => {
-    articles.refetch();
+    invalidateArticleQueries();
     handleModalClose();
   };
 

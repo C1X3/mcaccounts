@@ -128,7 +128,7 @@ const ProductCard = ({
               <button
                 onClick={handleAddToCart}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="p-2 bg-[var(--primary)] text-white rounded-lg hover:opacity-90 transition-opacity"
+                className="p-2 bg-[var(--primary)] text-[var(--text-on-primary)] rounded-lg hover:opacity-90 transition-opacity"
               >
                 <FaShoppingCart size={16} />
               </button>
@@ -143,21 +143,20 @@ const ProductCard = ({
   return (
     <motion.div
       key={product.id}
-      className="group bg-gradient-to-b from-[color-mix(in_srgb,var(--background),#333_15%)] to-[var(--background)] rounded-2xl overflow-hidden border border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] hover:border-[var(--accent)] backdrop-blur-sm cursor-pointer"
+      className="group bg-[var(--color-surface)] backdrop-blur-md rounded-2xl overflow-hidden border border-[var(--accent)]/40 hover:border-[var(--accent-light)] cursor-pointer"
       variants={{
         hidden: { opacity: 0, y: 30 },
         visible: { opacity: 1, y: 0 },
       }}
       whileHover={{
         y: -8,
-        boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-        borderColor: "var(--accent)",
+        boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
       }}
       onClick={handleNavigateToProduct}
     >
       {/* Image with hover and full-fill effect */}
       <div
-        className="relative h-60 overflow-hidden bg-gradient-to-br from-[color-mix(in_srgb,var(--primary),#fff_80%)] to-[color-mix(in_srgb,var(--secondary),#fff_80%)] bg-opacity-10"
+        className="relative h-60 overflow-hidden bg-[var(--color-background-darker)] dot-pattern"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
@@ -186,7 +185,7 @@ const ProductCard = ({
           </AnimatePresence>
         </motion.div>
         {product.badge && (
-          <div className="absolute top-3 left-3 bg-[var(--primary)] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+          <div className="absolute top-3 left-3 bg-[var(--primary)] text-[var(--text-on-primary)] text-xs font-bold px-3 py-1 rounded-full z-10">
             {product.badge}
           </div>
         )}
@@ -226,7 +225,7 @@ const ProductCard = ({
             <button
               type="button"
               onClick={handleAddToCart}
-              className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center"
+              className="p-2.5 bg-[var(--primary)] text-[var(--text-on-primary)] rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center"
             >
               <motion.div
                 whileHover={{ scale: 1.1 }}
@@ -239,7 +238,7 @@ const ProductCard = ({
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center gap-2"
+              className="p-2.5 bg-[var(--primary)] text-[var(--text-on-primary)] rounded-xl hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors flex items-center gap-2"
               onClick={(e) => {
                 e.stopPropagation();
                 router.push(`/shop/${product.slug}`);

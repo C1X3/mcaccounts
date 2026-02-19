@@ -153,7 +153,7 @@ const VideosCarousel = () => {
         <div className="flex justify-center mt-8">
           <Link
             href="/videos"
-            className="text-sm font-semibold px-5 py-2 rounded-full bg-gray-100 border border-gray-200 text-gray-500 hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] shadow-sm transition-all duration-200"
+            className="text-sm font-semibold px-5 py-2 rounded-full bg-gray-100 border border-gray-200 text-gray-500 hover:bg-[var(--primary)] hover:text-[var(--text-on-primary)] hover:border-[var(--primary)] shadow-sm transition-all duration-200"
           >
             View All
           </Link>

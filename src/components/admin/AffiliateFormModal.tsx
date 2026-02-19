@@ -191,7 +191,7 @@ export default function AffiliateFormModal({
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 px-4 py-3 rounded-lg bg-[var(--primary)] text-white hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-3 rounded-lg bg-[var(--primary)] text-[var(--text-on-primary)] hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending
                 ? "Saving..."

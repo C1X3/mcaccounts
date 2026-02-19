@@ -69,7 +69,7 @@ const NavIcons = () => {
             />
             <button
               type="submit"
-              className="flex items-center justify-center py-3 px-4 rounded-r-full border-2 border-l-0 border-[var(--primary)] bg-[var(--primary)] text-white hover:bg-[var(--primary-light)] transition-colors"
+              className="flex items-center justify-center py-3 px-4 rounded-r-full border-2 border-l-0 border-[var(--primary)] bg-[var(--primary)] text-[var(--text-on-primary)] hover:bg-[var(--primary-light)] transition-colors"
             >
               <FaSearch className="text-lg" />
             </button>
@@ -86,7 +86,7 @@ const NavIcons = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setSearchOpen(true)}
-            className="p-2 rounded-full bg-[var(--surface)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white transition-colors flex items-center justify-center"
+            className="p-2 rounded-full bg-[var(--surface)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--text-on-primary)] transition-colors flex items-center justify-center"
           >
             <FaSearch className="text-lg" />
           </motion.button>
@@ -96,11 +96,11 @@ const NavIcons = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="p-2 rounded-full bg-[var(--surface)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white transition-colors relative flex items-center justify-center"
+          className="p-2 rounded-full bg-[var(--surface)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--text-on-primary)] transition-colors relative flex items-center justify-center"
         >
           <FaShoppingCart className="text-lg" />
           {totalItems > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[var(--accent)] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 bg-[var(--accent)] text-[var(--text-on-primary)] text-xs w-5 h-5 rounded-full flex items-center justify-center">
               {totalItems}
             </span>
           )}

@@ -1,32 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  /* Base Colors */
-  --color-background: #cfe3d9;
-  --color-background-darker: #b8d1c6;
-  --color-foreground: #1e293b;
+  /* Base Colors - Dark Blue & Bright Rich Gold (exclusive club) */
+  --color-background: #0f2744;
+  --color-background-darker: #0a1e35;
+  --color-background-light: #1a365d;
+  --color-foreground: #f5f0e6;
 
   /* Surface Colors (Cards/Containers) */
-  --color-surface: #ffffff;
-  --color-surface-elevated: #f8fafc;
-  --color-surface-muted: #f1f5f9;
+  --color-surface: #1a365d;
+  --color-surface-elevated: #1e3a5f;
+  --color-surface-muted: #0f2744;
 
-  /* Primary Brand (Green Scale) */
-  --color-primary-50: #f0fdf4;
-  --color-primary-100: #dcfce7;
-  --color-primary-200: #bbf7d0;
-  --color-primary-300: #86efac;
-  --color-primary-400: #4ade80;
-  --color-primary-500: #22c55e;
-  --color-primary-600: #16a34a;
-  --color-primary-700: #15803d;
-  --color-primary-800: #166534;
-  --color-primary-900: #14532d;
+  /* Primary Brand - Bright Rich Gold */
+  --color-primary-50: #fffbeb;
+  --color-primary-100: #fef3c7;
+  --color-primary-200: #fde68a;
+  --color-primary-300: #fcd34d;
+  --color-primary-400: #fbbf24;
+  --color-primary-500: #f59e0b;
+  --color-primary-600: #d97706;
+  --color-primary-700: #b45309;
+  --color-primary-800: #92400e;
+  --color-primary-900: #78350f;
 
-  /* Semantic Aliases */
-  --color-primary: #4ade80;
-  --color-primary-light: #86efac;
-  --color-primary-dark: #22c55e;
+  /* Semantic Aliases - Bright Gold */
+  --color-primary: #ffd700;
+  --color-primary-light: #ffe44d;
+  --color-primary-dark: #e6c200;
 
   /* Success (Green) */
   --color-success: #22c55e;
@@ -76,17 +77,22 @@
   --color-border-dark: #cbd5e1;
 
   /* Text Colors */
-  --color-text-primary: #1e293b;
-  --color-text-secondary: #64748b;
-  --color-text-muted: #94a3b8;
-  --color-text-on-primary: #ffffff;
-  --color-text-on-dark: #f8fafc;
+  --color-text-primary: #f5f0e6;
+  --color-text-secondary: #c9c4b8;
+  --color-text-muted: #9a9588;
+  --color-text-on-primary: #0f2744;
+  --color-text-on-dark: #f5f0e6;
+
+  /* Accent - Greys (borders, dividers, subtle highlights) */
+  --color-accent: #64748b;
+  --color-accent-light: #94a3b8;
+  --color-accent-muted: #475569;
 
   /* Component-Specific Tokens */
-  --color-nav-active: #4ade80;
-  --color-admin-card: #ffffff;
-  --color-admin-card-border: #e2e8f0;
-  --color-admin-hover: #f8fafc;
+  --color-nav-active: #ffd700;
+  --color-admin-card: #1a365d;
+  --color-admin-card-border: #334155;
+  --color-admin-hover: #1e3a5f;
 
   /* Status Badges */
   --color-status-completed-bg: #f0fdf4;
@@ -97,7 +103,7 @@
   --color-status-cancelled-text: #991b1b;
 
   /* Effects */
-  --color-glow-primary: rgba(74, 222, 128, 0.4);
+  --color-glow-primary: rgba(255, 215, 0, 0.5);
   --color-shadow: rgba(0, 0, 0, 0.1);
   --color-shadow-lg: rgba(0, 0, 0, 0.15);
 
@@ -117,18 +123,26 @@
   --primary: var(--color-primary);
   --primary-light: var(--color-primary-light);
   --primary-dark: var(--color-primary-dark);
+  --accent: var(--color-accent);
+  --accent-light: var(--color-accent-light);
+  --secondary: var(--color-primary-dark);
+  --tertiary-light: var(--color-primary-light);
+  --surface-dark: var(--color-background-darker);
+  --surface-light: var(--color-surface-muted);
+  --primary-rgb: 255, 215, 0;
   --neon-glow: var(--color-glow-primary);
-  --accent-glow: rgba(74, 222, 128, 0.3);
+  --accent-glow: rgba(255, 215, 0, 0.4);
   --text-on-primary: var(--color-text-on-primary);
+  --admin-card: var(--color-admin-card);
+  --admin-card-border: var(--color-admin-card-border);
   --font-sans: system-ui, sans-serif;
   --font-mono: monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Override dark mode preference with our light theme */
-    --background: #dae8e1;
-    --foreground: #1e293b;
+    --background: #0f2744;
+    --foreground: #f5f0e6;
   }
 }
 
@@ -195,18 +209,122 @@ body {
   color: var(--foreground);
   font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   overflow-x: hidden;
-  background-image: url('/images/subtle-clouds.jpg');
-  background-size: cover;
+  background-color: #0f2744;
+  /* Subtle diagonal stripe - not plain grid */
+  background-image: repeating-linear-gradient(
+    -55deg,
+    transparent,
+    transparent 40px,
+    rgba(100, 116, 139, 0.04) 40px,
+    rgba(100, 116, 139, 0.04) 41px
+  );
   background-attachment: fixed;
-  background-blend-mode: overlay;
+}
+
+/* Grid texture - for section overlays */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(100, 116, 139, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Hero grid - centered, fades out toward edges and at bottom into dot grid */
+.hero-grid-pattern {
+  background-image:
+    linear-gradient(rgba(100, 116, 139, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.4) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center center;
+  mask-image:
+    radial-gradient(ellipse 75% 65% at 50% 50%, black 15%, transparent 65%),
+    linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
+  -webkit-mask-image:
+    radial-gradient(ellipse 75% 65% at 50% 50%, black 15%, transparent 65%),
+    linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+/* Dot grid - alternative texture */
+.dot-pattern {
+  background-image: radial-gradient(rgba(100, 116, 139, 0.35) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Diagonal lines - subtle tech feel */
+.diagonal-pattern {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 20px,
+    rgba(100, 116, 139, 0.14) 20px,
+    rgba(100, 116, 139, 0.14) 21px
+  );
+}
+
+/* Crosshatch - diagonal grid both ways */
+.crosshatch-pattern {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 16px,
+      rgba(100, 116, 139, 0.14) 16px,
+      rgba(100, 116, 139, 0.14) 17px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 16px,
+      rgba(100, 116, 139, 0.14) 16px,
+      rgba(100, 116, 139, 0.14) 17px
+    );
+  background-size: 100% 100%;
+}
+
+/* Hexagon dots - honeycomb feel */
+.hex-dots-pattern {
+  background-image:
+    radial-gradient(circle at 0 0, rgba(100, 116, 139, 0.22) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 14px 12px, rgba(100, 116, 139, 0.22) 1.5px, transparent 1.5px);
+  background-size: 28px 24px;
+}
+
+/* Circuit / tech lines - horizontal + vertical offset */
+.circuit-pattern {
+  background-image:
+    linear-gradient(rgba(100, 116, 139, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.14) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+/* Concentric rings - radar/sonar feel */
+.rings-pattern {
+  background-image:
+    radial-gradient(circle at center, transparent 0%, transparent 60%, rgba(100, 116, 139, 0.04) 60%, rgba(100, 116, 139, 0.04) 61%),
+    radial-gradient(circle at center, transparent 0%, transparent 40%, rgba(100, 116, 139, 0.05) 40%, rgba(100, 116, 139, 0.05) 41%),
+    radial-gradient(circle at center, transparent 0%, transparent 20%, rgba(100, 116, 139, 0.06) 20%, rgba(100, 116, 139, 0.06) 21%);
+  background-size: 100% 100%;
+}
+
+/* Noise / grain texture */
+.noise-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
 }
 
 .minecraft-btn {
   position: relative;
   display: inline-block;
   padding: 0.75rem 1.75rem;
-  background-color: var(--primary);
-  color: var(--text-on-primary);
+  background: linear-gradient(135deg, #ffd700 0%, #e6c200 50%, #ffd700 100%);
+  color: #0f2744;
   font-weight: 600;
   border: none;
   border-radius: 12px;
@@ -214,7 +332,7 @@ body {
   overflow: hidden;
   z-index: 1;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
 }
 
 .minecraft-btn::before {
@@ -232,7 +350,7 @@ body {
 
 .minecraft-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(91, 33, 182, 0.3);
+  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
 }
 
 .minecraft-btn:hover::before {
@@ -287,11 +405,11 @@ body {
 }
 
 .glass-effect {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(74, 222, 128, 0.2);
+  background: rgba(15, 39, 68, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(100, 116, 139, 0.4);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -341,7 +459,7 @@ body {
 
 .card-hover:hover {
   transform: translateY(-8px);
-  box-shadow: 0 10px 25px rgba(74, 222, 128, 0.2);
+  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.25);
 }
 
 /* animated gradient for the heading */
@@ -350,7 +468,16 @@ body {
   50%     { background-position: 100% 50%; }
 }
 .animate-gradient-x {
-  background: linear-gradient(90deg, #4ade80, #06b6d4, #4ade80);
+  background: linear-gradient(
+    90deg,
+    #e6c200 0%,
+    #ffd700 20%,
+    #ffe44d 40%,
+    #fff4b3 50%,
+    #ffe44d 60%,
+    #ffd700 80%,
+    #e6c200 100%
+  );
   background-size: 200% 200%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -358,18 +485,40 @@ body {
   animation: gradientX 6s ease infinite;
 }
 
-/* gentle floating orbs behind everything */
-@keyframes float {
-  0%   { transform: translateY(0) rotate(0deg); }
-  50%  { transform: translateY(-20px) rotate(45deg); }
-  100% { transform: translateY(0) rotate(0deg); }
+/* Baby blue text for hero and products */
+.gradient-text-baby-blue {
+  background: linear-gradient(90deg, #89CFF0, #ADD8E6, #B0E0E6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
 }
-.floating-orb {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.1;
-  animation: float var(--dance-speed) ease-in-out infinite;
+
+.animate-gradient-x-baby-blue {
+  background: linear-gradient(
+    90deg,
+    #7ec8e3 0%,
+    #89CFF0 25%,
+    #ADD8E6 50%,
+    #89CFF0 75%,
+    #7ec8e3 100%
+  );
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradientX 6s ease infinite;
 }
+
+/* Dark yellow for partners section */
+.gradient-text-dark-yellow {
+  background: linear-gradient(90deg, #9B870C, #B8860B, #DAA520);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
 
 /* Hide Chrome, Safari, Edge, Opera spinners */
 input[type=number]::-webkit-outer-spin-button,

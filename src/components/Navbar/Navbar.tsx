@@ -38,6 +38,9 @@ const Navbar = () => {
   };
 
   const shouldShowBanner = false;
+  const pathname = usePathname();
+  const isHomepage = pathname === "/";
+  const navbarBg = isHomepage ? "bg-[#1a1f2e]" : "bg-[var(--background)]/90";
 
   return (
     <>
@@ -45,8 +48,8 @@ const Navbar = () => {
       <div
         className={`fixed ${shouldShowBanner ? "top-[40px]" : "top-0"} left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? "py-2 bg-[var(--background)]/90 backdrop-blur-lg"
-            : "py-4"
+            ? `py-2 ${navbarBg} backdrop-blur-lg`
+            : `py-4 ${isHomepage ? "bg-[#1a1f2e]" : ""}`
         }`}
       >
         <div className="relative w-full max-w-7xl mx-auto px-4">
@@ -114,12 +117,13 @@ const Navbar = () => {
 
 // Mobile Nav Menu Component
 const MobileNavMenu = ({ closeMenu }: { closeMenu: () => void }) => {
-  const menuItems: { label: string; href: Route; external?: boolean }[] = [
+  const menuItems: { label: string; href: Route | string; external?: boolean }[] = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/shop" },
     { label: "Videos", href: "/videos" },
     { label: "Vouches", href: "/vouches" },
     { label: "About Us", href: "/about" },
+    { label: "MCCapes", href: "https://mccapes.net", external: true },
   ];
 
   const pathname = usePathname();
@@ -153,21 +157,32 @@ const MobileNavMenu = ({ closeMenu }: { closeMenu: () => void }) => {
             }}
             className="w-full text-center"
           >
-            <Link
-              href={item.href}
-              onClick={() => {
-                if (!item.external) closeMenu();
-              }}
-              target={item.external ? "_blank" : undefined}
-              rel={item.external ? "noopener noreferrer" : undefined}
-              className={`text-xl font-medium transition-colors block py-3 px-6 rounded-lg ${
-                isActive
-                  ? "bg-nav-active text-white"
-                  : "hover:bg-surface hover:text-primary"
-              }`}
-            >
-              {item.label}
-            </Link>
+            {item.external ? (
+              <a
+                href={item.href as string}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`text-xl font-medium transition-colors block py-3 px-6 rounded-lg ${
+                  isActive
+                    ? "bg-[#89CFF0] text-[#0f2744]"
+                    : "hover:bg-surface hover:text-[#89CFF0]"
+                }`}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <Link
+                href={item.href as Route}
+                onClick={() => closeMenu()}
+                className={`text-xl font-medium transition-colors block py-3 px-6 rounded-lg ${
+                  isActive
+                    ? "bg-[#89CFF0] text-[#0f2744]"
+                    : "hover:bg-surface hover:text-[#89CFF0]"
+                }`}
+              >
+                {item.label}
+              </Link>
+            )}
           </motion.li>
         );
       })}

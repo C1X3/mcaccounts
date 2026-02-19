@@ -18,7 +18,7 @@ export const schema = z.object({
   alignment: z.enum(["left", "right"]).default("left"),
   productSlug: z.string().min(1, "Product slug is required"),
   isActive: z.boolean().default(true),
-  order: z.number().optional().default(0),
+  order: z.coerce.number().default(0),
 });
 
 export type ArticleFormModalSchema = z.infer<typeof schema>;
@@ -40,6 +40,7 @@ export default function ArticleFormModal({
 }: ArticleFormModalProps) {
   const trpc = useTRPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string>("");
@@ -86,6 +87,14 @@ export default function ArticleFormModal({
       setVideoPreviewUrl("");
     }
   }, [initialData, reset]);
+
+  // Focus title field when modal opens (Add Article) so order field doesn't steal focus
+  useEffect(() => {
+    if (isOpen && !isEditing) {
+      const timer = setTimeout(() => titleInputRef.current?.focus(), 0);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isEditing]);
 
   // tRPC mutations
   const createArticle = useMutation(
@@ -233,6 +242,10 @@ export default function ArticleFormModal({
                     id="title"
                     type="text"
                     {...field}
+                    ref={(el) => {
+                      field.ref(el);
+                      (titleInputRef as React.MutableRefObject<HTMLInputElement | null>).current = el;
+                    }}
                     className="w-full p-3 bg-[color-mix(in_srgb,var(--background),#333_15%)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]"
                     placeholder="Enter article title"
                   />
@@ -475,7 +488,13 @@ export default function ArticleFormModal({
                     id="order"
                     type="number"
                     min="0"
-                    {...field}
+                    value={field.value ?? 0}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      field.onChange(val === "" ? 0 : Number(val));
+                    }}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
                     className="w-full p-3 bg-[color-mix(in_srgb,var(--background),#333_15%)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)]"
                     placeholder="0"
                   />

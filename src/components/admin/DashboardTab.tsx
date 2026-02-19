@@ -310,7 +310,7 @@ export default function DashboardTab() {
       {/* Display error message if there are any errors */}
       {hasErrors && (
         <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          className="bg-red-950/50 border border-red-500/50 text-red-300 px-4 py-3 rounded relative"
           role="alert"
         >
           <strong className="font-bold">Error!</strong>
@@ -437,7 +437,7 @@ export default function DashboardTab() {
                 Total Orders
               </h3>
               {ordersData.isLoading ? (
-                <div className="h-9 w-16 bg-gray-100 rounded animate-pulse mt-1"></div>
+                <div className="h-9 w-16 bg-surface-muted rounded animate-pulse mt-1"></div>
               ) : (
                 <p className="text-3xl font-bold text-[var(--foreground)] mt-1">
                   {orders.count}
@@ -473,7 +473,7 @@ export default function DashboardTab() {
                 Total Clicks
               </h3>
               {clickStatsData.isLoading ? (
-                <div className="h-9 w-16 bg-gray-100 rounded animate-pulse mt-1"></div>
+                <div className="h-9 w-16 bg-surface-muted rounded animate-pulse mt-1"></div>
               ) : (
                 <p className="text-3xl font-bold text-[var(--foreground)] mt-1">
                   {clickStats.clicks}
@@ -509,7 +509,7 @@ export default function DashboardTab() {
                 Conversion Rate
               </h3>
               {clickStatsData.isLoading ? (
-                <div className="h-9 w-16 bg-gray-100 rounded animate-pulse mt-1"></div>
+                <div className="h-9 w-16 bg-surface-muted rounded animate-pulse mt-1"></div>
               ) : (
                 <p className="text-3xl font-bold text-[var(--foreground)] mt-1">
                   {clickStats.conversionRate}%
@@ -538,7 +538,7 @@ export default function DashboardTab() {
         </div>
       </div>
       {/* Chart */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
+      <div className="bg-admin-card p-6 rounded-xl shadow-sm border border-admin-card-border">
         <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
           <FaChartLine />
           Revenue & Orders
@@ -556,7 +556,7 @@ export default function DashboardTab() {
                 data={chartData}
                 margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
                 <XAxis
                   dataKey="time"
                   stroke="var(--foreground)"
@@ -576,8 +576,8 @@ export default function DashboardTab() {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "white",
-                    borderColor: "rgba(0,0,0,0.1)",
+                    backgroundColor: "var(--color-admin-card)",
+                    borderColor: "var(--color-admin-card-border)",
                     color: "var(--foreground)",
                   }}
                   formatter={() => {
@@ -996,7 +996,7 @@ export default function DashboardTab() {
         </div>
       </div>
       {/* Crypto Balances Section */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
+      <div className="bg-admin-card p-6 rounded-xl shadow-sm border border-admin-card-border">
         <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
           <FaBitcoin />
           Crypto Balances
@@ -1006,15 +1006,15 @@ export default function DashboardTab() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-surface-muted p-4 rounded-lg animate-pulse">
-                <div className="h-6 bg-gray-200 rounded w-24 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-16"></div>
+                <div className="h-6 bg-[var(--color-admin-card-border)] rounded w-24 mb-2"></div>
+                <div className="h-8 bg-[var(--color-admin-card-border)] rounded w-16"></div>
               </div>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Bitcoin */}
-            <div className="bg-[#f7931a0d] p-4 rounded-lg border border-[#f7931a33]">
+            <div className="bg-[#f7931a1a] p-4 rounded-lg border border-[#f7931a33]">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
                   <FaBitcoin className="text-[#f7931a]" />
@@ -1023,7 +1023,7 @@ export default function DashboardTab() {
               </div>
               <p className="text-2xl font-bold mb-3">
                 {formatCryptoBalance(cryptoBalances.data?.bitcoin || 0)} BTC{" "}
-                <span className="text-base font-normal text-gray-500">
+                <span className="text-base font-normal text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
                   (${(cryptoBalances.data?.usdValues?.bitcoin || 0).toFixed(2)})
                 </span>
               </p>
@@ -1045,7 +1045,7 @@ export default function DashboardTab() {
               </div>
               <p className="text-2xl font-bold mb-3">
                 {formatCryptoBalance(cryptoBalances.data?.ethereum || 0)} ETH{" "}
-                <span className="text-base font-normal text-gray-500">
+                <span className="text-base font-normal text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
                   (${(cryptoBalances.data?.usdValues?.ethereum || 0).toFixed(2)}
                   )
                 </span>
@@ -1068,7 +1068,7 @@ export default function DashboardTab() {
               </div>
               <p className="text-2xl font-bold mb-3">
                 {formatCryptoBalance(cryptoBalances.data?.litecoin || 0)} LTC{" "}
-                <span className="text-base font-normal text-gray-500">
+                <span className="text-base font-normal text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
                   (${(cryptoBalances.data?.usdValues?.litecoin || 0).toFixed(2)}
                   )
                 </span>
@@ -1091,7 +1091,7 @@ export default function DashboardTab() {
               </div>
               <p className="text-2xl font-bold mb-3">
                 {formatCryptoBalance(cryptoBalances.data?.solana || 0)} SOL{" "}
-                <span className="text-base font-normal text-gray-500">
+                <span className="text-base font-normal text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
                   (${(cryptoBalances.data?.usdValues?.solana || 0).toFixed(2)})
                 </span>
               </p>
@@ -1108,7 +1108,7 @@ export default function DashboardTab() {
       {/* Withdrawal Dialog */}
       {isWithdrawDialogOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-admin-card border border-admin-card-border rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               {selectedCrypto === CryptoType.BITCOIN && (
                 <FaBitcoin className="text-[#f7931a]" />
@@ -1146,7 +1146,7 @@ export default function DashboardTab() {
               <div className="mb-4 text-red-500 text-sm">{withdrawalError}</div>
             )}
 
-            <div className="text-sm mb-4 p-2 bg-gray-50 rounded">
+            <div className="text-sm mb-4 p-2 bg-surface-muted rounded">
               <p className="font-medium mb-1">Withdrawal Details:</p>
               <p>
                 Amount:{" "}

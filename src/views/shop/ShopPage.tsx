@@ -85,10 +85,11 @@ const ShopPage = () => {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      {/* Header */}
-      <header className="py-8 flex flex-col items-center relative">
+      {/* Header with grid */}
+      <header className="py-8 flex flex-col items-center relative overflow-hidden">
+        <div className="absolute inset-0 dot-pattern opacity-50 pointer-events-none" />
         <Navbar />
-        <div className="container mx-auto px-4 pt-16 text-center">
+        <div className="container mx-auto px-4 pt-16 text-center relative z-10">
           <h1 className="text-4xl md:text-5xl font-bold text-[var(--foreground)] mb-4">
             Our Shop
           </h1>
@@ -102,14 +103,14 @@ const ShopPage = () => {
         {/* Premium Product Spotlight */}
         {topProduct && (
           <motion.div
-            className="mb-20 cursor-pointer bg-gradient-to-r from-[color-mix(in_srgb,var(--background),#333_10%)] to-[color-mix(in_srgb,var(--background),#000_10%)] p-4 md:p-8 rounded-3xl backdrop-blur-sm border border-[color-mix(in_srgb,var(--foreground),var(--background)_80%)]"
+            className="mb-20 cursor-pointer bg-[var(--color-surface)] backdrop-blur-md p-4 md:p-8 rounded-3xl border border-[var(--accent)]/40 hover:border-[var(--accent-light)] transition-colors"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             whileHover={{
               y: -8,
-              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-              borderColor: "var(--accent)",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+              borderColor: "var(--accent-light)",
             }}
             transition={{ duration: 0.7, delay: 0.2 }}
             onClick={() => router.push(`/shop/${topProduct.slug}`)}
@@ -178,7 +179,7 @@ const ShopPage = () => {
                     onClick={handleAddToCart}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
-                    className="flex items-center gap-2 bg-[var(--primary)] hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] text-white font-medium py-3 px-6 rounded-xl shadow-lg"
+                    className="flex items-center gap-2 bg-[var(--primary)] hover:bg-[color-mix(in_srgb,var(--primary),#000_10%)] text-[var(--text-on-primary)] font-medium py-3 px-6 rounded-xl shadow-lg"
                   >
                     <FaShoppingCart size={18} />
                     Add to Cart
@@ -211,7 +212,7 @@ const ShopPage = () => {
                     onClick={() => setSelectedCategory(cat)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       selectedCategory === cat
-                        ? "bg-[var(--primary)] text-white"
+                        ? "bg-[var(--primary)] text-[var(--text-on-primary)]"
                         : "bg-[color-mix(in_srgb,var(--background),#333_15%)] text-[var(--foreground)] hover:bg-[color-mix(in_srgb,var(--background),#333_25%)]"
                     }`}
                   >
@@ -228,7 +229,7 @@ const ShopPage = () => {
                     placeholder="Search by name..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-[color-mix(in_srgb,var(--background),#333_15%)] border border-[color-mix(in_srgb,var(--foreground),var(--background)_85%)] rounded-xl text-[var(--foreground)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all outline-none"
+                    className="w-full pl-10 pr-4 py-2 bg-[var(--color-surface)] border border-[var(--accent)]/40 rounded-xl text-[var(--foreground)] focus:border-[var(--accent-light)] focus:ring-1 focus:ring-[var(--accent-light)] transition-all outline-none"
                   />
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[color-mix(in_srgb,var(--foreground),#888_40%)]">
                     <FaSearch size={16} />

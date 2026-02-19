@@ -204,17 +204,8 @@ export default function VideosPage() {
         <Navbar />
       </header>
 
-      <section className="py-16 bg-white relative overflow-hidden">
-        <motion.div
-          className="absolute inset-0 bg-[url('/images/subtle-pattern.jpg')] bg-cover bg-center opacity-10"
-          animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
-          transition={{
-            duration: 60,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-        />
+      <section className="py-16 bg-[var(--background)] relative overflow-hidden">
+        <div className="absolute inset-0 dot-pattern opacity-30 pointer-events-none" />
 
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
@@ -227,7 +218,7 @@ export default function VideosPage() {
             <h3 className="text-3xl font-bold mb-2 text-[var(--foreground)]">
               <span className="gradient-text">Videos</span>
             </h3>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-[var(--color-text-muted)] max-w-2xl mx-auto">
               Check out our latest videos showcasing our products, tutorials,
               and more.
             </p>
@@ -275,7 +266,7 @@ function VideoCard({ video }: { video: Video }) {
   const firstPara = paragraphs[0];
 
   return (
-    <div className="bg-[var(--surface-light)] rounded-2xl overflow-hidden shadow-lg">
+    <div className="bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-lg border border-[var(--color-admin-card-border)]/50">
       <div
         className="relative aspect-video w-full cursor-pointer"
         onClick={!isPlaying ? handlePlay : undefined}
@@ -309,9 +300,9 @@ function VideoCard({ video }: { video: Video }) {
         <h4 className="text-xl font-semibold mb-2 text-[var(--foreground)]">
           {video.title}
         </h4>
-        <p className="text-gray-600 mb-2">{firstPara}</p>
+        <p className="text-[var(--color-text-muted)] mb-2">{firstPara}</p>
         {paragraphs.slice(1).map((p, idx) => (
-          <p key={idx} className="text-gray-600">
+          <p key={idx} className="text-[var(--color-text-muted)]">
             {p}
           </p>
         ))}

@@ -10,14 +10,6 @@ import PartnerScroller from "@/views/homepage/PartnerScroll";
 import FAQSection from "@/components/FAQSection";
 import { motion } from "framer-motion";
 
-const orbs = [
-  { size: 280, left: "2%",  top: "15%", speed: "10s" },
-  { size: 320, left: "66%", top: "20%", speed: "15s" },
-  { size: 170, left: "15%", top: "45%", speed: "11s" },
-  { size: 120, left: "88%", top: "10%", speed: "9s"  },
-  { size: 200, left: "50%", top: "70%", speed: "13s" },
-  { size: 150, left: "80%", top: "60%", speed: "12s" },
-];
 import { useTRPC } from "@/server/client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -34,26 +26,9 @@ const AboutPage = () => {
     <div className="min-h-screen bg-[var(--background)]">
       <Navbar />
 
-      {/* Hero + Videos + Vouches — single continuous gradient with shared orbs */}
+      {/* Hero + Videos + Vouches — with grid texture */}
       <div className="relative overflow-hidden bg-gradient-to-b from-[var(--background)] to-[color-mix(in_srgb,var(--background),#000_5%)]">
-        {/* Floating orbs across all three sections */}
-        <div className="absolute inset-0 pointer-events-none hidden md:block" style={{ zIndex: 0 }}>
-          {orbs.map((orb, i) => (
-            <div
-              key={i}
-              className="floating-orb absolute"
-              style={{
-                width: orb.size,
-                height: orb.size,
-                left: orb.left,
-                top: orb.top,
-                backgroundColor: "var(--primary)",
-                opacity: 0.1,
-                ["--dance-speed" as string]: orb.speed,
-              }}
-            />
-          ))}
-        </div>
+        <div className="absolute inset-0 hex-dots-pattern opacity-80 pointer-events-none" />
         <AboutHeroSection />
         <VideosCarousel />
         <VouchesCarousel />
@@ -65,12 +40,8 @@ const AboutPage = () => {
       )}
 
       {/* Partners */}
-      <section className="py-16 bg-white relative overflow-hidden">
-        <motion.div
-          className="absolute inset-0 bg-[url('/images/subtle-pattern.jpg')] bg-cover bg-center opacity-10 z-0"
-          animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
-          transition={{ duration: 60, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
-        />
+      <section className="py-20 bg-[var(--color-background-darker)] border-y border-[var(--accent)]/30 relative overflow-hidden">
+        <div className="absolute inset-0 circuit-pattern opacity-80 pointer-events-none" />
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
             className="text-center mb-12"
@@ -82,7 +53,7 @@ const AboutPage = () => {
             <h3 className="text-3xl font-bold mb-2 text-[var(--foreground)]">
               <span className="gradient-text">Our Partners</span>
             </h3>
-            <p className="text-gray-600">
+            <p className="text-[var(--color-text-muted)]">
               Top Minecraft content creators who trust our products
             </p>
           </motion.div>

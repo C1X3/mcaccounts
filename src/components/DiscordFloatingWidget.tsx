@@ -67,7 +67,7 @@ const DiscordFloatingWidget = () => {
         {/* Banner */}
         <div
           className="h-14 w-full"
-          style={{ background: "#23a65e" }}
+          style={{ background: "#5865F2" }}
         />
 
         <div className="px-4 pb-4">
@@ -87,7 +87,7 @@ const DiscordFloatingWidget = () => {
 
           <p className="text-white font-bold text-base mb-1">MC Accounts</p>
           <div className="flex items-center gap-1.5 text-xs text-[#b5bac1] mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#23a55a] inline-block flex-shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[var(--primary)] inline-block flex-shrink-0" />
             <span>5,000+ Members</span>
           </div>
           <p className="text-[11px] text-[#80848e] mb-2">Est. Dec 2024</p>
@@ -100,8 +100,8 @@ const DiscordFloatingWidget = () => {
             href="https://discord.maccounts.net"
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full text-center py-2 rounded-md font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-75"
-            style={{ background: "#23a55a" }}
+            className="block w-full text-center py-2 rounded-md font-semibold text-sm text-[#0f2744] transition-opacity hover:opacity-90 active:opacity-75"
+            style={{ background: "linear-gradient(135deg, #ffd700 0%, #e6c200 100%)" }}
           >
             Join Server
           </a>

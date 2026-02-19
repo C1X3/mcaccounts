@@ -28,7 +28,7 @@ const staggerContainer = {
   },
 };
 
-const items: { label: string; href: Route; external?: boolean }[] = [
+const items: { label: string; href: Route | string; external?: boolean }[] = [
   {
     label: "Home",
     href: "/",
@@ -44,6 +44,11 @@ const items: { label: string; href: Route; external?: boolean }[] = [
   {
     label: "About Us",
     href: "/about" as Route,
+  },
+  {
+    label: "MCCapes",
+    href: "https://mccapes.net",
+    external: true,
   },
 ];
 
@@ -65,18 +70,31 @@ const NavMenu = () => {
 
         return (
           <motion.li key={item.label} variants={fadeInUp} className="relative">
-            <Link
-              href={item.href}
-              target={item.external ? "_blank" : undefined}
-              rel={item.external ? "noopener noreferrer" : undefined}
-              className={`font-medium px-4 py-2 rounded-full transition-all ${
-                isActive
-                  ? "bg-nav-active text-white"
-                  : "hover:text-[var(--primary-light)]"
-              }`}
-            >
-              {item.label}
-            </Link>
+            {item.external ? (
+              <a
+                href={item.href as string}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`font-medium px-4 py-2 rounded-full transition-all ${
+                  isActive
+                    ? "bg-[#89CFF0] text-[#0f2744]"
+                    : "hover:text-[#89CFF0]"
+                }`}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <Link
+                href={item.href as Route}
+                className={`font-medium px-4 py-2 rounded-full transition-all ${
+                  isActive
+                    ? "bg-[#89CFF0] text-[#0f2744]"
+                    : "hover:text-[#89CFF0]"
+                }`}
+              >
+                {item.label}
+              </Link>
+            )}
           </motion.li>
         );
       })}
