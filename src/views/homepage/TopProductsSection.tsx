@@ -12,7 +12,7 @@ const TopProductsSection = ({
   const router = useRouter();
 
   return (
-    <section className="py-24 bg-gradient-to-br from-[var(--background)] to-[color-mix(in_srgb,var(--background),#000_15%)] text-[var(--foreground)] relative overflow-hidden">
+    <section className="py-24 bg-[color-mix(in_srgb,var(--background),#000_5%)] text-[var(--foreground)] relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10">
         <div className="absolute top-[10%] left-[5%] w-64 h-64 bg-[var(--primary)] rounded-full filter blur-[80px]" />

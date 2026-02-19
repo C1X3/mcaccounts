@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
-import { FaChevronRight, FaPlayCircle } from "react-icons/fa";
-import { HiCube } from "react-icons/hi";
+import { FaChevronRight } from "react-icons/fa";
 
 const links = [
   {
@@ -12,12 +11,12 @@ const links = [
     href: "/shop",
   },
   {
-    label: "Vouches",
-    href: "/vouches",
+    label: "Videos",
+    href: "/videos",
   },
   {
-    label: "Discord",
-    href: "https://discord.mccapes.net",
+    label: "Vouches",
+    href: "/vouches",
   },
 ];
 
@@ -31,12 +30,12 @@ const Footer = () => {
           <div>
             <h5 className="text-xl font-bold mb-4 gradient-text">MCCapes</h5>
             <p className="text-text-muted mb-4">
-              Premium Minecraft cosmetics for discerning players.
+              Premium Minecraft cosmetics for dedicated players.
             </p>
           </div>
 
           <div>
-            <h5 className="text-lg font-semibold mb-4 text-[var(--primary-light)]">
+            <h5 className="text-lg font-semibold mb-4 text-[var(--accent-light)]">
               Shop
             </h5>
             <ul className="space-y-2">
@@ -44,7 +43,7 @@ const Footer = () => {
                 <li key={item.label}>
                   <a
                     href={item.href}
-                    className="text-text-muted hover:text-[var(--primary-light)] transition-colors flex items-center"
+                    className="text-text-muted hover:text-black transition-colors flex items-center"
                   >
                     <FaChevronRight className="mr-2 text-xs" />
                     {item.label}
@@ -63,11 +62,12 @@ const Footer = () => {
                 { label: "FAQ", href: "/faq" },
                 { label: "Privacy Policy", href: "/privacy" },
                 { label: "Terms of Service", href: "/terms" },
+                { label: "About Us", href: "/about" },
               ].map((item) => (
                 <li key={item.label}>
                   <a
                     href={item.href}
-                    className="text-text-muted hover:text-[var(--accent-light)] transition-colors flex items-center"
+                    className="text-text-muted hover:text-black transition-colors flex items-center"
                   >
                     <FaChevronRight className="mr-2 text-xs" />
                     {item.label}
@@ -81,15 +81,23 @@ const Footer = () => {
             <h5 className="text-lg font-semibold mb-4 text-[var(--tertiary-light)]">
               Contact Us
             </h5>
-            <address className="text-text-muted not-italic space-y-2">
-              <p className="flex items-center">
-                <HiCube className="mr-2" />
+            <address className="not-italic space-y-2">
+              <a
+                href="mailto:mccapesbusiness@gmail.com"
+                className="text-text-muted hover:text-black transition-colors flex items-center"
+              >
+                <FaChevronRight className="mr-2 text-xs" />
                 mccapesbusiness@gmail.com
-              </p>
-              <p className="flex items-center">
-                <FaPlayCircle className="mr-2" />
-                <a href="https://discord.mccapes.net">Discord</a>
-              </p>
+              </a>
+              <a
+                href="https://discord.mccapes.net"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-muted hover:text-black transition-colors flex items-center"
+              >
+                <FaChevronRight className="mr-2 text-xs" />
+                Discord
+              </a>
             </address>
           </div>
         </div>
