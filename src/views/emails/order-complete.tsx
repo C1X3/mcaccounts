@@ -51,7 +51,7 @@ export const OrderCompleteTemplate = ({
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Text style={headerText}>MCCapes</Text>
+            <Text style={headerText}>MCAccounts</Text>
             <Hr style={divider} />
           </Section>
 

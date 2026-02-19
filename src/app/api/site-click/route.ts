@@ -1,8 +1,8 @@
 import { prisma } from "@/utils/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-const AFFILIATE_COOKIE_NAME = "mccapes_affiliate";
-const TRACKED_COOKIE_NAME = "mccapes_tracked";
+const AFFILIATE_COOKIE_NAME = "mcaccounts_affiliate";
+const TRACKED_COOKIE_NAME = "mcaccounts_tracked";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 14; // 14 days
 
 export async function POST(request: NextRequest) {

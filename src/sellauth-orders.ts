@@ -26,7 +26,7 @@ function mapOrderStatus(status: string): OrderStatus {
 }
 
 async function main() {
-  const filePath = path.resolve(__dirname, "invoices-mccapes-2025-05-24.csv");
+  const filePath = path.resolve(__dirname, "invoices-mcaccounts-2025-05-24.csv");
   const stream = fs.createReadStream(filePath).pipe(csvParser());
 
   for await (const row of stream) {

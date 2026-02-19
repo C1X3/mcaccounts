@@ -59,10 +59,10 @@ export const OrderPlacedTemplate = ({
           {/* Logo Header */}
           <Section style={logoContainer}>
             <Img
-              src="https://mccapes.net/logo.png"
+              src="https://maccounts.net/logo.png"
               width="120"
               height="40"
-              alt="MCCapes"
+              alt="MCAccounts"
               style={logo}
             />
           </Section>
@@ -118,7 +118,7 @@ export const OrderPlacedTemplate = ({
                     <Column style={itemImageColumn}>
                       <Img
                         src={
-                          item.image || "https://mccapes.net/placeholder.png"
+                          item.image || "https://maccounts.net/placeholder.png"
                         }
                         width="64"
                         height="64"
@@ -177,7 +177,7 @@ export const OrderPlacedTemplate = ({
                   {paymentDetails?.url && (
                     <div style={qrCodeContainer}>
                       <Img
-                        src="https://mccapes.net/paypalqrcode.png"
+                        src="https://maccounts.net/paypalqrcode.png"
                         width="150"
                         height="150"
                         alt="PayPal QR Code"

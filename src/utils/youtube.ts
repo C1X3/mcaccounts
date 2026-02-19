@@ -2,7 +2,7 @@ import { YouTubeApiResponse, YouTubeChannel } from "@/types/youtube";
 
 export const YOUTUBE_CHANNEL_IDS = [
   "UCZf6WKzzljB8LHyPHTPxHLA", // Dewier
-  "UCzS1DfNk-TnKXe2oRWxRRXw", // MC Capes
+  "UCzS1DfNk-TnKXe2oRWxRRXw", // MC Accounts
   "UChNwsP0_jTrqYgq74DyfCIg", // ItzBlake
   "UCXHiZWRYzDnzZE_Xm_1OEVA", // Vaes
   "UCoDmUnYTz2ly28F6rdDdBNw", // godnxss

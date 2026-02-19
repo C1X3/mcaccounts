@@ -12,7 +12,7 @@ const Logo = () => {
     >
       <h1 className="text-2xl md:text-3xl font-bold text-[var(--foreground)]">
         <span className="text-[var(--primary)]">MC</span>
-        <span className="gradient-text">Capes</span>
+        <span className="gradient-text">Accounts</span>
       </h1>
     </div>
   );

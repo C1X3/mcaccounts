@@ -993,7 +993,7 @@ export const mockVouches: Vouch[] = [
     author: "aidan",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "+Vouch We got the Home and Menace capes from MC Capes.",
+    message: "+Vouch We got the Home and Menace capes from MC Accounts.",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1351994299616858233",
   },
   {
@@ -1001,7 +1001,7 @@ export const mockVouches: Vouch[] = [
     author: "Jeff",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "+Vouch @Suvox $150 for twitch and experience cape code! I had an issue at first but got resolved really quickly and professionally. You can safely buy cape codes from MC Capes!  :fixed:",
+    message: "+Vouch @Suvox $150 for twitch and experience cape code! I had an issue at first but got resolved really quickly and professionally. You can safely buy cape codes from MC Accounts!  :fixed:",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1352471074847330315",
   },
   {
@@ -1025,7 +1025,7 @@ export const mockVouches: Vouch[] = [
     author: "Jeff",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "+Vouch @Suvox 129.99$ for another experience cape code! The transaction was seamless, and I got it immediately. You can safely buy cape codes from MC Capes!   :fixed:",
+    message: "+Vouch @Suvox 129.99$ for another experience cape code! The transaction was seamless, and I got it immediately. You can safely buy cape codes from MC Accounts!   :fixed:",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1352614077548990507",
   },
   {
@@ -1305,7 +1305,7 @@ export const mockVouches: Vouch[] = [
     author: "xyay",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "+Vouch @Suvox bought the experience cape 2 months ago but just now got the chance to vouch. very epic trusted and instant delivery. would buy more capes from mccapes in the future!",
+    message: "+Vouch @Suvox bought the experience cape 2 months ago but just now got the chance to vouch. very epic trusted and instant delivery. would buy more accounts from mcaccounts in the future!",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1379854971880607796",
   },
   {
@@ -1369,7 +1369,7 @@ export const mockVouches: Vouch[] = [
     author: "new account @43bliss",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "+Vouch @Suvox  and @aidan $3k+ in deals over the past 6 months, mc capes is by far the  most trustworthy company ive worked with",
+    message: "+Vouch @Suvox  and @aidan $3k+ in deals over the past 6 months, mc accounts is by far the  most trustworthy company ive worked with",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1383650708506677309",
   },
   {
@@ -1417,7 +1417,7 @@ export const mockVouches: Vouch[] = [
     author: "Pixelixchel 🐾",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "+Vouch I purchased the Minecraft Experience cape for my main account, and the Home, Menace, and Purple Heart capes for my alt account. I can not recommend MC Capes enough, money well spent. \n\nAll...",
+    message: "+Vouch I purchased the Minecraft Experience cape for my main account, and the Home, Menace, and Purple Heart capes for my alt account. I can not recommend MC Accounts enough, money well spent. \n\nAll...",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1386701731110588486",
   },
   {
@@ -1585,7 +1585,7 @@ export const mockVouches: Vouch[] = [
     author: "typesoffears",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "@BrianRanger68 +Vouch i bought menace cape from mccapes and they did not scam theyre legit ty guys would buy again",
+    message: "@BrianRanger68 +Vouch i bought menace account from mcaccounts and they did not scam theyre legit ty guys would buy again",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1429882060255789137",
   },
   {
@@ -1793,7 +1793,7 @@ export const mockVouches: Vouch[] = [
     author: "Ferrox",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "Got the cape, many thanks to the McCape for the help! Great service",
+    message: "Got the cape, many thanks to the MC Accounts for the help! Great service",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1464693788541718558",
   },
   {
@@ -1809,7 +1809,7 @@ export const mockVouches: Vouch[] = [
     author: "future",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "Huge vouch Got my cape instantly I highly recommend mccapes ❤️",
+    message: "Huge vouch Got my cape instantly I highly recommend mcaccounts ❤️",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1464878108317450322",
   },
   {
@@ -1889,7 +1889,7 @@ export const mockVouches: Vouch[] = [
     author: "POLY POCKETTTTTTT",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "Vouch, tysm, mc capes w",
+    message: "Vouch, tysm, mc accounts w",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1467308611318448331",
   },
   {
@@ -1921,7 +1921,7 @@ export const mockVouches: Vouch[] = [
     author: ".𝓭𝓸𝓸𝓭",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "W mccapes",
+    message: "W mcaccounts",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1467639283006443560",
   },
   {
@@ -1929,7 +1929,7 @@ export const mockVouches: Vouch[] = [
     author: "RISHU :>",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "W thanks mccapes",
+    message: "W thanks mcaccounts",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1467770744493572178",
   },
   {
@@ -2017,7 +2017,7 @@ export const mockVouches: Vouch[] = [
     author: "GX Dani",
     authorAvatar: DEFAULT_AVATAR,
     rating: 5,
-    message: "+Vouch\nReally not my best financial decision, but at least it was legit. +rep mccapes",
+    message: "+Vouch\nReally not my best financial decision, but at least it was legit. +rep mcaccounts",
     discordLink: "https://discord.com/channels/1315408127755157615/1319614848320929843/1469988254110580868",
   },
   {

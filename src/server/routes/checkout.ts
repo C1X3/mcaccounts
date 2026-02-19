@@ -16,7 +16,7 @@ import { sendOrderCompleteEmail } from "@/utils/email";
 import { headers, cookies } from "next/headers";
 import { getPaymentFee } from "@/utils/fees";
 
-const AFFILIATE_COOKIE_NAME = "mccapes_affiliate";
+const AFFILIATE_COOKIE_NAME = "mcaccounts_affiliate";
 
 export const checkoutRouter = createTRPCRouter({
   processPayment: baseProcedure

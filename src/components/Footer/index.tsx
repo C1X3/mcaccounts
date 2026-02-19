@@ -28,7 +28,7 @@ const Footer = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h5 className="text-xl font-bold mb-4 gradient-text">MCCapes</h5>
+            <h5 className="text-xl font-bold mb-4 gradient-text">MCAccounts</h5>
             <p className="text-text-muted mb-4">
               Premium Minecraft cosmetics for dedicated players.
             </p>
@@ -83,14 +83,14 @@ const Footer = () => {
             </h5>
             <address className="not-italic space-y-2">
               <a
-                href="mailto:mccapesbusiness@gmail.com"
+                href="mailto:mcaccountsbusiness@gmail.com"
                 className="text-text-muted hover:text-black transition-colors flex items-center"
               >
                 <FaChevronRight className="mr-2 text-xs" />
-                mccapesbusiness@gmail.com
+                mcaccountsbusiness@gmail.com
               </a>
               <a
-                href="https://discord.mccapes.net"
+                href="https://discord.maccounts.net"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-text-muted hover:text-black transition-colors flex items-center"
@@ -104,9 +104,9 @@ const Footer = () => {
 
         <div className="border-t border-[var(--surface-light)] mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-500 text-sm">
-            &copy; 2026 MCCapes. All rights reserved.
+            &copy; 2026 MCAccounts. All rights reserved.
           </p>
-          <p className="text-gray-500 text-sm mt-4 md:mt-0">mccapes.net</p>
+          <p className="text-gray-500 text-sm mt-4 md:mt-0">maccounts.net</p>
         </div>
       </div>
     </footer>

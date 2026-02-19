@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const AFFILIATE_COOKIE_NAME = "mccapes_affiliate";
+const AFFILIATE_COOKIE_NAME = "mcaccounts_affiliate";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 14; // 14 days
 
 const RESERVED_ROUTES = [

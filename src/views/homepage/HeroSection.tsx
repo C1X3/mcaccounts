@@ -79,8 +79,8 @@ const HeroSection = () => {
                 className="text-sm md:text-base mb-6 text-gray-600 max-w-md"
                 variants={{ hidden: {}, visible: {} }}
               >
-                Premium capes that are no longer obtainable anywhere else… grab
-                these exclusive, limited-edition capes to make your Minecraft
+                Premium accounts that are no longer obtainable anywhere else… grab
+                these exclusive, limited-edition accounts to make your Minecraft
                 character stand out.
               </motion.p>
 

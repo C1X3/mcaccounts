@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
 
 // Base email sending function
 async function sendEmail({
-  from = "noreply@mccapes.net",
+  from = "noreply@maccounts.net",
   to,
   subject,
   html,

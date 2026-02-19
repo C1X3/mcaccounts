@@ -3,7 +3,7 @@
  */
 
 // Constants
-export const CART_STORAGE_KEY = "mccapes-cart";
+export const CART_STORAGE_KEY = "mcaccounts-cart";
 export const CART_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 // Types

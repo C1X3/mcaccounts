@@ -20,12 +20,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MCCapes",
+  title: "MCAccounts",
   description:
-    "Get exclusive high-quality Minecraft capes, skins and accessories to make your character stand out.",
+    "Get exclusive high-quality Minecraft accounts, skins and accessories to make your character stand out.",
   keywords: [
     "minecraft",
-    "capes",
+    "accounts",
     "skins",
     "minecraft cosmetics",
     "minecraft store",

@@ -191,7 +191,7 @@ const videos: Video[] = [
   },
   {
     title: "How Minecraft's NEW $100,000 Cape Disappeared...",
-    description: "MC Capes",
+    description: "MC Accounts",
     url: "https://www.youtube.com/watch?v=lxdYGesTV6U",
     thumbnail: "https://img.youtube.com/vi/lxdYGesTV6U/maxresdefault.jpg",
   },

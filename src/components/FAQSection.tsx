@@ -33,10 +33,10 @@ const faqData: FAQItem[] = [
             <span>
               Email us at{" "}
               <a
-                href="mailto:mccapesbusiness@gmail.com"
+                href="mailto:mcaccountsbusiness@gmail.com"
                 className="text-[var(--primary-dark)] hover:underline font-medium"
               >
-                mccapesbusiness@gmail.com
+                mcaccountsbusiness@gmail.com
               </a>
             </span>
           </li>
@@ -45,7 +45,7 @@ const faqData: FAQItem[] = [
             <span>
               Join our{" "}
               <a
-                href="https://discord.mccapes.net"
+                href="https://discord.maccounts.net"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[var(--primary-dark)] hover:underline font-medium"
@@ -61,7 +61,7 @@ const faqData: FAQItem[] = [
     ),
   },
   {
-    question: "How do I Redeem the cape?",
+    question: "How do I Redeem my purchase?",
     answer: (
       <ol className="space-y-3 mt-2">
         <li className="flex items-start">
@@ -84,7 +84,7 @@ const faqData: FAQItem[] = [
           <span className="font-semibold text-[var(--primary-dark)] mr-2">
             2.
           </span>
-          <span>Redeem the cape under your profile after logging in.</span>
+          <span>Redeem the product under your profile after logging in.</span>
         </li>
         <li className="flex items-start">
           <span className="font-semibold text-[var(--primary-dark)] mr-2">
@@ -108,14 +108,14 @@ const faqData: FAQItem[] = [
           <span className="font-semibold text-[var(--primary-dark)] mr-2">
             6.
           </span>
-          <span>Equip the cape.</span>
+          <span>Equip the item.</span>
         </li>
         <li className="flex items-start">
           <span className="font-semibold text-[var(--primary-dark)] mr-2">
             7.
           </span>
           <span>
-            Log off any server, then log back on. The cape will appear
+            Log off any server, then log back on. The item will appear
             afterward.
           </span>
         </li>
@@ -196,7 +196,7 @@ const FAQSection = ({
             <span className="gradient-text">Frequently Asked Questions</span>
           </h1>
           <p className="text-gray-600 text-lg">
-            Find answers to common questions about our Minecraft capes
+            Find answers to common questions about our Minecraft accounts
           </p>
         </motion.div>
       )}
@@ -226,13 +226,13 @@ const FAQSection = ({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a
-              href="mailto:mccapesbusiness@gmail.com"
+              href="mailto:mcaccountsbusiness@gmail.com"
               className="minecraft-btn inline-block"
             >
               Email Support
             </a>
             <a
-              href="https://discord.mccapes.net"
+              href="https://discord.maccounts.net"
               target="_blank"
               rel="noopener noreferrer"
               className="minecraft-btn inline-block"

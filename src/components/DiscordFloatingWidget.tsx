@@ -76,7 +76,7 @@ const DiscordFloatingWidget = () => {
             <div className="w-16 h-16 rounded-2xl border-4 border-[#2b2d31] overflow-hidden bg-[#1e1f22] shadow-lg">
               <Image
                 src="/favicon.ico"
-                alt="MC Capes"
+                alt="MC Accounts"
                 width={64}
                 height={64}
                 className="w-full h-full object-cover"
@@ -85,19 +85,19 @@ const DiscordFloatingWidget = () => {
             </div>
           </div>
 
-          <p className="text-white font-bold text-base mb-1">MC Capes</p>
+          <p className="text-white font-bold text-base mb-1">MC Accounts</p>
           <div className="flex items-center gap-1.5 text-xs text-[#b5bac1] mb-1">
             <span className="w-2 h-2 rounded-full bg-[#23a55a] inline-block flex-shrink-0" />
             <span>5,000+ Members</span>
           </div>
           <p className="text-[11px] text-[#80848e] mb-2">Est. Dec 2024</p>
           <p className="text-[12px] text-[#b5bac1] leading-relaxed mb-4">
-            MC Capes is the #1 online Minecraft cape shop. We verify that our
-            cape codes are 100% legitimate before selling.
+            MC Accounts is the #1 online Minecraft account shop. We verify that our
+            accounts are 100% legitimate before selling.
           </p>
 
           <a
-            href="https://discord.mccapes.net"
+            href="https://discord.maccounts.net"
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full text-center py-2 rounded-md font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-75"
