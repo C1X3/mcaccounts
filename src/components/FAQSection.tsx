@@ -11,7 +11,7 @@ interface FAQItem {
 
 const faqData: FAQItem[] = [
   {
-    question: "Is it only for bedrock or will it be for java edition?",
+    question: "Is it only for Bedrock or will it be for Java Edition?",
     answer: "It's both for Java & Bedrock.",
   },
   {
