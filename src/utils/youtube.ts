@@ -12,7 +12,6 @@ export const YOUTUBE_CHANNEL_IDS = [
   "UCH8CkkLskdhprMPO4EYsHVw", // Flowtives
   "UC2gufCjSyNihNbOEZE50bwQ", // JudeLow
   "UC2MjV-x5Lc4ELCtypv6BVgw", // qBedwars
-  "UC1FteQvZl19GKHCcBoOR5Jw", // Kornelic
 ];
 
 export const YOUTUBE_API_CONFIG = {
